@@ -50,7 +50,7 @@ const priceText = (w) =>
 function page({ title, desc, path, body, image, jsonld }) {
   const url = SITE + path;
   return `<!doctype html>
-<html lang="en" data-lang="bn">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

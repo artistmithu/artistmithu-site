@@ -8,7 +8,7 @@
   const say = (en, b) => (bn() ? b : en);
 
   // Language
-  root.dataset.lang = store.get("lang", "bn");
+  root.dataset.lang = store.get("lang", "en");
   root.lang = root.dataset.lang;
   document.getElementById("langBtn")?.addEventListener("click", () => {
     root.dataset.lang = bn() ? "en" : "bn"; root.lang = root.dataset.lang; store.set("lang", root.dataset.lang); updateCount();
