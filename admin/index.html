@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Studio Admin | artistmithu.com</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--paper:#f6f6f2;--sheet:#fff;--ink:#18203a;--soft:#5a6278;--line:#d9dbe2;--accent:#1f47c4;--ok:#25744a;--bad:#a23a2a;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--paper:#11141d;--sheet:#181c28;--ink:#e9ebf2;--soft:#a0a7ba;--line:#2b3142;--accent:#8eaaff;--ok:#79d3a0;--bad:#f08a76;color-scheme:dark}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 "Hind Siliguri",system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-left))}
+header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px}
+header h1{font-size:18px;margin:0 auto 0 0}
+button,.btn{font:inherit;border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:8px;padding:6px 14px;cursor:pointer}
+button.alt{background:transparent;color:var(--ink)}
+button.danger{background:transparent;color:var(--bad);border-color:var(--bad)}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+nav.tabs button{background:transparent;color:var(--ink);border-color:var(--line)}
+nav.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+input,select,textarea{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);width:100%}
+label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.list{display:grid;gap:8px}
+.item{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:8px}
+.item img{width:64px;height:64px;object-fit:cover;border-radius:4px;background:var(--paper)}
+.item .t{font-weight:600}.item .s{font-size:13px;color:var(--soft)}
+.mono{font-family:"IBM Plex Mono",monospace;font-size:12px}
+.pill{font-size:11px;border:1px solid currentColor;border-radius:999px;padding:0 8px;margin-left:6px}
+.pill.sold{color:var(--bad)}.pill.available{color:var(--ok)}.pill.draft{color:var(--soft)}
+.panel{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px}
+.imgs{display:flex;gap:8px;flex-wrap:wrap}.imgs figure{margin:0;display:grid;gap:4px;width:110px}.imgs img{width:110px;height:110px;object-fit:cover;border-radius:4px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:8px 16px;border-radius:999px}
+.check{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:14px}.check input{width:auto}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:420px;overflow:auto}
+.pick label{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px;color:var(--ink)}
+.pick img{width:100%;aspect-ratio:1;object-fit:cover}
+</style>
+</head>
+<body><div class="wrap">
+<header><h1>স্টুডিও অ্যাডমিন</h1><span id="who" class="mono"></span><button id="publish" hidden title="নতুন তথ্য দিয়ে সাইট আবার তৈরি করুন">সাইটে প্রকাশ করুন</button><button id="logout" class="alt" hidden>লগআউট</button></header>
+
+<section id="login" class="panel" style="max-width:420px;margin-top:24px">
+  <strong>লগইন</strong>
+  <label>ইমেইল<input id="email" type="email" autocomplete="username"></label>
+  <label>পাসওয়ার্ড<input id="password" type="password" autocomplete="current-password"></label>
+  <button id="doLogin">লগইন</button>
+  <button id="doMagic" class="alt">পাসওয়ার্ড ছাড়া ইমেইলে লিংক পাঠান</button>
+  <p id="loginMsg" class="s"></p>
+</section>
+
+<section id="app" hidden>
+  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button></nav>
+
+  <div data-pane="works">
+    <div class="row" style="margin-bottom:10px"><input id="q" placeholder="নাম বা ইনভেন্টরি দিয়ে খুঁজুন"><select id="fStatus"><option value="">সব</option><option value="nosize">মাপ নেই</option><option value="available">উপলব্ধ</option><option value="sold">বিক্রিত</option><option value="draft">অপ্রকাশিত</option></select><button id="newWork">+ নতুন কাজ</button></div>
+    <div id="editor" class="panel" hidden></div>
+    <div id="works" class="list"></div>
+  </div>
+  <div data-pane="inq" hidden><div id="inq" class="list"></div></div>
+  <div data-pane="client" hidden>
+    <div class="panel">
+      <strong>ক্লায়েন্টের জন্য বাছাই করা কাজের লিংক</strong>
+      <div class="row"><label>ক্লায়েন্টের নাম<input id="cName"></label><label>মেয়াদ (দিন)<input id="cDays" type="number" value="30" min="1"></label></div>
+      <label>বার্তা<textarea id="cNote" rows="2" placeholder="যেমন: আপনার অফিসের রিসেপশনের জন্য কয়েকটি বড় কাজ"></textarea></label>
+      <label class="check"><input type="checkbox" id="cPrices" checked> দাম দেখাবে</label>
+      <div id="cPick" class="pick"></div>
+      <button id="cCreate">লিংক তৈরি করুন</button>
+      <p id="cOut" class="mono"></p>
+    </div>
+    <h3>আগের লিংক</h3><div id="cList" class="list"></div>
+  </div>
+  <div data-pane="subs" hidden><div id="subs" class="list"></div></div>
+</section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
+const URL_ = "https://msbgnvltxoxrnvuriiez.supabase.co";
+const sb = createClient(URL_, "sb_publishable_vxt7vC2yHGGhMON90ZFnBw_PehR5Qod");
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pub = (p) => `${URL_}/storage/v1/object/public/artworks/${p}`;
+const toast = (m) => { const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 2500); };
+let works = [], series = [];
+
+// Auth
+$("#doLogin").onclick = async () => {
+  const { error } = await sb.auth.signInWithPassword({ email: $("#email").value, password: $("#password").value });
+  $("#loginMsg").textContent = error ? "লগইন হয়নি: " + error.message : "";
+};
+$("#doMagic").onclick = async () => {
+  const { error } = await sb.auth.signInWithOtp({ email: $("#email").value, options: { emailRedirectTo: location.href } });
+  $("#loginMsg").textContent = error ? error.message : "ইমেইলে লিংক পাঠানো হয়েছে।";
+};
+$("#logout").onclick = () => sb.auth.signOut();
+sb.auth.onAuthStateChange(async (_e, session) => {
+  const on = !!session;
+  $("#login").hidden = on; $("#app").hidden = !on; $("#logout").hidden = !on; $("#publish").hidden = !on;
+  $("#who").textContent = session?.user?.email || "";
+  if (on) {
+    const { data } = await sb.rpc("is_admin");
+    if (!data) { $("#app").innerHTML = `<p class="panel">এই অ্যাকাউন্টটি এখনো অ্যাডমিন নয়। ব্যবহারকারী আইডি: <span class="mono">${session.user.id}</span></p>`; return; }
+    load();
+  }
+});
+
+// Tabs
+document.querySelectorAll("nav.tabs button").forEach((b) => (b.onclick = () => {
+  document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  document.querySelectorAll("[data-pane]").forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
+  ({ inq: loadInq, client: loadClient, subs: loadSubs })[b.dataset.tab]?.();
+}));
+
+async function load() {
+  const [s, w] = await Promise.all([
+    sb.from("series").select("*").order("sort"),
+    sb.from("artworks").select("*, artwork_images(id,path,sort,kind)").order("sort").order("year"),
+  ]);
+  series = s.data || []; works = w.data || [];
+  renderWorks();
+}
+const statusBn = { available: "উপলব্ধ", reserved: "সংরক্ষিত", sold: "বিক্রিত", nfs: "বিক্রির জন্য নয়" };
+function renderWorks() {
+  const q = $("#q").value.toLowerCase(), f = $("#fStatus").value;
+  const list = works.filter((w) => (!q || (w.title_en + w.inv_no + (w.title_bn || "")).toLowerCase().includes(q)) &&
+    (!f || (f === "nosize" ? !w.height_cm : f === "draft" ? !w.published : w.status === f)));
+  $("#works").innerHTML = list.map((w) => {
+    const im = [...(w.artwork_images || [])].sort((a, b) => a.sort - b.sort)[0];
+    return `<div class="item"><img src="${im ? pub(im.path) : ""}" alt="">
+      <div><div class="t">${esc(w.title_en)}<span class="pill ${w.published ? w.status : "draft"}">${w.published ? statusBn[w.status] : "অপ্রকাশিত"}</span></div>
+      <div class="s"><span class="mono">${esc(w.inv_no)}</span> · ${w.year || "সাল নেই"} · ${esc(w.medium || "")} · ${w.height_cm ? `${+w.height_cm}×${+w.width_cm} সেমি` : "<b>মাপ নেই</b>"} · ${w.price_bdt ? "৳" + w.price_bdt : "দাম নেই"}</div></div>
+      <button class="alt" data-edit="${w.id}">সম্পাদনা</button></div>`;
+  }).join("") || "<p>কিছু পাওয়া যায়নি।</p>";
+}
+$("#q").oninput = renderWorks; $("#fStatus").onchange = renderWorks;
+$("#works").onclick = (e) => { const id = e.target.dataset.edit; if (id) edit(works.find((w) => w.id === id)); };
+$("#newWork").onclick = () => edit({ inv_no: `TIM-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`, status: "available", published: false, artwork_images: [] });
+
+function edit(w) {
+  const E = $("#editor"); E.hidden = false; E.scrollIntoView({ behavior: "smooth" });
+  const v = (k) => esc(w[k] ?? "");
+  E.innerHTML = `<strong>${w.id ? "কাজ সম্পাদনা" : "নতুন কাজ"}</strong>
+  <div class="row"><label>শিরোনাম (ইংরেজি)<input name="title_en" value="${v("title_en")}"></label><label>শিরোনাম (বাংলা)<input name="title_bn" value="${v("title_bn")}"></label><label>ইনভেন্টরি নম্বর<input name="inv_no" value="${v("inv_no")}"></label></div>
+  <div class="row"><label>অধ্যায়<select name="series_id"><option value="">—</option>${series.map((s) => `<option value="${s.id}" ${s.id === w.series_id ? "selected" : ""}>${esc(s.title_en)}</option>`).join("")}</select></label>
+   <label>সাল<input name="year" type="number" value="${v("year")}"></label><label>মাধ্যম<input name="medium" value="${v("medium")}" placeholder="Acrylic on canvas"></label><label>সংস্করণ (প্রিন্ট)<input name="edition" value="${v("edition")}" placeholder="12/50"></label></div>
+  <div class="row"><label>উচ্চতা (সেমি)<input name="height_cm" type="number" step="0.1" value="${v("height_cm")}"></label><label>প্রস্থ (সেমি)<input name="width_cm" type="number" step="0.1" value="${v("width_cm")}"></label>
+   <label>দাম (টাকা)<input name="price_bdt" type="number" value="${v("price_bdt")}"></label><label>দাম (ডলার)<input name="price_usd" type="number" value="${v("price_usd")}"></label></div>
+  <div class="row"><label>অবস্থা<select name="status">${Object.entries(statusBn).map(([k, t]) => `<option value="${k}" ${w.status === k ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+   <label class="check"><input type="checkbox" name="show_price" ${w.show_price ? "checked" : ""}> সাইটে দাম দেখাবে</label>
+   <label class="check"><input type="checkbox" name="featured" ${w.featured ? "checked" : ""}> হোমপেজে দেখাবে</label>
+   <label class="check"><input type="checkbox" name="published" ${w.published ? "checked" : ""}> প্রকাশিত</label></div>
+  <label>বর্ণনা<textarea name="description_en" rows="3">${v("description_en")}</textarea></label>
+  <div><strong>ছবি</strong> <span class="s">(প্রথম ছবিটি মূল ছবি; বড় ছবি দিন, কমপক্ষে ২০০০ পিক্সেল)</span>
+   <div class="imgs">${[...(w.artwork_images || [])].sort((a, b) => a.sort - b.sort).map((i) => `<figure><img src="${pub(i.path)}" alt=""><button class="danger" data-delimg="${i.id}">মুছুন</button></figure>`).join("")}</div>
+   ${w.id ? `<input type="file" id="upload" accept="image/*" multiple>` : `<p class="s">ছবি যোগ করতে আগে কাজটি সংরক্ষণ করুন।</p>`}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="save">সংরক্ষণ</button><button class="alt" id="cancel">বন্ধ</button>${w.id ? `<button class="danger" id="del">কাজটি মুছুন</button>` : ""}</div>`;
+  $("#cancel").onclick = () => (E.hidden = true);
+  $("#save").onclick = async () => {
+    const row = {};
+    E.querySelectorAll("[name]").forEach((el) => { row[el.name] = el.type === "checkbox" ? el.checked : el.value === "" ? null : el.type === "number" ? +el.value : el.value; });
+    if (!row.title_en || !row.inv_no) return toast("শিরোনাম ও ইনভেন্টরি নম্বর দরকার");
+    row.slug = w.slug || `${row.title_en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${String(Date.now()).slice(-4)}`;
+    const q = w.id ? sb.from("artworks").update(row).eq("id", w.id) : sb.from("artworks").insert(row);
+    const { error } = await q;
+    if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+    toast("সংরক্ষণ হয়েছে"); await load(); if (!w.id) E.hidden = true; else edit(works.find((x) => x.id === w.id));
+  };
+  $("#del") && ($("#del").onclick = async () => {
+    if ($("#del").dataset.sure !== "1") { $("#del").dataset.sure = "1"; $("#del").textContent = "নিশ্চিত? আবার চাপুন"; return; }
+    await sb.from("artworks").delete().eq("id", w.id); E.hidden = true; toast("মুছে ফেলা হয়েছে"); load();
+  });
+  E.querySelectorAll("[data-delimg]").forEach((b) => (b.onclick = async () => {
+    await sb.from("artwork_images").delete().eq("id", b.dataset.delimg); await load(); edit(works.find((x) => x.id === w.id));
+  }));
+  $("#upload") && ($("#upload").onchange = async (e) => {
+    let n = (w.artwork_images || []).length;
+    for (const file of e.target.files) {
+      const path = `works/${w.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]+/g, "-")}`;
+      const dims = await new Promise((r) => { const im = new Image(); im.onload = () => r([im.naturalWidth, im.naturalHeight]); im.onerror = () => r([null, null]); im.src = URL.createObjectURL(file); });
+      const up = await sb.storage.from("artworks").upload(path, file, { contentType: file.type });
+      if (up.error) { toast("আপলোড হয়নি: " + up.error.message); continue; }
+      await sb.from("artwork_images").insert({ artwork_id: w.id, path, sort: n++, alt_en: w.title_en, width: dims[0], height: dims[1] });
+      if (dims[0] && dims[0] < 1600) toast("ছবিটি ছোট (" + dims[0] + "px)। বড় ছবি দিলে ভালো দেখাবে।");
+    }
+    await load(); edit(works.find((x) => x.id === w.id));
+  });
+}
+
+async function loadInq() {
+  const { data } = await sb.from("inquiries").select("*, artworks(title_en,inv_no)").order("created_at", { ascending: false });
+  $("#inq").innerHTML = (data || []).map((i) => `<div class="item" style="grid-template-columns:1fr auto"><div>
+    <div class="t">${esc(i.name)} ${i.handled ? '<span class="pill available">উত্তর দেওয়া</span>' : '<span class="pill sold">নতুন</span>'}</div>
+    <div class="s">${esc(i.email || "")} ${esc(i.phone || "")} · ${new Date(i.created_at).toLocaleString("bn-BD")}${i.artworks ? ` · ${esc(i.artworks.title_en)} (${esc(i.artworks.inv_no)})` : ""}</div>
+    <div>${esc(i.message || "")}</div></div>
+    <button class="alt" data-done="${i.id}" ${i.handled ? "hidden" : ""}>উত্তর দিয়েছি</button></div>`).join("") || "<p>এখনো কোনো জিজ্ঞাসা নেই।</p>";
+  $("#inq").onclick = async (e) => { const id = e.target.dataset.done; if (id) { await sb.from("inquiries").update({ handled: true }).eq("id", id); loadInq(); } };
+}
+
+async function loadClient() {
+  $("#cPick").innerHTML = works.map((w) => { const im = (w.artwork_images || [])[0]; return `<label><input type="checkbox" value="${w.id}"> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${esc(w.title_en)}</label>`; }).join("");
+  const { data } = await sb.from("client_collections").select("*").order("created_at", { ascending: false });
+  $("#cList").innerHTML = (data || []).map((c) => `<div class="item" style="grid-template-columns:1fr auto"><div><div class="t">${esc(c.client_name || "নাম নেই")} · ${c.artwork_ids.length}টি কাজ</div>
+    <div class="s mono">https://artistmithu.com/c/?t=${c.token}${c.expires_at ? ` · মেয়াদ ${new Date(c.expires_at).toLocaleDateString("bn-BD")}` : ""}</div></div>
+    <button class="alt" data-copy="https://artistmithu.com/c/?t=${c.token}">কপি</button></div>`).join("");
+}
+$("#cList").onclick = (e) => { const u = e.target.dataset.copy; if (u) navigator.clipboard.writeText(u).then(() => toast("লিংক কপি হয়েছে")); };
+$("#cCreate").onclick = async () => {
+  const ids = [...document.querySelectorAll("#cPick input:checked")].map((i) => i.value);
+  if (!ids.length) return toast("অন্তত একটি কাজ বাছাই করুন");
+  const days = +$("#cDays").value || 30;
+  const { data, error } = await sb.from("client_collections").insert({ client_name: $("#cName").value || null, note: $("#cNote").value || null, artwork_ids: ids, show_prices: $("#cPrices").checked, expires_at: new Date(Date.now() + days * 864e5).toISOString() }).select().single();
+  if (error) return toast(error.message);
+  const link = `https://artistmithu.com/c/?t=${data.token}`;
+  $("#cOut").textContent = link; navigator.clipboard?.writeText(link).then(() => toast("লিংক তৈরি ও কপি হয়েছে"));
+  loadClient();
+};
+
+async function loadSubs() {
+  const { data } = await sb.from("subscribers").select("*").order("created_at", { ascending: false });
+  $("#subs").innerHTML = `<p>${(data || []).length} জন সাবস্ক্রাইবার</p>` + (data || []).map((s) => `<div class="s mono">${esc(s.email)} · ${s.lang}</div>`).join("");
+}
+
+$("#publish").onclick = async () => {
+  $("#publish").disabled = true;
+  const { error } = await sb.functions.invoke("rebuild-site");
+  toast(error ? "প্রকাশ হয়নি: " + error.message : "সাইট আপডেট হচ্ছে, ২-৩ মিনিট লাগবে");
+  setTimeout(() => ($("#publish").disabled = false), 60000);
+};
+</script>
+</body>
+</html>
