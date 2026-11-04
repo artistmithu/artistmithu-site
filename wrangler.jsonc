@@ -1,0 +1,9 @@
+{
+  // Cloudflare Workers static-assets deployment. Build: `npm run build`, deploy: `npx wrangler deploy`.
+  "name": "artistmithu-site",
+  "compatibility_date": "2026-10-15",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
