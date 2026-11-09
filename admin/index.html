@@ -86,6 +86,8 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const pub = (p) => `${URL_}/storage/v1/object/public/artworks/${p}`;
 const toast = (m) => { const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 2500); };
 let works = [], series = [];
+let hasMode = false; // true once migration 002 (price_mode) is applied
+const fxRate = () => { try { return +localStorage.getItem("fx") || 122; } catch { return 122; } };
 
 // Auth
 $("#doLogin").onclick = async () => {
@@ -131,6 +133,7 @@ async function load() {
     return;
   }
   series = s.data || []; works = w.data || [];
+  hasMode = works.length > 0 && "price_mode" in works[0];
   renderWorks();
 }
 const statusBn = { available: "উপলব্ধ", reserved: "সংরক্ষিত", sold: "বিক্রিত", nfs: "বিক্রির জন্য নয়" };
@@ -158,9 +161,23 @@ function edit(w) {
   <div class="row"><label>অধ্যায়<select name="series_id"><option value="">—</option>${series.map((s) => `<option value="${s.id}" ${s.id === w.series_id ? "selected" : ""}>${esc(s.title_en)}</option>`).join("")}</select></label>
    <label>সাল<input name="year" type="number" value="${v("year")}"></label><label>মাধ্যম<input name="medium" value="${v("medium")}" placeholder="Acrylic on canvas"></label><label>সংস্করণ (প্রিন্ট)<input name="edition" value="${v("edition")}" placeholder="12/50"></label></div>
   <div class="row"><label>উচ্চতা (সেমি)<input name="height_cm" type="number" step="0.1" value="${v("height_cm")}"></label><label>প্রস্থ (সেমি)<input name="width_cm" type="number" step="0.1" value="${v("width_cm")}"></label>
-   <label>দাম (টাকা)<input name="price_bdt" type="number" value="${v("price_bdt")}"></label><label>দাম (ডলার)<input name="price_usd" type="number" value="${v("price_usd")}"></label></div>
+  </div>
+  <div class="panel" style="padding:10px">
+   <div class="row">
+    ${hasMode ? `<label>দাম দেখানোর ধরন<select name="price_mode" id="pMode">
+      <option value="on_request" ${(w.price_mode || "on_request") === "on_request" ? "selected" : ""}>দাম জানতে যোগাযোগ (দাম লুকানো)</option>
+      <option value="fixed" ${w.price_mode === "fixed" ? "selected" : ""}>নির্দিষ্ট দাম</option>
+      <option value="range" ${w.price_mode === "range" ? "selected" : ""}>দামের সীমা (যেমন ৳৮০,০০০–১,০০,০০০)</option></select></label>` : ""}
+    <label>দাম (টাকা)<input name="price_bdt" id="pBdt" type="number" value="${v("price_bdt")}"></label>
+    ${hasMode ? `<label class="pmax">সর্বোচ্চ (টাকা)<input name="price_bdt_max" type="number" value="${v("price_bdt_max")}"></label>` : ""}
+    <label>দাম (ডলার)<input name="price_usd" id="pUsd" type="number" value="${v("price_usd")}"></label>
+    ${hasMode ? `<label class="pmax">সর্বোচ্চ (ডলার)<input name="price_usd_max" type="number" value="${v("price_usd_max")}"></label>` : ""}
+   </div>
+   <div class="s" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">ডলারের প্রস্তাব: ১ ডলার = <input id="fx" type="number" value="${fxRate()}" style="width:80px"> টাকা <button type="button" class="alt" id="suggestUsd">টাকা থেকে ডলার হিসাব করুন</button> <span>(গোল করে দেবে; বিদেশি ক্রেতার জন্য নিজে ঠিক করে নিন)</span></div>
+  </div>
+  <div class="row">
   <div class="row"><label>অবস্থা<select name="status">${Object.entries(statusBn).map(([k, t]) => `<option value="${k}" ${w.status === k ? "selected" : ""}>${t}</option>`).join("")}</select></label>
-   <label class="check"><input type="checkbox" name="show_price" ${w.show_price ? "checked" : ""}> সাইটে দাম দেখাবে</label>
+   ${hasMode ? "" : `<label class="check"><input type="checkbox" name="show_price" ${w.show_price ? "checked" : ""}> সাইটে দাম দেখাবে</label>`}
    <label class="check"><input type="checkbox" name="featured" ${w.featured ? "checked" : ""}> হোমপেজে দেখাবে</label>
    <label class="check"><input type="checkbox" name="published" ${w.published ? "checked" : ""}> প্রকাশিত</label></div>
   <label>বর্ণনা<textarea name="description_en" rows="3">${v("description_en")}</textarea></label>
@@ -169,10 +186,22 @@ function edit(w) {
    ${w.id ? `<input type="file" id="upload" accept="image/*" multiple>` : `<p class="s">ছবি যোগ করতে আগে কাজটি সংরক্ষণ করুন।</p>`}</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="save">সংরক্ষণ</button><button class="alt" id="cancel">বন্ধ</button>${w.id ? `<button class="danger" id="del">কাজটি মুছুন</button>` : ""}</div>`;
   $("#cancel").onclick = () => (E.hidden = true);
+  const syncMode = () => E.querySelectorAll(".pmax").forEach((l) => (l.hidden = $("#pMode")?.value !== "range"));
+  $("#pMode") && ($("#pMode").onchange = syncMode); syncMode();
+  $("#suggestUsd").onclick = () => {
+    const rate = +$("#fx").value; if (!rate) return;
+    try { localStorage.setItem("fx", rate); } catch {}
+    const round = (n) => (n >= 1000 ? Math.round(n / 50) * 50 : Math.round(n / 10) * 10);
+    const b = +$("#pBdt").value; if (b) $("#pUsd").value = round(b / rate);
+    const bm = E.querySelector('[name="price_bdt_max"]'), um = E.querySelector('[name="price_usd_max"]');
+    if (bm && um && +bm.value) um.value = round(+bm.value / rate);
+  };
   $("#save").onclick = async () => {
     const row = {};
     E.querySelectorAll("[name]").forEach((el) => { row[el.name] = el.type === "checkbox" ? el.checked : el.value === "" ? null : el.type === "number" ? +el.value : el.value; });
     if (!row.title_en || !row.inv_no) return toast("শিরোনাম ও ইনভেন্টরি নম্বর দরকার");
+    if (hasMode) row.show_price = row.price_mode !== "on_request";
+    if (hasMode && row.price_mode !== "on_request" && row.price_bdt == null && row.price_usd == null) return toast("দাম দেখাতে হলে টাকা বা ডলারে দাম দিন");
     row.slug = w.slug || `${row.title_en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${String(Date.now()).slice(-4)}`;
     const q = w.id ? sb.from("artworks").update(row).eq("id", w.id) : sb.from("artworks").insert(row);
     const { error } = await q;

@@ -105,10 +105,19 @@
       if (data.client_name) document.getElementById("cTitle").textContent = say(`Selected for ${data.client_name}`, `${data.client_name}-এর জন্য নির্বাচিত`);
       document.getElementById("cNote").textContent = data.note || "";
       const img = (p) => `${url}/storage/v1/object/public/artworks/${p}`;
+      const nB = (n) => Number(n).toLocaleString("en-IN"), nU = (n) => Number(n).toLocaleString("en-US");
+      const amt = (min, max, f, sym, r) => (min == null ? "" : r && max ? `${sym}${f(min)}–${f(max)}` : `${sym}${f(min)}`);
+      const priceOf = (a) => {
+        if (a.status === "sold" || a.status === "nfs") return "";
+        const m = a.price_mode || (a.price_bdt ? "fixed" : "on_request");
+        if (m === "on_request" || (a.price_bdt == null && a.price_usd == null)) return say("Price on request", "দাম জানতে যোগাযোগ");
+        const b = amt(a.price_bdt, a.price_bdt_max, nB, "৳ ", m === "range"), u = amt(a.price_usd, a.price_usd_max, nU, "US$ ", m === "range");
+        return (bn() ? [b, u] : [u, b]).filter(Boolean).join(" · ");
+      };
       cGrid.innerHTML = data.artworks.map((a) => `<article class="card"><a class="frame" href="${a.images?.[0] ? img(a.images[0]) : "#"}" target="_blank" rel="noopener">${a.images?.[0] ? `<img src="${img(a.images[0])}" alt="${a.title_en}">` : ""}</a>
         <div class="meta"><h3>${a.title_en}</h3><span class="yr">${a.year || ""}</span></div>
         <div class="sub">${a.medium || ""}${a.height_cm ? ` · ${+a.height_cm} × ${+a.width_cm} cm` : ""}</div>
-        <div class="sub"><span class="pill ${a.status}">${a.status}</span>${a.price_bdt ? `<span class="price">৳ ${Number(a.price_bdt).toLocaleString("en-IN")}${a.price_usd ? ` · US$ ${a.price_usd}` : ""}</span>` : ""}</div>
+        <div class="sub"><span class="pill ${a.status}">${({ available: say("Available", "উপলব্ধ"), reserved: say("Reserved", "সংরক্ষিত"), sold: say("Sold", "বিক্রিত"), nfs: say("Not for sale", "বিক্রির জন্য নয়") })[a.status] || a.status}</span><span class="price">${priceOf(a)}</span></div>
         <a class="btn" href="https://wa.me/${wa}?text=${encodeURIComponent(`About ${a.title_en} (${a.inv_no})`)}">WhatsApp</a></article>`).join("");
     })();
   }

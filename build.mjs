@@ -23,6 +23,8 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const inch = (cm) => (cm / 2.54).toFixed(1);
 const fmtBDT = (n) => "৳ " + Number(n).toLocaleString("en-IN");
 const fmtUSD = (n) => "US$ " + Number(n).toLocaleString("en-US");
+const fmtBDTn = (n) => Number(n).toLocaleString("en-IN");
+const fmtUSDn = (n) => Number(n).toLocaleString("en-US");
 
 // FIXTURE=path.json builds from a saved snapshot instead of Supabase (for offline testing).
 const fx = process.env.FIXTURE ? JSON.parse(await (await import("node:fs/promises")).readFile(process.env.FIXTURE, "utf8")) : null;
@@ -32,6 +34,7 @@ const [series, works, images, exhibitions] = fx ? [fx.series, fx.works, fx.image
   api("artwork_images?select=artwork_id,path,kind,alt_en,width,height,sort&order=sort"),
   api("exhibitions?select=*&order=start_date.desc.nullslast").catch(() => []),
 ]);
+const showLinks = fx ? fx.exhibition_works || [] : await api("exhibition_works?select=*&order=sort").catch(() => []);
 const seriesById = Object.fromEntries(series.map((s) => [s.id, s]));
 for (const w of works) {
   w.images = images.filter((i) => i.artwork_id === w.id);
@@ -44,8 +47,22 @@ const SIZE = { small: ["Small", "ছোট"], medium: ["Medium", "মাঝা�
 const bi = ([en, bn]) => `<span lang="en">${en}</span><span lang="bn">${bn}</span>`;
 
 const sizeText = (w) => (w.height_cm && w.width_cm ? `${+w.height_cm} × ${+w.width_cm} cm <small>(${inch(w.height_cm)} × ${inch(w.width_cm)} in)</small>` : bi(["Size on request", "মাপ জানতে যোগাযোগ"]));
-const priceText = (w) =>
-  w.status === "sold" || w.status === "nfs" ? "" : w.price_bdt ? `${fmtBDT(w.price_bdt)}${w.price_usd ? " · " + fmtUSD(w.price_usd) : ""}` : bi(["Price on request", "দাম জানতে যোগাযোগ"]);
+// Price display. Bangla shows taka first, English shows dollars first. No automatic currency conversion:
+// each currency appears only if the artist entered it.
+const mode = (w) => (w.price_mode ? w.price_mode : w.price_bdt ? "fixed" : "on_request");
+const amount = (min, max, fmtN, sym, isRange) => (min == null ? "" : isRange && max ? `${sym}${fmtN(min)}–${fmtN(max)}` : `${sym}${fmtN(min)}`);
+function priceText(w, { note = false } = {}) {
+  if (w.status === "sold" || w.status === "nfs") return "";
+  const m = mode(w);
+  if (m === "on_request" || (w.price_bdt == null && w.price_usd == null)) return bi(["Price on request", "দাম জানতে যোগাযোগ"]);
+  const r = m === "range";
+  const bdt = amount(w.price_bdt, w.price_bdt_max, fmtBDTn, "৳ ", r);
+  const usd = amount(w.price_usd, w.price_usd_max, fmtUSDn, "US$ ", r);
+  const en = [usd, bdt].filter(Boolean).join(" · ");
+  const bn = [bdt, usd].filter(Boolean).join(" · ");
+  const ship = note ? `<small class="ship">${bi(["Framing and international shipping quoted separately.", "ফ্রেম ও বিদেশে পাঠানোর খরচ আলাদা।"])}</small>` : "";
+  return bi([en, bn]) + ship;
+}
 
 function page({ title, desc, path, body, image, jsonld }) {
   const url = SITE + path;
@@ -73,6 +90,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
   <nav class="main">
     <a href="/works/">${bi(["Works", "কাজ"])}</a>
     <a href="/chapters/">${bi(["Chapters", "অধ্যায়"])}</a>
+    <a href="/shows/">${bi(["Shows", "প্রদর্শনী"])}</a>
     <a href="/about/">${bi(["About", "পরিচিতি"])}</a>
     <a href="/contact/">${bi(["Contact", "যোগাযোগ"])}</a>
   </nav>
@@ -189,8 +207,9 @@ for (const w of works) {
           ${w.medium ? `<dt>${bi(["Medium", "মাধ্যম"])}</dt><dd>${esc(w.medium)}</dd>` : ""}
           <dt>${bi(["Size", "মাপ"])}</dt><dd>${sizeText(w)}${w.size_class ? ` · ${bi(SIZE[w.size_class])}` : ""}</dd>
           ${w.edition ? `<dt>${bi(["Edition", "সংস্করণ"])}</dt><dd>${esc(w.edition)}</dd>` : ""}
+          <!--SHOWS-->
           <dt>${bi(["Status", "অবস্থা"])}</dt><dd><span class="pill ${w.status}">${bi(STATUS[w.status])}</span></dd>
-          ${priceText(w) ? `<dt>${bi(["Price", "দাম"])}</dt><dd class="price">${priceText(w)}</dd>` : ""}
+          ${priceText(w) ? `<dt>${bi(["Price", "দাম"])}</dt><dd class="price">${priceText(w, { note: true })}</dd>` : ""}
         </dl>
         ${w.description_en && w.description_en !== w.title_en ? `<p class="lead">${esc(w.description_en)}</p>` : ""}
         <div class="actions">
@@ -217,7 +236,7 @@ files["about/index.html"] = page({
   <p>Tanvirul Islam Mithu began drawing as a child, copying illustrations from books. In 1991 he met S.M. Sultan in Narail, who gave him a signed pencil sketch. He studied Drawing and Painting at the University of Dhaka from 1992 and graduated in 2001, the year of his first solo exhibition.</p>
   <p>Around 2000 he moved into graphic design and media. In 2013 he took part in the USA Media Fellowship, and on 16 December 2013 he opened <em>Transparent Boundary</em>, Bangladesh's first solo web show. He launched <em>Lines of Life</em> in 2017 and has since held seven web shows.</p>
   <h2 class="sec">${bi(["Exhibitions and web shows", "প্রদর্শনী ও ওয়েব শো"])}</h2>
-  ${exhibitions.length ? `<ul class="ex">${exhibitions.map((e) => `<li><span class="mono">${e.start_date ? e.start_date.slice(0, 4) : ""}</span> ${esc(e.title)}${e.venue ? `, ${esc(e.venue)}` : ""}${e.city ? `, ${esc(e.city)}` : ""}</li>`).join("")}</ul>` : `<p class="note">List coming soon.</p>`}
+  ${exhibitions.length ? `<ul class="ex">${exhibitions.map((e) => `<li><span class="mono">${e.start_date ? e.start_date.slice(0, 4) : ""}</span> ${e.slug ? `<a href="/shows/${e.slug}/">${esc(e.title)}</a>` : esc(e.title)}${e.venue ? `, ${esc(e.venue)}` : ""}${e.city ? `, ${esc(e.city)}` : ""}</li>`).join("")}</ul>` : `<p class="note">List coming soon.</p>`}
   </div>`,
 });
 
@@ -241,7 +260,61 @@ files["c/index.html"] = page({
 
 files["404.html"] = page({ title: "Page not found | Tanvirul Islam Mithu", desc: "Page not found", path: "/404", body: `<div class="wrap prose"><h1 class="page-title">${bi(["Page not found", "পাতাটি পাওয়া যায়নি"])}</h1><p><a href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></div>` });
 
-const urls = ["/", "/works/", "/chapters/", "/about/", "/contact/", ...series.map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
+// Shows: web shows and exhibitions ---------------------------------------------
+const KIND = { "web-show": ["Web show", "ওয়েব শো"], solo: ["Solo exhibition", "একক প্রদর্শনী"], group: ["Group exhibition", "যৌথ প্রদর্শনী"], "art-fair": ["Art fair", "আর্ট ফেয়ার"] };
+const shows = exhibitions.filter((e) => e.slug && e.published !== false);
+const worksById = Object.fromEntries(works.map((w) => [w.id, w]));
+const yt = (u) => { const m = String(u || "").match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : null; };
+const showCover = (e) => e.cover_path ? img(e.cover_path) : (() => { const l = showLinks.find((x) => x.exhibition_id === e.id && worksById[x.artwork_id]?.images[0]); return l ? img(worksById[l.artwork_id].images[0].path) : null; })();
+const dateRange = (e) => [e.start_date, e.end_date].filter(Boolean).map((d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })).join(" – ");
+const byYear = {};
+for (const e of shows) (byYear[e.start_date ? e.start_date.slice(0, 4) : "—"] ||= []).push(e);
+
+files["shows/index.html"] = page({
+  title: "Shows | Tanvirul Islam Mithu",
+  desc: "Web shows and exhibitions by Tanvirul Islam Mithu, from Transparent Boundary (2013), Bangladesh's first solo web show, to today.",
+  path: "/shows/",
+  body: `<div class="wrap"><h1 class="page-title">${bi(["Shows", "প্রদর্শনী"])}</h1>
+  <p class="lead">${bi(["Since 2013 Mithu has opened his solo shows on the web first. Each show below keeps its statement, works and video.", "২০১৩ সাল থেকে মিঠু তাঁর একক প্রদর্শনী প্রথমে ওয়েবে খুলে আসছেন। নিচের প্রতিটি শো-তে আছে তার বক্তব্য, কাজ ও ভিডিও।"])}</p>
+  ${shows.length ? Object.keys(byYear).sort().reverse().map((y) => `<h2 class="sec mono-year">${y}</h2><div class="shows">${byYear[y].map((e) => { const c = showCover(e); const n = showLinks.filter((x) => x.exhibition_id === e.id && worksById[x.artwork_id]).length; return `<a class="show" href="/shows/${e.slug}/">${c ? `<img src="${c}" alt="" loading="lazy">` : `<span class="empty"></span>`}<span class="eyebrow">${bi(KIND[e.kind] || [e.kind, e.kind])}</span><strong>${esc(e.title)}</strong>${e.title_bn ? `<small lang="bn">${esc(e.title_bn)}</small>` : ""}<span class="note">${dateRange(e)}${n ? ` · ${n} works` : ""}</span></a>`; }).join("")}</div>`).join("") : `<p class="note">${bi(["The show archive is being added.", "প্রদর্শনীর আর্কাইভ যোগ করা হচ্ছে।"])}</p>`}
+  </div>`,
+});
+
+const ordered = [...shows].sort((a, b) => String(a.start_date).localeCompare(String(b.start_date)));
+ordered.forEach((e, i) => {
+  const list = showLinks.filter((x) => x.exhibition_id === e.id).sort((a, b) => a.sort - b.sort).map((x) => worksById[x.artwork_id]).filter(Boolean);
+  const vid = yt(e.youtube_url), prev = ordered[i - 1], next = ordered[i + 1], c = showCover(e);
+  files[`shows/${e.slug}/index.html`] = page({
+    title: `${e.title}${e.start_date ? `, ${e.start_date.slice(0, 4)}` : ""} | Tanvirul Islam Mithu`,
+    desc: (e.statement_en || `${e.title}: ${(KIND[e.kind] || [e.kind])[0]} by Tanvirul Islam Mithu.`).slice(0, 160),
+    path: `/shows/${e.slug}/`,
+    image: c || undefined,
+    jsonld: { "@context": "https://schema.org", "@type": "ExhibitionEvent", name: e.title, startDate: e.start_date || undefined, endDate: e.end_date || undefined, eventAttendanceMode: e.kind === "web-show" ? "https://schema.org/OnlineEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode", location: e.kind === "web-show" ? { "@type": "VirtualLocation", url: e.original_url || `${SITE}/shows/${e.slug}/` } : { "@type": "Place", name: e.venue || e.city || "", address: [e.city, e.country].filter(Boolean).join(", ") }, organizer: { "@type": "Person", name: "Tanvirul Islam Mithu" }, image: c || undefined, url: `${SITE}/shows/${e.slug}/` },
+    body: `<div class="wrap"><p class="eyebrow"><a href="/shows/">${bi(["Shows", "প্রদর্শনী"])}</a> / ${bi(KIND[e.kind] || [e.kind, e.kind])}</p>
+    <h1 class="page-title">${esc(e.title)}${e.title_bn ? ` <small lang="bn">${esc(e.title_bn)}</small>` : ""}</h1>
+    <p class="note">${dateRange(e)}${e.venue ? ` · ${esc(e.venue)}` : ""}${e.city ? `, ${esc(e.city)}` : ""}</p>
+    <div class="show-head">
+      ${vid ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${vid}" title="${esc(e.title)}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>` : c ? `<img class="show-cover" src="${c}" alt="${esc(e.title)}">` : ""}
+      <div class="prose">
+        ${e.statement_en ? `<div lang="en">${esc(e.statement_en).split(/\n{2,}/).map((p) => `<p>${p}</p>`).join("")}</div>` : ""}
+        ${e.statement_bn ? `<div lang="bn">${esc(e.statement_bn).split(/\n{2,}/).map((p) => `<p>${p}</p>`).join("")}</div>` : ""}
+        <p class="links">${e.original_url ? `<a href="${esc(e.original_url)}" rel="noopener">${bi(["Original web show", "মূল ওয়েব শো"])}</a>` : ""}${e.wayback_url ? ` · <a href="${esc(e.wayback_url)}" rel="noopener">${bi(["Archived copy", "আর্কাইভ কপি"])}</a>` : ""}</p>
+      </div>
+    </div>
+    ${list.length ? `<h2 class="sec">${bi(["Works in this show", "এই শো-এর কাজ"])}</h2><div class="grid">${list.map(card).join("")}</div>` : ""}
+    <nav class="prevnext">${prev ? `<a href="/shows/${prev.slug}/">← ${esc(prev.title)}</a>` : "<span></span>"}${next ? `<a href="/shows/${next.slug}/">${esc(next.title)} →</a>` : ""}</nav>
+    </div>`,
+  });
+});
+
+// Work pages list the shows each work was in (filled after shows are known).
+for (const w of works) {
+  const inShows = showLinks.filter((x) => x.artwork_id === w.id).map((x) => shows.find((e) => e.id === x.exhibition_id)).filter(Boolean);
+  const f = `works/${w.slug}/index.html`;
+  if (inShows.length && files[f]) files[f] = files[f].replace("<!--SHOWS-->", `<dt>${bi(["Shown in", "প্রদর্শিত"])}</dt><dd>${inShows.map((e) => `<a href="/shows/${e.slug}/">${esc(e.title)}</a>`).join(", ")}</dd>`);
+}
+
+const urls = ["/", "/works/", "/chapters/", "/shows/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...series.map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
 files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${SITE}${u}</loc></url>`).join("")}</urlset>`;
 files["robots.txt"] = `User-agent: *\nDisallow: /admin/\nDisallow: /c/\nSitemap: ${SITE}/sitemap.xml\n`;
 // Old WordPress URLs -> new pages
@@ -254,7 +327,7 @@ files["_redirects"] = [
   "/index.php/media-life/* /chapters/media-life/ 301",
   "/index.php/lines-of-life/* /chapters/lines-of-life/ 301",
   "/index.php/biography/* /about/ 301",
-  "/index.php/exhibitions/* /about/ 301",
+  "/index.php/exhibitions/* /shows/ 301",
   "/index.php/journal/* /about/ 301",
   "/index.php/contact/* /contact/ 301",
   "/index.php/* / 301",
