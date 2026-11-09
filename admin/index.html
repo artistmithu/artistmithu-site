@@ -97,16 +97,22 @@ $("#doMagic").onclick = async () => {
   $("#loginMsg").textContent = error ? error.message : "ইমেইলে লিংক পাঠানো হয়েছে।";
 };
 $("#logout").onclick = () => sb.auth.signOut();
-sb.auth.onAuthStateChange(async (_e, session) => {
+// Supabase docs: don't await other Supabase calls inside this callback (it can lock); defer them.
+sb.auth.onAuthStateChange((_e, session) => { setTimeout(() => onSession(session), 0); });
+let started = false;
+async function onSession(session) {
   const on = !!session;
   $("#login").hidden = on; $("#app").hidden = !on; $("#logout").hidden = !on; $("#publish").hidden = !on;
   $("#who").textContent = session?.user?.email || "";
   if (on) {
-    const { data } = await sb.rpc("is_admin");
+    if (started) return;
+    const { data, error } = await sb.rpc("is_admin");
+    if (error) { $("#works").innerHTML = `<p class="panel">সার্ভারে সমস্যা: ${esc(error.message)}</p>`; return; }
     if (!data) { $("#app").innerHTML = `<p class="panel">এই অ্যাকাউন্টটি এখনো অ্যাডমিন নয়। ব্যবহারকারী আইডি: <span class="mono">${session.user.id}</span></p>`; return; }
+    started = true;
     load();
-  }
-});
+  } else started = false;
+}
 
 // Tabs
 document.querySelectorAll("nav.tabs button").forEach((b) => (b.onclick = () => {
@@ -120,6 +126,10 @@ async function load() {
     sb.from("series").select("*").order("sort"),
     sb.from("artworks").select("*, artwork_images(id,path,sort,kind)").order("sort").order("year"),
   ]);
+  if (s.error || w.error) {
+    $("#works").innerHTML = `<p class="panel">কাজের তালিকা আনা যায়নি: ${esc((w.error || s.error).message)}. পাতাটা রিলোড করুন; আবার দেখালে এই লেখাটার স্ক্রিনশট পাঠান।</p>`;
+    return;
+  }
   series = s.data || []; works = w.data || [];
   renderWorks();
 }
