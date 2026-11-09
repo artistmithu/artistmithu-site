@@ -204,8 +204,8 @@ async function loadClient() {
   $("#cPick").innerHTML = works.map((w) => { const im = (w.artwork_images || [])[0]; return `<label><input type="checkbox" value="${w.id}"> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${esc(w.title_en)}</label>`; }).join("");
   const { data } = await sb.from("client_collections").select("*").order("created_at", { ascending: false });
   $("#cList").innerHTML = (data || []).map((c) => `<div class="item" style="grid-template-columns:1fr auto"><div><div class="t">${esc(c.client_name || "নাম নেই")} · ${c.artwork_ids.length}টি কাজ</div>
-    <div class="s mono">https://artistmithu.com/c/?t=${c.token}${c.expires_at ? ` · মেয়াদ ${new Date(c.expires_at).toLocaleDateString("bn-BD")}` : ""}</div></div>
-    <button class="alt" data-copy="https://artistmithu.com/c/?t=${c.token}">কপি</button></div>`).join("");
+    <div class="s mono">${location.origin}/c/?t=${c.token}${c.expires_at ? ` · মেয়াদ ${new Date(c.expires_at).toLocaleDateString("bn-BD")}` : ""}</div></div>
+    <button class="alt" data-copy="${location.origin}/c/?t=${c.token}">কপি</button></div>`).join("");
 }
 $("#cList").onclick = (e) => { const u = e.target.dataset.copy; if (u) navigator.clipboard.writeText(u).then(() => toast("লিংক কপি হয়েছে")); };
 $("#cCreate").onclick = async () => {
@@ -214,7 +214,7 @@ $("#cCreate").onclick = async () => {
   const days = +$("#cDays").value || 30;
   const { data, error } = await sb.from("client_collections").insert({ client_name: $("#cName").value || null, note: $("#cNote").value || null, artwork_ids: ids, show_prices: $("#cPrices").checked, expires_at: new Date(Date.now() + days * 864e5).toISOString() }).select().single();
   if (error) return toast(error.message);
-  const link = `https://artistmithu.com/c/?t=${data.token}`;
+  const link = `${location.origin}/c/?t=${data.token}`;
   $("#cOut").textContent = link; navigator.clipboard?.writeText(link).then(() => toast("লিংক তৈরি ও কপি হয়েছে"));
   loadClient();
 };

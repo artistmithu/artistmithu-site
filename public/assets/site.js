@@ -105,8 +105,8 @@
       if (data.client_name) document.getElementById("cTitle").textContent = say(`Selected for ${data.client_name}`, `${data.client_name}-এর জন্য নির্বাচিত`);
       document.getElementById("cNote").textContent = data.note || "";
       const img = (p) => `${url}/storage/v1/object/public/artworks/${p}`;
-      cGrid.innerHTML = data.artworks.map((a) => `<article class="card"><a class="frame" href="/works/${a.slug}/">${a.images?.[0] ? `<img src="${img(a.images[0])}" alt="">` : ""}</a>
-        <div class="meta"><h3><a href="/works/${a.slug}/">${a.title_en}</a></h3><span class="yr">${a.year || ""}</span></div>
+      cGrid.innerHTML = data.artworks.map((a) => `<article class="card"><a class="frame" href="${a.images?.[0] ? img(a.images[0]) : "#"}" target="_blank" rel="noopener">${a.images?.[0] ? `<img src="${img(a.images[0])}" alt="${a.title_en}">` : ""}</a>
+        <div class="meta"><h3>${a.title_en}</h3><span class="yr">${a.year || ""}</span></div>
         <div class="sub">${a.medium || ""}${a.height_cm ? ` · ${+a.height_cm} × ${+a.width_cm} cm` : ""}</div>
         <div class="sub"><span class="pill ${a.status}">${a.status}</span>${a.price_bdt ? `<span class="price">৳ ${Number(a.price_bdt).toLocaleString("en-IN")}${a.price_usd ? ` · US$ ${a.price_usd}` : ""}</span>` : ""}</div>
         <a class="btn" href="https://wa.me/${wa}?text=${encodeURIComponent(`About ${a.title_en} (${a.inv_no})`)}">WhatsApp</a></article>`).join("");
