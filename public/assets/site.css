@@ -128,3 +128,14 @@ html[data-lang="en"] div[lang="bn"]{display:none}
 html[data-lang="bn"] div[lang="en"]{display:none}
 .ship{display:block;font-weight:400;font-size:12px;color:var(--ink-soft);margin-top:2px}
 @media (max-width:760px){.show-head{grid-template-columns:1fr}}
+
+/* Videos */
+.vnav{display:flex;gap:8px 16px;flex-wrap:wrap;font-size:14px;margin:8px 0 8px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;padding-bottom:12px}
+.vcard{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:var(--ink);min-width:0}
+.vcard .thumb{position:relative;display:block;aspect-ratio:16/9;overflow:hidden;background:var(--accent-soft);border:1px solid var(--line)}
+.vcard .thumb img{width:100%;height:100%;object-fit:cover}
+.vcard .dur{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.75);color:#fff;font-family:var(--f-mono);font-size:11px;padding:1px 6px;border-radius:4px}
+.vcard .vt{font-weight:500;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vcard:hover .vt{color:var(--accent)}
+h3.chan{font-family:var(--f-mono);font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:20px 0 10px}

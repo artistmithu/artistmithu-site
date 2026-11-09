@@ -1,0 +1,774 @@
+{
+ "channel": "https://www.youtube.com/@artistmithu",
+ "categories": {
+  "interview-press": "TV interviews and news reports",
+  "web-show-film": "Films of the web shows",
+  "artwork-review": "Short films on single works (Transparent Boundary paintings)",
+  "drawing-series": "\"Transform Your Thoughts and Emotions Through Art\" drawing series",
+  "exhibition-film": "Physical exhibitions (first solo show)",
+  "process-short": "YouTube Shorts: drawing process",
+  "other": "Other"
+ },
+ "videos": [
+  {
+   "id": "odgHmqnjE3g",
+   "title": "🎨 Lines of Life – Tokyo Chapter | Md. Tanvirul Islam | Tokyo Biennale 2025 Proposal",
+   "category": "other",
+   "related_show": null,
+   "upload_date": "2025-05-01",
+   "duration": "2:02",
+   "thumbnail": "https://i.ytimg.com/vi/odgHmqnjE3g/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "1PSoTpOIi1s",
+   "title": "3rd Web Art Show , Lines of Life, Charchoal on paper, December 16, 2014",
+   "category": "web-show-film",
+   "related_show": "lines-of-life-2014",
+   "upload_date": "2023-12-12",
+   "duration": "7:01",
+   "thumbnail": "https://i.ytimg.com/vi/1PSoTpOIi1s/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "itVYoWxpj1M",
+   "title": "2nd Web Art Show , Expression of color & Line ( Paintings) , March 26, 2014",
+   "category": "web-show-film",
+   "related_show": "expression-of-color-and-line-2014",
+   "upload_date": null,
+   "duration": "3:58",
+   "thumbnail": "https://i.ytimg.com/vi/itVYoWxpj1M/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "A-88WeXKbTo",
+   "title": "2nd Web Art Show , Expression of color & Line ( Paintings) & Janogon Series Drawing, March 26, 2014",
+   "category": "web-show-film",
+   "related_show": "expression-of-color-and-line-2014",
+   "upload_date": "2023-12-02",
+   "duration": "8:51",
+   "thumbnail": "https://i.ytimg.com/vi/A-88WeXKbTo/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "ptTnGhrW0V0",
+   "title": "7th Solo web Art show  |   November 25, 2023 | Lines of Color 2021/22",
+   "category": "web-show-film",
+   "related_show": "metamorphosis-of-hues-2023",
+   "upload_date": "2023-11-26",
+   "duration": "7:01",
+   "thumbnail": "https://i.ytimg.com/vi/ptTnGhrW0V0/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "YO66smyNc7c",
+   "title": "Transform Your Thoughts and Emotions Through Art | 022",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-10-04",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/YO66smyNc7c/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "o397ZQU5oEA",
+   "title": "Transform Your Thoughts and Emotions Through Art | 021",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-09-25",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/o397ZQU5oEA/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "qhpqANyjdCs",
+   "title": "Transform Your Thoughts and Emotions Through Art | 020",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-09-18",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/qhpqANyjdCs/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "ho9GbScx4cg",
+   "title": "My First Solo Exhibition in 2001 at Zainul Gallery, Dhaka University | Reviews",
+   "category": "exhibition-film",
+   "related_show": "first-solo-2001",
+   "upload_date": "2023-09-16",
+   "duration": "7:51",
+   "thumbnail": "https://i.ytimg.com/vi/ho9GbScx4cg/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "aW9_w6zMQWk",
+   "title": "Transform Your Thoughts and Emotions Through Art | 019",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-09-12",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/aW9_w6zMQWk/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "-1Vq1QtK6xg",
+   "title": "Transform Your Thoughts and Emotions Through Art | 017",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-08-31",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/-1Vq1QtK6xg/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "Hkge8muSRsU",
+   "title": "Transform Your Thoughts and Emotions Through Art | 016",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-08-28",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/Hkge8muSRsU/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "NYOwaoNUTP0",
+   "title": "Transform Your Thoughts and Emotions Through Art | 015",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-08-22",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/NYOwaoNUTP0/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "DN1aQnGSCiM",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 015 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": null,
+   "duration": "1:31",
+   "thumbnail": "https://i.ytimg.com/vi/DN1aQnGSCiM/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "4yorN3ngoTA",
+   "title": "Transform Your Thoughts and Emotions Through Art | 014",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-08-13",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/4yorN3ngoTA/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "89L_2TgWBHY",
+   "title": "Transform Your Thoughts and Emotions Through Art | 013",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-08-03",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/89L_2TgWBHY/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "KR2R2hHWWVQ",
+   "title": "Transform Your Thoughts and Emotions Through Art | 012",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": null,
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/KR2R2hHWWVQ/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "eYrS_3w0cbQ",
+   "title": "Transform Your Thoughts and Emotions Through Art | 010",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-07-24",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/eYrS_3w0cbQ/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "woC_rPtaCA8",
+   "title": "Transform Your Thoughts and Emotions Through Art | 011",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-07-24",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/woC_rPtaCA8/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "bJFCDOuanPw",
+   "title": "Transform Your Thoughts and Emotions Through Art | 009",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-07-21",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/bJFCDOuanPw/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "dDVC5C5osS0",
+   "title": "Transform Your Thoughts and Emotions Through Art | 008",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-07-18",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/dDVC5C5osS0/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "qh8lS-LtKpE",
+   "title": "Transform Your Thoughts and Emotions Through Art | 007",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": null,
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/qh8lS-LtKpE/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "2CM89Hlwgs4",
+   "title": "Transform Your Thoughts and Emotions Through Art | 006",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-06-17",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/2CM89Hlwgs4/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "YMRaYZ133as",
+   "title": "Transform Your Thoughts and Emotions Through Art | 005",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-06-13",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/YMRaYZ133as/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "llzFLACdWJg",
+   "title": "Transform Your Thoughts and Emotions Through Art | 004",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": null,
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/llzFLACdWJg/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "AAEiZTZdaek",
+   "title": "Transform Your Thoughts and Emotions Through Art | 003",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-05-28",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/AAEiZTZdaek/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "84bOB7g7gmY",
+   "title": "Transform Your Thoughts and Emotions Through Art | 002",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": null,
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/84bOB7g7gmY/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "J6fy2xp9MWY",
+   "title": "Transform Your Thoughts and Emotions Through Art  |  002",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": "2023-05-27",
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/J6fy2xp9MWY/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "OFxfQdv0nGk",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 0014 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-05-15",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/OFxfQdv0nGk/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "kUiFz7EYtfA",
+   "title": "Transform Your Thoughts and Emotions Through Art  |  001",
+   "category": "drawing-series",
+   "related_show": null,
+   "upload_date": null,
+   "duration": "3:01",
+   "thumbnail": "https://i.ytimg.com/vi/kUiFz7EYtfA/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "107a5MitdGs",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 0013 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-29",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/107a5MitdGs/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "t-qTp7BU1jY",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 0012 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": null,
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/t-qTp7BU1jY/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "R03R-gAOk6A",
+   "title": "Panel Paintings | Transparent Boundary 2023  |  Acrylic on paintings  |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-25",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/R03R-gAOk6A/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "dSpSxW7qiJE",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 0011 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-22",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/dSpSxW7qiJE/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "iJH7Xga8O_Y",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 0010 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-21",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/iJH7Xga8O_Y/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "LLFZ769LeMk",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 009 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-21",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/LLFZ769LeMk/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "U642hytW8fU",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 008 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-18",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/U642hytW8fU/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "7c-hfybVSxo",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 007 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-15",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/7c-hfybVSxo/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "umTr9lmNcmY",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 006 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-13",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/umTr9lmNcmY/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "ZabKie_RUaI",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 005 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-04-11",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/ZabKie_RUaI/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "cQpgU_mSKx4",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 004 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-03-27",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/cQpgU_mSKx4/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "t5d1T5DAKN0",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 003 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-03-27",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/t5d1T5DAKN0/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "13UDdvVmKWI",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews  Paintings 002 |",
+   "category": "web-show-film",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-03-19",
+   "duration": "1:30",
+   "thumbnail": "https://i.ytimg.com/vi/13UDdvVmKWI/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "cDEptGVtI_w",
+   "title": "\"Transparent Boundary \" Web Art Show 2013 | Reviews Paintings 001 |",
+   "category": "artwork-review",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-03-16",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/cDEptGVtI_w/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "rmdABMLVDDI",
+   "title": "Artist Tanvirul Islam Current Series \" Lines Of Life \"  March 2023",
+   "category": "other",
+   "related_show": null,
+   "upload_date": "2023-03-15",
+   "duration": "1:31",
+   "thumbnail": "https://i.ytimg.com/vi/rmdABMLVDDI/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "8DrKAY9VbBA",
+   "title": "Reviews Web Art Exhibition 2013",
+   "category": "web-show-film",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2023-03-13",
+   "duration": "1:31",
+   "thumbnail": "https://i.ytimg.com/vi/8DrKAY9VbBA/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "5gDbrKhIH9c",
+   "title": "6th Solo web Art show, 01 November, 2022",
+   "category": "web-show-film",
+   "related_show": "lines-of-life-2022",
+   "upload_date": "2022-10-31",
+   "duration": "3:30",
+   "thumbnail": "https://i.ytimg.com/vi/5gDbrKhIH9c/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "K4XPfF2JhJY",
+   "title": "5th Solo  web Art show  14 April, 2019",
+   "category": "web-show-film",
+   "related_show": "lines-of-image-61-120-2019",
+   "upload_date": "2019-04-07",
+   "duration": "9:06",
+   "thumbnail": "https://i.ytimg.com/vi/K4XPfF2JhJY/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "IL7w2iTXXjU",
+   "title": "4th solo web Art show, Md. Tanvirul Islam (mithu) 21 February,  2019",
+   "category": "web-show-film",
+   "related_show": "lines-of-image-2019",
+   "upload_date": null,
+   "duration": "9:06",
+   "thumbnail": "https://i.ytimg.com/vi/IL7w2iTXXjU/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "AqhaiNZ-Adc",
+   "title": "artistmithu, Report on Jamuna news , 11-1-2015, about 3rd web art exhibition in Bangladesh",
+   "category": "interview-press",
+   "related_show": "lines-of-life-2014",
+   "upload_date": "2015-01-24",
+   "duration": "1:43",
+   "thumbnail": "https://i.ytimg.com/vi/AqhaiNZ-Adc/hqdefault.jpg",
+   "channel": "Jamuna TV"
+  },
+  {
+   "id": "7aHUcYp7VcI",
+   "title": "artistmithu interview channel 9 Godhulir amontrone part 3",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2014-05-22",
+   "duration": "5:43",
+   "thumbnail": "https://i.ytimg.com/vi/7aHUcYp7VcI/hqdefault.jpg",
+   "channel": "Channel 9"
+  },
+  {
+   "id": "58LCD9BObzU",
+   "title": "artistmithu interview channel 9 Godhulir amontrone programe part 2",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2014-05-21",
+   "duration": "7:32",
+   "thumbnail": "https://i.ytimg.com/vi/58LCD9BObzU/hqdefault.jpg",
+   "channel": "Channel 9"
+  },
+  {
+   "id": "am2ZSTmBUj0",
+   "title": "artistmithu interview channel 9 Godhulir amontrone programe",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2014-05-20",
+   "duration": "8:04",
+   "thumbnail": "https://i.ytimg.com/vi/am2ZSTmBUj0/hqdefault.jpg",
+   "channel": "Channel 9"
+  },
+  {
+   "id": "ZurtiGGXrj0",
+   "title": "artistmithu interview Jamuna TV Sakaler bangladesh, part-2",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2014-04-30",
+   "duration": "12:07",
+   "thumbnail": "https://i.ytimg.com/vi/ZurtiGGXrj0/hqdefault.jpg",
+   "channel": "Jamuna TV"
+  },
+  {
+   "id": "IsgbEgmptjM",
+   "title": "artistmithu interview Jamuna TV Sakaler bangladesh",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": null,
+   "duration": "13:08",
+   "thumbnail": "https://i.ytimg.com/vi/IsgbEgmptjM/hqdefault.jpg",
+   "channel": "Jamuna TV"
+  },
+  {
+   "id": "cR29DVFp8Fw",
+   "title": "artistmithu Report on 71 tv,  anondo jog program",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2014-01-24",
+   "duration": "3:21",
+   "thumbnail": "https://i.ytimg.com/vi/cR29DVFp8Fw/hqdefault.jpg",
+   "channel": "Ekattor TV"
+  },
+  {
+   "id": "ACMm29NitGM",
+   "title": "artistmithu interview somoy tv , youth club program , about web show .................",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2014-01-08",
+   "duration": "3:42",
+   "thumbnail": "https://i.ytimg.com/vi/ACMm29NitGM/hqdefault.jpg",
+   "channel": "Somoy TV"
+  },
+  {
+   "id": "m8_7LtgjBm0",
+   "title": "artistmithu, Report on Ntv news , 3-1-2014, about first web art exhibition in Bangladesh",
+   "category": "interview-press",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2014-01-05",
+   "duration": "2:29",
+   "thumbnail": "https://i.ytimg.com/vi/m8_7LtgjBm0/hqdefault.jpg",
+   "channel": "NTV"
+  },
+  {
+   "id": "imG4LGWOacQ",
+   "title": "artistmithu report on Ntv,Sytechwatch program about webshow",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2014-01-02",
+   "duration": "3:47",
+   "thumbnail": "https://i.ytimg.com/vi/imG4LGWOacQ/hqdefault.jpg",
+   "channel": "NTV"
+  },
+  {
+   "id": "bZcRVSEwJic",
+   "title": "artistmithu, interview about web show on Gtv, 31-12-2013 on air time 5:40",
+   "category": "interview-press",
+   "related_show": "transparent-boundary-2013",
+   "upload_date": "2013-12-31",
+   "duration": "7:47",
+   "thumbnail": "https://i.ytimg.com/vi/bZcRVSEwJic/hqdefault.jpg",
+   "channel": "Gazi TV (GTV)"
+  },
+  {
+   "id": "Q2a9p_tWMdo",
+   "title": "artistmithu interview live on ATN news, young night programs part -3 , 24 dec, 2013",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2013-12-29",
+   "duration": "14:45",
+   "thumbnail": "https://i.ytimg.com/vi/Q2a9p_tWMdo/hqdefault.jpg",
+   "channel": "ATN News"
+  },
+  {
+   "id": "AN5XQQiILCw",
+   "title": "artistmithu interview live on ATN news, young night programs part -2 , 24 dec, 2013",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": null,
+   "duration": "9:34",
+   "thumbnail": "https://i.ytimg.com/vi/AN5XQQiILCw/hqdefault.jpg",
+   "channel": "ATN News"
+  },
+  {
+   "id": "MSQR2Dx6qmQ",
+   "title": "artistmithu interview live on atn news, young night programs part -1 , 24 dec, 2013",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2013-12-28",
+   "duration": "10:01",
+   "thumbnail": "https://i.ytimg.com/vi/MSQR2Dx6qmQ/hqdefault.jpg",
+   "channel": "ATN News"
+  },
+  {
+   "id": "GOAB00uf2qo",
+   "title": "artistmithu, Web art exhibition Interview Channel 24 ,",
+   "category": "interview-press",
+   "related_show": null,
+   "upload_date": "2013-12-28",
+   "duration": "3:36",
+   "thumbnail": "https://i.ytimg.com/vi/GOAB00uf2qo/hqdefault.jpg",
+   "channel": "Channel 24"
+  },
+  {
+   "id": "TcVOJgqiQnw",
+   "title": "artistmithu First solo exhibition interview ekusher dupur on ETV",
+   "category": "interview-press",
+   "related_show": "first-solo-2001",
+   "upload_date": "2011-07-11",
+   "duration": "6:09",
+   "thumbnail": "https://i.ytimg.com/vi/TcVOJgqiQnw/hqdefault.jpg",
+   "channel": "Ekushey TV"
+  },
+  {
+   "id": "WzaCm6so_6w",
+   "title": "artistmithu's first solo Exhibition.mpg",
+   "category": "exhibition-film",
+   "related_show": "first-solo-2001",
+   "upload_date": "2011-07-10",
+   "duration": "1:07",
+   "thumbnail": "https://i.ytimg.com/vi/WzaCm6so_6w/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "smkfWQVnzSk",
+   "title": "lines of life, pen on canvas,  #LinesOfLife #BlackAndWhiteArt #CharcoalDrawing #MonochromeArt",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": "2025-06-14",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/smkfWQVnzSk/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "le5BVKMZHNE",
+   "title": "Lines going on......... #piano #relaxingmusic #pianomusic #art #drawing",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": "2024-07-02",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/le5BVKMZHNE/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "Ip71sTT2sjs",
+   "title": "Lines of life going on......part 1 #artistsofinstagram #artistlife #artexh#artlovers #abstractart",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": "2023-05-20",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/Ip71sTT2sjs/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "5mQd51kui6I",
+   "title": "Lines going on.................",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": null,
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/5mQd51kui6I/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "fWiO96vmSDY",
+   "title": "Lines of Life,01 April ,23     Acrylic on paper 14\" x 12\" #LinesOfLife,#ArtisticExpression,",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": "2023-03-31",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/fWiO96vmSDY/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "a2oxQEIfPuk",
+   "title": "Lines of Life, 31 March, 2023 # Acrylic Color on Paper 15\" x 15\" #artlovers #art #artspeaks #paint",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": "2023-03-30",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/a2oxQEIfPuk/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "rtZPmLBsahc",
+   "title": "Lines of life, 30 March, 2023, Acrylic on paper,15\" x 15\" #artlovers #art #artspeaks #painting #art",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": "2023-03-29",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/rtZPmLBsahc/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "ATZeRBKuOFM",
+   "title": "Lines of life, 29 March, 2023",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": null,
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/ATZeRBKuOFM/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "-5iR8iz_KvY",
+   "title": "Lines of life, 21Mar, 2023",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": "2023-03-21",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/-5iR8iz_KvY/hqdefault.jpg",
+   "channel": null
+  },
+  {
+   "id": "_oG0qRJKH_Q",
+   "title": "Lines of Life, 22 March",
+   "category": "process-short",
+   "related_show": null,
+   "upload_date": "2023-03-21",
+   "duration": null,
+   "thumbnail": "https://i.ytimg.com/vi/_oG0qRJKH_Q/hqdefault.jpg",
+   "channel": null
+  }
+ ]
+}

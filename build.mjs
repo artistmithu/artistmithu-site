@@ -34,6 +34,8 @@ const [series, works, images, exhibitions] = fx ? [fx.series, fx.works, fx.image
   api("artwork_images?select=artwork_id,path,kind,alt_en,width,height,sort&order=sort"),
   api("exhibitions?select=*&order=start_date.desc.nullslast").catch(() => []),
 ]);
+// YouTube channel index (data/videos.json, collected from youtube.com/@artistmithu).
+const VID = JSON.parse(await (await import("node:fs/promises")).readFile("data/videos.json", "utf8"));
 const showLinks = fx ? fx.exhibition_works || [] : await api("exhibition_works?select=*&order=sort").catch(() => []);
 const seriesById = Object.fromEntries(series.map((s) => [s.id, s]));
 for (const w of works) {
@@ -91,6 +93,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
     <a href="/works/">${bi(["Works", "কাজ"])}</a>
     <a href="/chapters/">${bi(["Chapters", "অধ্যায়"])}</a>
     <a href="/shows/">${bi(["Shows", "প্রদর্শনী"])}</a>
+    <a href="/videos/">${bi(["Videos", "ভিডিও"])}</a>
     <a href="/about/">${bi(["About", "পরিচিতি"])}</a>
     <a href="/contact/">${bi(["Contact", "যোগাযোগ"])}</a>
   </nav>
@@ -101,7 +104,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
   <form class="subscribe" id="subscribe"><label for="subEmail">${bi(["New works and shows by email", "নতুন কাজ ও প্রদর্শনীর খবর ইমেইলে"])}</label>
     <div><input id="subEmail" type="email" required placeholder="you@example.com"><button type="submit">${bi(["Subscribe", "সাবস্ক্রাইব"])}</button></div>
     <p class="note" id="subNote" hidden></p></form>
-  <div class="social"><a href="https://www.facebook.com/artistmithu2022" rel="noopener">Facebook</a> · <a href="https://www.instagram.com/artistmithu/" rel="noopener">Instagram</a> · <a href="https://twitter.com/artistmithu" rel="noopener">X</a>
+  <div class="social"><a href="https://www.facebook.com/artistmithu2022" rel="noopener">Facebook</a> · <a href="https://www.instagram.com/artistmithu/" rel="noopener">Instagram</a> · <a href="https://twitter.com/artistmithu" rel="noopener">X</a> · <a href="https://www.youtube.com/@artistmithu" rel="noopener">YouTube</a>
   <p class="note">© ${new Date().getFullYear()} Tanvirul Islam Mithu · <a href="/admin/" rel="nofollow" style="color:inherit">${bi(["Studio login", "স্টুডিও লগইন"])}</a></p></div>
 </div></footer>
 <div class="tray" id="tray" hidden><div class="wrap"><strong id="trayCount"></strong><a class="btn light" id="trayEnquire" href="/contact/">${bi(["Enquire about these", "এগুলো নিয়ে জিজ্ঞাসা"])}</a><button type="button" class="btn ghost" id="trayClear">${bi(["Clear", "মুছুন"])}</button></div></div>
@@ -145,7 +148,7 @@ files["index.html"] = page({
   desc: "Paintings and drawings by Bangladeshi artist Tanvirul Islam Mithu: forty years of lines, from Dhaka streets to the Janogon series. View sizes and prices, and enquire directly.",
   path: "/",
   image: heroImg ? img(heroImg.path) : undefined,
-  jsonld: { "@context": "https://schema.org", "@type": "Person", name: "Tanvirul Islam Mithu", alternateName: "Artist Mithu", jobTitle: "Visual Artist", url: SITE, alumniOf: "University of Dhaka", sameAs: ["https://www.facebook.com/artistmithu2022", "https://www.instagram.com/artistmithu/", "https://twitter.com/artistmithu"] },
+  jsonld: { "@context": "https://schema.org", "@type": "Person", name: "Tanvirul Islam Mithu", alternateName: "Artist Mithu", jobTitle: "Visual Artist", url: SITE, alumniOf: "University of Dhaka", sameAs: ["https://www.facebook.com/artistmithu2022", "https://www.instagram.com/artistmithu/", "https://twitter.com/artistmithu", "https://www.youtube.com/@artistmithu"] },
   body: `<section class="hero"><div class="wrap">
   <div><h1>${bi(["Forty years of <b>lines</b>, in one place", "চল্লিশ বছরের <b>রেখা</b>, এক জায়গায়"])}</h1>
   <p>${bi(["Pen, watercolor, oil and acrylic: the people, streets and life of Dhaka. See size, medium, year and price for every work, shortlist what you like and talk to the artist directly.", "কাগজে কলম, জলরং, তেলরং আর অ্যাক্রিলিকে ঢাকার মানুষ, রাস্তা ও জীবনের ছবি। প্রতিটি কাজের মাপ, মাধ্যম, সাল ও দাম দেখুন, পছন্দের কাজ বেছে সরাসরি শিল্পীর সাথে কথা বলুন।"])}</p>
@@ -260,6 +263,35 @@ files["c/index.html"] = page({
 
 files["404.html"] = page({ title: "Page not found | Tanvirul Islam Mithu", desc: "Page not found", path: "/404", body: `<div class="wrap prose"><h1 class="page-title">${bi(["Page not found", "পাতাটি পাওয়া যায়নি"])}</h1><p><a href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></div>` });
 
+// Videos --------------------------------------------------------------------------
+const fmtDate = (d) => (d ? new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) : "");
+const vcard = (v) => `<a class="vcard" href="https://www.youtube.com/watch?v=${v.id}" rel="noopener" target="_blank">
+  <span class="thumb"><img src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="" loading="lazy" width="480" height="360">${v.duration ? `<span class="dur">${esc(v.duration)}</span>` : ""}</span>
+  <span class="vt">${esc(v.title)}</span><span class="note">${[v.channel, fmtDate(v.upload_date)].filter(Boolean).join(" · ")}</span></a>`;
+const VCATS = [
+  ["interview-press", ["TV interviews and news", "টিভি সাক্ষাৎকার ও সংবাদ"]],
+  ["web-show-film", ["Web show films", "ওয়েব শো-এর ভিডিও"]],
+  ["exhibition-film", ["Exhibition films", "প্রদর্শনীর ভিডিও"]],
+  ["artwork-review", ["Works up close", "কাছ থেকে কাজ"]],
+  ["drawing-series", ["Drawing series: Transform your thoughts and emotions through art", "ড্রয়িং সিরিজ"]],
+  ["process-short", ["Drawing process (Shorts)", "আঁকার প্রক্রিয়া (Shorts)"]],
+  ["other", ["Other", "অন্যান্য"]],
+];
+const byDate = (a, b) => String(a.upload_date || "").localeCompare(String(b.upload_date || ""));
+files["videos/index.html"] = page({
+  title: "Videos and press | Tanvirul Islam Mithu",
+  desc: "TV interviews, news reports and films about Tanvirul Islam Mithu's web shows and paintings, 2001 to today.",
+  path: "/videos/",
+  body: `<div class="wrap"><h1 class="page-title">${bi(["Videos and press", "ভিডিও ও সংবাদ"])}</h1>
+  <p class="lead">${bi(["When Transparent Boundary opened in December 2013 as Bangladesh's first solo web show, national TV channels covered it. These are those interviews and reports, with films of the shows and the work.", "২০১৩ সালের ডিসেম্বরে দেশের প্রথম একক ওয়েব শো \"Transparent Boundary\" খোলার পর জাতীয় টিভি চ্যানেলগুলো এ নিয়ে সংবাদ ও সাক্ষাৎকার প্রচার করে। এখানে সেগুলোর পাশাপাশি প্রদর্শনী ও কাজের ভিডিও রয়েছে।"])} <a href="${VID.channel}" rel="noopener">YouTube</a></p>
+  <nav class="vnav">${VCATS.filter(([k]) => VID.videos.some((v) => v.category === k)).map(([k, l]) => `<a href="#${k}">${bi(l)}</a>`).join("")}</nav>
+  ${VCATS.map(([k, l]) => { const list = VID.videos.filter((v) => v.category === k).sort(byDate); if (!list.length) return "";
+    if (k === "interview-press") { const chans = [...new Set(list.map((v) => v.channel || "Other"))];
+      return `<section id="${k}"><h2 class="sec">${bi(l)}</h2>${chans.map((c) => `<h3 class="chan">${esc(c)}</h3><div class="vgrid">${list.filter((v) => (v.channel || "Other") === c).map(vcard).join("")}</div>`).join("")}</section>`; }
+    return `<section id="${k}"><h2 class="sec">${bi(l)}</h2><div class="vgrid">${list.map(vcard).join("")}</div></section>`; }).join("")}
+  </div>`,
+});
+
 // Shows: web shows and exhibitions ---------------------------------------------
 const KIND = { "web-show": ["Web show", "ওয়েব শো"], solo: ["Solo exhibition", "একক প্রদর্শনী"], group: ["Group exhibition", "যৌথ প্রদর্শনী"], "art-fair": ["Art fair", "আর্ট ফেয়ার"] };
 const shows = exhibitions.filter((e) => e.slug && e.published !== false);
@@ -302,6 +334,7 @@ ordered.forEach((e, i) => {
       </div>
     </div>
     ${list.length ? `<h2 class="sec">${bi(["Works in this show", "এই শো-এর কাজ"])}</h2><div class="grid">${list.map(card).join("")}</div>` : ""}
+    ${(() => { const vs = VID.videos.filter((v) => v.related_show === e.slug && v.id !== vid).sort(byDate); return vs.length ? `<h2 class="sec">${bi(["Videos and press", "ভিডিও ও সংবাদ"])}</h2><div class="vgrid">${vs.map(vcard).join("")}</div>` : ""; })()}
     <nav class="prevnext">${prev ? `<a href="/shows/${prev.slug}/">← ${esc(prev.title)}</a>` : "<span></span>"}${next ? `<a href="/shows/${next.slug}/">${esc(next.title)} →</a>` : ""}</nav>
     </div>`,
   });
@@ -314,7 +347,7 @@ for (const w of works) {
   if (inShows.length && files[f]) files[f] = files[f].replace("<!--SHOWS-->", `<dt>${bi(["Shown in", "প্রদর্শিত"])}</dt><dd>${inShows.map((e) => `<a href="/shows/${e.slug}/">${esc(e.title)}</a>`).join(", ")}</dd>`);
 }
 
-const urls = ["/", "/works/", "/chapters/", "/shows/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...series.map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
+const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...series.map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
 files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${SITE}${u}</loc></url>`).join("")}</urlset>`;
 files["robots.txt"] = `User-agent: *\nDisallow: /admin/\nDisallow: /c/\nSitemap: ${SITE}/sitemap.xml\n`;
 // Old WordPress URLs -> new pages
