@@ -84,7 +84,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
     <div><input id="subEmail" type="email" required placeholder="you@example.com"><button type="submit">${bi(["Subscribe", "সাবস্ক্রাইব"])}</button></div>
     <p class="note" id="subNote" hidden></p></form>
   <div class="social"><a href="https://www.facebook.com/artistmithu2022" rel="noopener">Facebook</a> · <a href="https://www.instagram.com/artistmithu/" rel="noopener">Instagram</a> · <a href="https://twitter.com/artistmithu" rel="noopener">X</a>
-  <p class="note">© ${new Date().getFullYear()} Tanvirul Islam Mithu</p></div>
+  <p class="note">© ${new Date().getFullYear()} Tanvirul Islam Mithu · <a href="/admin/" rel="nofollow" style="color:inherit">${bi(["Studio login", "স্টুডিও লগইন"])}</a></p></div>
 </div></footer>
 <div class="tray" id="tray" hidden><div class="wrap"><strong id="trayCount"></strong><a class="btn light" id="trayEnquire" href="/contact/">${bi(["Enquire about these", "এগুলো নিয়ে জিজ্ঞাসা"])}</a><button type="button" class="btn ghost" id="trayClear">${bi(["Clear", "মুছুন"])}</button></div></div>
 <script>window.CFG=${JSON.stringify({ url: SUPABASE_URL, key: SUPABASE_KEY, wa: WHATSAPP })}</script>
