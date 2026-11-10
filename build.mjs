@@ -353,7 +353,7 @@ ordered.forEach((e, i) => {
     desc: (e.statement_en || `${e.title}: ${(KIND[e.kind] || [e.kind])[0]} by Tanvirul Islam Mithu.`).slice(0, 160),
     path: `/shows/${e.slug}/`,
     image: c || undefined,
-    jsonld: { "@context": "https://schema.org", "@type": "ExhibitionEvent", name: e.title, startDate: e.start_date || undefined, endDate: e.end_date || undefined, eventAttendanceMode: e.kind === "web-show" ? "https://schema.org/OnlineEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode", location: e.kind === "web-show" ? { "@type": "VirtualLocation", url: `${SITE}/shows/${e.slug}/` } : { "@type": "Place", name: e.venue || e.city || "", address: [e.city, e.country].filter(Boolean).join(", ") }, organizer: { "@type": "Person", name: "Tanvirul Islam Mithu" }, image: c || undefined, url: `${SITE}/shows/${e.slug}/` },
+    jsonld: { "@context": "https://schema.org", "@type": "ExhibitionEvent", name: e.title, startDate: e.start_date || undefined, endDate: e.end_date || undefined, eventAttendanceMode: e.kind === "web-show" ? "https://schema.org/OnlineEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode", location: e.kind === "web-show" ? { "@type": "VirtualLocation", url: `${SITE}/shows/${e.slug}/` } : { "@type": "Place", name: e.venue || e.city || "", address: [e.city, e.country].filter(Boolean).join(", ") }, organizer: e.kind === "group" ? undefined : { "@type": "Person", name: "Tanvirul Islam Mithu" }, performer: { "@type": "Person", name: "Tanvirul Islam Mithu" }, image: c || undefined, url: `${SITE}/shows/${e.slug}/` },
     body: `<div class="wrap"><p class="eyebrow"><a href="/shows/">${bi(["Shows", "প্রদর্শনী"])}</a> / ${bi(KIND[e.kind] || [e.kind, e.kind])}</p>
     <h1 class="page-title">${esc(e.title)}${e.title_bn ? ` <small lang="bn">${esc(e.title_bn)}</small>` : ""}</h1>
     <p class="note">${dateRange(e)}${e.venue ? ` · ${esc(e.venue)}` : ""}${e.city ? `, ${esc(e.city)}` : ""}</p>
@@ -366,6 +366,7 @@ ordered.forEach((e, i) => {
       </div>
     </div>
     ${list.length ? `<h2 class="sec">${bi(["Works in this show", "এই শো-এর কাজ"])}</h2><div class="grid">${list.map(card).join("")}</div>` : ""}
+    ${(e.images || []).length ? `<h2 class="sec">${bi(["Photos from the exhibition", "প্রদর্শনীর ছবি"])}</h2><div class="studio">${e.images.map((x) => `<figure><a href="${img(x)}" target="_blank" rel="noopener"><img src="${img(x)}" alt="${esc(e.title)}" loading="lazy"></a></figure>`).join("")}</div>` : ""}
     ${(() => { const vs = VID.videos.filter((v) => v.related_show === e.slug && v.id !== vid).sort(byDate); return vs.length ? `<h2 class="sec">${bi(["Videos and press", "ভিডিও ও সংবাদ"])}</h2><div class="vgrid">${vs.map(vcard).join("")}</div>` : ""; })()}
     <nav class="prevnext">${prev ? `<a href="/shows/${prev.slug}/">← ${esc(prev.title)}</a>` : "<span></span>"}${next ? `<a href="/shows/${next.slug}/">${esc(next.title)} →</a>` : ""}</nav>
     </div>`,

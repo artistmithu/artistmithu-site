@@ -287,6 +287,7 @@ function editShow(x) {
   <div class="row"><label>YouTube লিংক<input name="youtube_url" value="${v("youtube_url")}"></label><label>মূল ওয়েব শো-এর লিংক<input name="original_url" value="${v("original_url")}"></label><label>আর্কাইভ (Wayback) লিংক<input name="wayback_url" value="${v("wayback_url")}"></label></div>
   <div class="row"><label>ক্রম (বড় সংখ্যা আগে)<input name="sort" type="number" value="${v("sort") || 0}"></label><label class="check"><input type="checkbox" name="published" ${x.published !== false ? "checked" : ""}> প্রকাশিত</label></div>
   <div><strong>প্রচ্ছদ ছবি</strong> ${x.cover_path ? `<div class="imgs"><figure><img src="${pub(x.cover_path)}" alt=""></figure></div>` : ""}${x.id ? `<input type="file" id="coverUp" accept="image/*">` : `<p class="s">ছবি দিতে আগে সংরক্ষণ করুন।</p>`}</div>
+  ${x.id && "images" in x ? `<div><strong>প্রদর্শনীর ছবি</strong> <span class="s">(উদ্বোধন, গ্যালারি, আপনার কাজের পাশে আপনি; একসাথে কয়েকটি দেওয়া যায়)</span><div class="imgs">${(x.images || []).map((p, i) => `<figure><img src="${pub(p)}" alt=""><button class="danger" data-delsimg="${i}">মুছুন</button></figure>`).join("")}</div><input type="file" id="showImgsUp" accept="image/*" multiple></div>` : ""}
   ${x.id ? `<div><strong>এই প্রদর্শনীর কাজ</strong> <span class="s">(টিক দিন; ক্রম = যে ক্রমে টিক দিয়েছেন)</span>
    <input id="pickQ" placeholder="কাজ খুঁজুন" style="margin:6px 0"><div class="pick" id="showPick">${works.map((w) => { const im = (w.artwork_images || [])[0]; return `<label data-t="${esc((w.title_en + " " + (w.inv_no || "")).toLowerCase())}"><input type="checkbox" value="${w.id}" ${linked.includes(w.id) ? "checked" : ""}> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${esc(w.title_en)} <span class="s">${w.year || ""}</span></label>`; }).join("")}</div></div>` : ""}
   <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="saveShow">সংরক্ষণ</button><button class="alt" id="closeShow">বন্ধ</button>${x.id ? `<button class="danger" id="delShow">প্রদর্শনী মুছুন</button>` : ""}</div>`;
@@ -320,6 +321,16 @@ function editShow(x) {
     if (up.error) return toast("আপলোড হয়নি: " + up.error.message);
     await sb.from("exhibitions").update({ cover_path: path }).eq("id", x.id); await loadShows(); editShow(showsData.find((s) => s.id === x.id));
   });
+  const reShow = async () => { await loadShows(); editShow(showsData.find((s) => s.id === x.id)); };
+  $("#showImgsUp") && ($("#showImgsUp").onchange = async (ev) => {
+    const add = [];
+    for (const f of ev.target.files) { const p = await upFile(`shows/${x.id}`, f); if (p) add.push(p); }
+    await sb.from("exhibitions").update({ images: [...(x.images || []), ...add] }).eq("id", x.id); toast("ছবি যোগ হয়েছে"); reShow();
+  });
+  document.querySelectorAll("[data-delsimg]").forEach((b) => (b.onclick = async () => {
+    const imgs = [...(x.images || [])]; imgs.splice(+b.dataset.delsimg, 1);
+    await sb.from("exhibitions").update({ images: imgs }).eq("id", x.id); reShow();
+  }));
 }
 
 async function loadInq() {
