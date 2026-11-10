@@ -58,3 +58,4 @@ alter table public.artworks add column if not exists collection_en text, add col
 -- Data: Station -2 and Untitled -> Bangladesh National Museum; Landscape and new My Room-1 -> Ekushey Television;
 -- new Drawing 6 (catalogue image) opens the first solo show page; catalogue cover added to its press list.
 -- Helper edge function "thumbs" (token-guarded) was deployed to compare images; remove with the import token.
+-- Data (applied): first solo show works TIM-2001-FS-003..009 added from Vaab's photos (no duplicates found by fingerprint)
