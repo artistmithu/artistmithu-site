@@ -322,7 +322,7 @@ ordered.forEach((e, i) => {
     desc: (e.statement_en || `${e.title}: ${(KIND[e.kind] || [e.kind])[0]} by Tanvirul Islam Mithu.`).slice(0, 160),
     path: `/shows/${e.slug}/`,
     image: c || undefined,
-    jsonld: { "@context": "https://schema.org", "@type": "ExhibitionEvent", name: e.title, startDate: e.start_date || undefined, endDate: e.end_date || undefined, eventAttendanceMode: e.kind === "web-show" ? "https://schema.org/OnlineEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode", location: e.kind === "web-show" ? { "@type": "VirtualLocation", url: e.original_url || `${SITE}/shows/${e.slug}/` } : { "@type": "Place", name: e.venue || e.city || "", address: [e.city, e.country].filter(Boolean).join(", ") }, organizer: { "@type": "Person", name: "Tanvirul Islam Mithu" }, image: c || undefined, url: `${SITE}/shows/${e.slug}/` },
+    jsonld: { "@context": "https://schema.org", "@type": "ExhibitionEvent", name: e.title, startDate: e.start_date || undefined, endDate: e.end_date || undefined, eventAttendanceMode: e.kind === "web-show" ? "https://schema.org/OnlineEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode", location: e.kind === "web-show" ? { "@type": "VirtualLocation", url: `${SITE}/shows/${e.slug}/` } : { "@type": "Place", name: e.venue || e.city || "", address: [e.city, e.country].filter(Boolean).join(", ") }, organizer: { "@type": "Person", name: "Tanvirul Islam Mithu" }, image: c || undefined, url: `${SITE}/shows/${e.slug}/` },
     body: `<div class="wrap"><p class="eyebrow"><a href="/shows/">${bi(["Shows", "প্রদর্শনী"])}</a> / ${bi(KIND[e.kind] || [e.kind, e.kind])}</p>
     <h1 class="page-title">${esc(e.title)}${e.title_bn ? ` <small lang="bn">${esc(e.title_bn)}</small>` : ""}</h1>
     <p class="note">${dateRange(e)}${e.venue ? ` · ${esc(e.venue)}` : ""}${e.city ? `, ${esc(e.city)}` : ""}</p>
@@ -331,7 +331,7 @@ ordered.forEach((e, i) => {
       <div class="prose">
         ${e.statement_en ? `<div lang="en">${esc(e.statement_en).split(/\n{2,}/).map((p) => `<p>${p}</p>`).join("")}</div>` : ""}
         ${e.statement_bn ? `<div lang="bn">${esc(e.statement_bn).split(/\n{2,}/).map((p) => `<p>${p}</p>`).join("")}</div>` : ""}
-        <p class="links">${e.original_url ? `<a href="${esc(e.original_url)}" rel="noopener">${bi(["Original web show", "মূল ওয়েব শো"])}</a>` : ""}${e.wayback_url ? ` · <a href="${esc(e.wayback_url)}" rel="noopener">${bi(["Archived copy", "আর্কাইভ কপি"])}</a>` : ""}</p>
+        <p class="links">${e.wayback_url ? `<a href="${esc(e.wayback_url)}" rel="noopener">${bi(["Archived copy of the original page", "মূল পাতার আর্কাইভ কপি"])}</a>` : ""}</p>
       </div>
     </div>
     ${list.length ? `<h2 class="sec">${bi(["Works in this show", "এই শো-এর কাজ"])}</h2><div class="grid">${list.map(card).join("")}</div>` : ""}
@@ -365,6 +365,10 @@ files["_redirects"] = [
   "/index.php/journal/* /about/ 301",
   "/index.php/contact/* /contact/ 301",
   "/index.php/* / 301",
+  // linesof.life is forwarded here with its path kept: each old show page goes to the same show on this site.
+  ...[...new Map(shows.filter((e) => e.original_url).map((e) => [new URL(e.original_url).pathname, e.slug])).entries()].filter(([p]) => p.length > 1).map(([p, slug]) => `${p} /shows/${slug}/ 301`),
+  "/category/shows/* /shows/ 301",
+  "/category/* /shows/ 301",
 ].join("\n") + "\n";
 files["_headers"] = "/assets/*\n  Cache-Control: public, max-age=86400\n/admin/*\n  X-Robots-Tag: noindex\n/c/*\n  X-Robots-Tag: noindex\n";
 
