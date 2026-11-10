@@ -184,11 +184,19 @@
           <button class="btn" type="submit">${say("Place bid", "দাম জমা দিন")}</button><p class="note msg" hidden></p></form>`;
       };
       cGrid.innerHTML = data.artworks.map((a) => `<article class="card"><a class="frame" href="${a.images?.[0] ? img(a.images[0]) : "#"}" target="_blank" rel="noopener">${a.images?.[0] ? `<img src="${img(a.images[0])}" alt="${esc(a.title_en)}">` : ""}</a>
+        ${(a.images || []).length > 1 ? `<div class="thumbs">${a.images.map((p, i) => `<button type="button" data-src="${img(p)}" class="${i ? "" : "on"}" aria-label="${say("Picture", "ছবি")} ${i + 1}"><img src="${img(p)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
         ${a.artist_name ? `<div class="artistline"><span class="label">${say("Artist", "শিল্পী")}</span><strong>${esc(a.artist_name)}</strong>${a.artist_note ? `<p>${esc(a.artist_note)}</p>` : ""}</div>` : ""}<div class="meta"><h3>${esc(a.title_en)}</h3><span class="yr">${a.year || ""}</span></div>
         <dl class="facts">${a.medium ? `<dt>${say("Medium", "মাধ্যম")}</dt><dd>${esc(a.medium)}</dd>` : ""}${a.height_cm ? `<dt>${say("Size", "মাপ")}</dt><dd>${+a.height_cm} × ${+a.width_cm} cm <small>(${(a.height_cm / 2.54).toFixed(1)} × ${(a.width_cm / 2.54).toFixed(1)} in)</small></dd>` : ""}${a.year ? `<dt>${say("Year", "সাল")}</dt><dd>${a.year}</dd>` : ""}</dl>
         ${a.description_en ? (() => { const ps = String(a.description_en).split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean).map((x) => `<p>${esc(x).replace(/\n/g, "<br>")}</p>`); return `<div class="desc">${ps[0]}${ps.length > 1 ? `<details><summary>${say("Read more", "আরও পড়ুন")}</summary>${ps.slice(1).join("")}</details>` : ""}</div>`; })() : ""}
         <div class="sub"><span class="pill ${a.status}">${({ available: say("Available", "উপলব্ধ"), reserved: say("Reserved", "সংরক্ষিত"), sold: say("Sold", "বিক্রিত"), nfs: say("Not for sale", "বিক্রির জন্য নয়") })[a.status] || a.status}</span>${bidding ? "" : `<span class="price">${priceOf(a)}</span>`}</div>
         ${bidding ? bidBox(a) : `<a class="btn" href="https://wa.me/${wa}?text=${encodeURIComponent(`About ${a.artist_name ? `${a.artist_name}, ` : ""}${a.title_en} (${a.inv_no})`)}">WhatsApp</a>`}</article>`).join("");
+      // More than one picture of a work: tap a small one to see it large.
+      cGrid.addEventListener("click", (e) => {
+        const t = e.target.closest(".thumbs button"); if (!t) return;
+        const card = t.closest(".card"), fr = card.querySelector(".frame");
+        fr.href = t.dataset.src; fr.querySelector("img").src = t.dataset.src;
+        card.querySelectorAll(".thumbs button").forEach((b) => b.classList.toggle("on", b === t));
+      });
       if (bidding) {
         // Remember the bidder's name and contact for the next bid on this device.
         const me = store.get("bidder", {});
