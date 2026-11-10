@@ -345,7 +345,7 @@ files["c/index.html"] = page({
   title: "Selected for you | Tanvirul Islam Mithu",
   desc: "A private selection of works.",
   path: "/c/",
-  body: `<div class="wrap"><p class="eyebrow">${bi(["Selected for you by the artist", "শিল্পী আপনার জন্য বাছাই করেছেন"])}</p><h1 class="page-title" id="cTitle">${bi(["Works chosen for you", "আপনার জন্য নির্বাচিত কাজ"])}</h1><p class="lead" id="cNote"></p><div id="cIntro" class="intro" hidden></div><p class="note" id="cRules" hidden></p><div class="grid" id="cGrid"><p class="note">Loading…</p></div></div>`,
+  body: `<div class="wrap"><p class="eyebrow">${bi(["Selected for you by the artist", "শিল্পী আপনার জন্য বাছাই করেছেন"])}</p><h1 class="page-title" id="cTitle">${bi(["Works chosen for you", "আপনার জন্য নির্বাচিত কাজ"])}</h1><p class="lead" id="cNote"></p><div id="cIntro" class="intro" hidden></div><div class="rules" id="cRules" hidden></div><div class="grid" id="cGrid"><p class="note">Loading…</p></div></div>`,
 });
 
 files["404.html"] = page({ title: "Page not found | Tanvirul Islam Mithu", desc: "Page not found", path: "/404", body: `<div class="wrap prose"><h1 class="page-title">${bi(["Page not found", "পাতাটি পাওয়া যায়নি"])}</h1><p><a href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></div>` });

@@ -162,9 +162,13 @@
         intro.innerHTML = `<img src="/assets/logo.jpg" alt="" width="64" height="64"><div><strong>${data.artworks.some((x) => x.artist_name) ? say("From the collection of Tanvirul Islam Mithu", "তানভীরুল ইসলাম মিঠুর সংগ্রহ থেকে") : "Tanvirul Islam Mithu"}</strong><p>${esc(text) || say("Painter and visual artist, Dhaka. MFA in Drawing and Painting, University of Dhaka. First solo exhibition in 2001; Bangladesh's first solo web show in 2013.", "চিত্রশিল্পী, ঢাকা। ঢাকা বিশ্ববিদ্যালয় থেকে ড্রইং ও পেইন্টিংয়ে স্নাতকোত্তর। প্রথম একক প্রদর্শনী ২০০১, দেশের প্রথম একক ওয়েব শো ২০১৩।")}</p><a href="/about/">${say("About the artist", "শিল্পী সম্পর্কে")}</a></div>`;
         const rules = document.getElementById("cRules"); rules.hidden = false;
         const closes = data.closes_at ? new Date(data.closes_at).toLocaleString(bn() ? "bn-BD" : "en-GB", { day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
-        rules.textContent = say(
-          `Write your offer under any work. Bids are in ${data.currency === "USD" ? "US dollars" : "taka"}${data.show_top_bid ? " and must be higher than the current top bid" : " and are sealed: only the artist sees them"}.${closes ? ` Bidding closes ${closes}.` : ""} The artist will contact the winning bidder.`,
-          `পছন্দের কাজের নিচে আপনার দাম লিখুন। দাম ${data.currency === "USD" ? "ডলারে" : "টাকায়"}${data.show_top_bid ? ", বর্তমান সর্বোচ্চ দামের চেয়ে বেশি হতে হবে" : "; শুধু শিল্পী দেখবেন"}।${closes ? ` বিডিং শেষ: ${closes}।` : ""} সর্বোচ্চ দামদাতার সাথে শিল্পী যোগাযোগ করবেন।`);
+        // Short rules: three lines a collector can take in at a glance.
+        const usd = data.currency === "USD";
+        rules.innerHTML = `<strong>${say("How to bid", "কীভাবে দাম দেবেন")}</strong><ol>${[
+          say(`Write your offer in ${usd ? "US dollars" : "taka"} under the work you like.`, `পছন্দের কাজের নিচে ${usd ? "ডলারে" : "টাকায়"} আপনার দাম লিখুন।`),
+          data.show_top_bid ? say("It must be higher than the top bid shown.", "দেখানো সর্বোচ্চ দামের চেয়ে বেশি হতে হবে।") : say("Bids are private: only the artist sees them.", "দাম গোপন থাকবে, শুধু শিল্পী দেখবেন।"),
+          say(`The highest bid${closes ? ` on ${closes}` : ""} wins. The artist will call you.`, `${closes ? `${closes}-এ ` : ""}সর্বোচ্চ দাম যাঁর, শিল্পী তাঁকে ফোন করবেন।`),
+        ].map((x) => `<li>${x}</li>`).join("")}</ol>`;
       }
       const bidBox = (a) => {
         if (a.status === "sold" || a.status === "nfs") return "";
@@ -190,12 +194,14 @@
           const body = { p_token: t, p_artwork_id: f.dataset.id, p_name: f.elements.namedItem("name").value, p_contact: f.contact.value, p_amount: +f.amount.value };
           const r = await rest("rpc/place_bid", { method: "POST", body: JSON.stringify(body) });
           const res = r.ok ? await r.json() : { ok: false, error: "network" };
-          btn.disabled = false; msg.hidden = false;
+          btn.disabled = false; msg.hidden = false; msg.classList.remove("ok");
           if (res.ok) {
+            // Thank-you note for 3 seconds, then the form is fresh again (name and contact are remembered on this device).
             store.set("bidder", { name: f.elements.namedItem("name").value, contact: f.contact.value });
-            msg.textContent = say("Thank you, your bid is in. The artist will contact you.", "ধন্যবাদ, আপনার দাম জমা হয়েছে। শিল্পী আপনার সাথে যোগাযোগ করবেন।");
+            msg.classList.add("ok"); msg.textContent = say("✓ Thank you, your bid is in. The artist will contact you.", "✓ ধন্যবাদ, আপনার দাম জমা হয়েছে। শিল্পী আপনার সাথে যোগাযোগ করবেন।");
             if (res.top != null) f.querySelector(".top").innerHTML = `${say("Top bid", "সর্বোচ্চ দাম")}: <b>${cur}${fmt(res.top)}</b>`;
-            f.amount.value = "";
+            f.amount.value = ""; btn.disabled = true;
+            setTimeout(() => { msg.hidden = true; msg.classList.remove("ok"); msg.textContent = ""; btn.disabled = false; f.amount.blur(); }, 3000);
           } else msg.textContent = ({
             too_low: say(`Please offer at least ${cur}${fmt(res.min)}.`, `অনুগ্রহ করে কমপক্ষে ${cur}${fmt(res.min)} লিখুন।`),
             closed: say("Bidding for this link has closed.", "এই লিংকের বিডিং শেষ হয়ে গেছে।"),

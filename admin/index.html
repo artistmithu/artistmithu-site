@@ -90,9 +90,11 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
         <div class="row"><label>দাম (টাকা)<input id="oBdt" type="number"></label><label>দাম (ডলার)<input id="oUsd" type="number"></label></div>
         <label>বিবরণ<textarea id="oDesc" rows="2" placeholder="কাজটি সম্পর্কে, কোথা থেকে সংগ্রহ ইত্যাদি (ক্লায়েন্ট দেখবে)"></textarea></label>
         <label>ছবি * (একাধিক দিতে পারেন)<input id="oImgs" type="file" accept="image/*" multiple></label>
-        <button class="alt" id="oSave">কাজটি যোগ করুন</button>
+        <label class="check" id="oReplaceWrap" hidden><input type="checkbox" id="oReplace"> নতুন ছবি দিলে আগের ছবিগুলো সরিয়ে দিন</label>
+        <button class="alt" id="oSave">কাজটি যোগ করুন</button> <button class="alt" id="oCancel" type="button" hidden>বাতিল</button>
       </details>
-      <button id="cCreate">লিংক তৈরি করুন</button>
+      <p class="s" id="cEditing" hidden></p>
+      <button id="cCreate">লিংক তৈরি করুন</button> <button class="alt" id="cCancel" type="button" hidden>সম্পাদনা বাতিল</button>
       <p id="cOut" class="mono"></p>
     </div>
     <h3>আগের লিংক</h3><div id="cList" class="list"></div>
@@ -383,7 +385,7 @@ async function loadInq() {
 
 async function loadClient() {
   const checked = new Set([...document.querySelectorAll("#cPick input:checked, #cOther input:checked")].map((i) => i.value));
-  const tile = (w, del) => { const im = [...(w.artwork_images || [])].sort((a, b) => a.sort - b.sort)[0]; return `<label><input type="checkbox" value="${w.id}" ${checked.has(w.id) ? "checked" : ""}> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${w.artist_name ? `<b>${esc(w.artist_name)}</b><br>` : ""}${esc(w.title_en)}${del ? ` <button class="danger" type="button" data-delother="${w.id}" style="padding:2px 6px">মুছুন</button>` : ""}</label>`; };
+  const tile = (w, del) => { const im = [...(w.artwork_images || [])].sort((a, b) => a.sort - b.sort)[0]; return `<label><input type="checkbox" value="${w.id}" ${checked.has(w.id) ? "checked" : ""}> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${w.artist_name ? `<b>${esc(w.artist_name)}</b><br>` : ""}${esc(w.title_en)}${del ? ` <button class="alt" type="button" data-editother="${w.id}" style="padding:2px 6px">সম্পাদনা</button> <button class="danger" type="button" data-delother="${w.id}" style="padding:2px 6px">মুছুন</button>` : ""}</label>`; };
   $("#cPick").innerHTML = works.map((w) => tile(w)).join("");
   $("#cOther").innerHTML = others.map((w) => tile(w, true)).join("") || `<p class="s">এখনো কিছু যোগ করা হয়নি।</p>`;
   const [{ data }, b] = await Promise.all([
@@ -391,9 +393,10 @@ async function loadClient() {
     sb.from("bids").select("collection_id"),
   ]);
   const nb = {}; (b.data || []).forEach((x) => (nb[x.collection_id] = (nb[x.collection_id] || 0) + 1));
-  $("#cList").innerHTML = (data || []).map((c) => `<div class="item" style="grid-template-columns:1fr auto"><div><div class="t">${esc(c.client_name || "নাম নেই")} · ${c.artwork_ids.length}টি কাজ${c.mode === "bidding" ? ` <span class="pill reserved">বিডিং · ${nb[c.id] || 0}টি দাম</span>` : ""}</div>
+  const expired = (c) => c.expires_at && new Date(c.expires_at) < new Date();
+  $("#cList").innerHTML = (data || []).map((c) => `<div class="item" style="grid-template-columns:1fr auto${c.active === false || expired(c) ? ";opacity:.6" : ""}"><div><div class="t">${esc(c.client_name || "নাম নেই")} · ${c.artwork_ids.length}টি কাজ${c.mode === "bidding" ? ` <span class="pill reserved">বিডিং · ${nb[c.id] || 0}টি দাম</span>` : nb[c.id] ? ` <span class="pill">বিডিং বন্ধ · ${nb[c.id]}টি দাম</span>` : ""}${c.active === false ? ` <span class="pill sold">লিংক বন্ধ</span>` : expired(c) ? ` <span class="pill sold">মেয়াদ শেষ</span>` : ""}</div>
     <div class="s mono">${location.origin}/c/?t=${c.token}${c.expires_at ? ` · মেয়াদ ${new Date(c.expires_at).toLocaleDateString("bn-BD")}` : ""}</div></div>
-    <div style="display:flex;gap:6px">${c.mode === "bidding" ? `<button class="alt" data-bids="${c.id}">দামগুলো দেখুন</button>` : ""}<button class="alt" data-copy="${location.origin}/c/?t=${c.token}">কপি</button></div></div>`).join("");
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">${nb[c.id] ? `<button class="alt" data-bids="${c.id}">দামগুলো দেখুন</button>` : ""}<button class="alt" data-copy="${location.origin}/c/?t=${c.token}">কপি</button><button class="alt" data-editlink="${c.id}">সম্পাদনা</button>${c.mode === "bidding" ? `<button class="alt" data-stopbid="${c.id}" title="লিংকটা থাকবে, শুধু দেখার জন্য">বিডিং বন্ধ</button>` : ""}<button class="alt" data-toggle="${c.id}">${c.active === false ? "লিংক চালু করুন" : "লিংক বন্ধ করুন"}</button><button class="danger" data-dellink="${c.id}">মুছুন</button></div></div>`).join("");
   clientRooms = data || [];
 }
 let clientRooms = [];
@@ -412,12 +415,54 @@ async function showBids(id) {
   $("#bidClose").onclick = () => (P.hidden = true);
 }
 $("#cMode").onchange = () => ($("#cBidOpts").hidden = $("#cMode").value !== "bidding");
-$("#cList").onclick = (e) => {
-  const u = e.target.dataset.copy; if (u) navigator.clipboard.writeText(u).then(() => toast("লিংক কপি হয়েছে"));
-  const b = e.target.dataset.bids; if (b) showBids(b);
+$("#cList").onclick = async (e) => {
+  const d = e.target.dataset, c = clientRooms.find((x) => x.id === (d.editlink || d.stopbid || d.toggle || d.dellink));
+  if (d.copy) navigator.clipboard.writeText(d.copy).then(() => toast("লিংক কপি হয়েছে"));
+  if (d.bids) showBids(d.bids);
+  if (d.editlink) editLink(c);
+  if (d.stopbid) { await sb.from("client_collections").update({ mode: "view", updated_at: new Date().toISOString() }).eq("id", c.id); toast("বিডিং বন্ধ হয়েছে। লিংকটা এখন শুধু দেখার জন্য; আগের দামগুলো রাখা আছে"); loadClient(); }
+  if (d.toggle) { await sb.from("client_collections").update({ active: c.active === false, updated_at: new Date().toISOString() }).eq("id", c.id); toast(c.active === false ? "লিংক আবার চালু হয়েছে" : "লিংক বন্ধ হয়েছে। কেউ খুললে দেখবে লিংকটি আর চালু নেই"); loadClient(); }
+  if (d.dellink) {
+    if (e.target.dataset.sure !== "1") { e.target.dataset.sure = "1"; e.target.textContent = "নিশ্চিত? এর সব দামও মুছে যাবে"; return; }
+    const { error } = await sb.from("client_collections").delete().eq("id", c.id);
+    toast(error ? "মোছা যায়নি: " + error.message : "লিংক মুছে ফেলা হয়েছে"); if (editingLink === c.id) resetLinkForm(); loadClient();
+  }
 };
+// Editing a link keeps the same address: the client's link keeps working with the corrections.
+let editingLink = null;
+function resetLinkForm() {
+  editingLink = null; ["#cName", "#cNote", "#cIntroEn", "#cIntroBn"].forEach((id) => ($(id).value = "")); $("#cDays").value = 30; $("#cMode").value = "view"; $("#cBidOpts").hidden = true; $("#cPrices").checked = true; $("#cTop").checked = true;
+  document.querySelectorAll("#cPick input, #cOther input").forEach((i) => (i.checked = false));
+  $("#cCreate").textContent = "লিংক তৈরি করুন"; $("#cCancel").hidden = true; $("#cEditing").hidden = true;
+}
+function editLink(c) {
+  editingLink = c.id;
+  $("#cName").value = c.client_name || ""; $("#cNote").value = c.note || ""; $("#cMode").value = c.mode || "view"; $("#cBidOpts").hidden = c.mode !== "bidding";
+  $("#cCur").value = c.bid_currency || "BDT"; $("#cTop").checked = c.show_top_bid !== false; $("#cIntroEn").value = c.intro_en || ""; $("#cIntroBn").value = c.intro_bn || ""; $("#cPrices").checked = !!c.show_prices;
+  $("#cDays").value = c.expires_at ? Math.max(1, Math.ceil((new Date(c.expires_at) - Date.now()) / 864e5)) : 30;
+  const ids = new Set(c.artwork_ids); document.querySelectorAll("#cPick input, #cOther input").forEach((i) => (i.checked = ids.has(i.value)));
+  $("#cCreate").textContent = "পরিবর্তন সংরক্ষণ"; $("#cCancel").hidden = false; $("#cEditing").hidden = false;
+  $("#cEditing").textContent = `"${c.client_name || "নাম নেই"}" লিংকটি সম্পাদনা করছেন। সংরক্ষণ করলে একই লিংকে পরিবর্তন দেখাবে, নতুন লিংক পাঠাতে হবে না। মেয়াদ আজ থেকে গোনা হবে। নিজের কাজের দাম বা তথ্য ভুল হলে "কাজ" ট্যাব থেকে ঠিক করুন।`;
+  $("#cName").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+$("#cCancel").onclick = resetLinkForm;
+let editingOther = null;
+const oFields = ["#oArtist", "#oTitle", "#oYear", "#oMedium", "#oH", "#oW", "#oBdt", "#oUsd", "#oDesc", "#oImgs"];
+function resetOther() { editingOther = null; oFields.forEach((id) => ($(id).value = "")); $("#oReplace").checked = false; $("#oReplaceWrap").hidden = true; $("#oCancel").hidden = true; $("#oSave").textContent = "কাজটি যোগ করুন"; }
+$("#oCancel").onclick = resetOther;
 $("#oSave").onclick = async () => {
   const artist = $("#oArtist").value.trim(), title = $("#oTitle").value.trim(), files = [...$("#oImgs").files];
+  if (editingOther) {
+    if (!artist || !title) return toast("শিল্পীর নাম আর কাজের নাম দিন");
+    const num = (id) => ($(id).value === "" ? null : +$(id).value), bdt = num("#oBdt"), usd = num("#oUsd");
+    const { error } = await sb.from("artworks").update({ artist_name: artist, title_en: title, year: num("#oYear"), medium: $("#oMedium").value.trim() || null, height_cm: num("#oH"), width_cm: num("#oW"), description_en: $("#oDesc").value.trim() || null, price_bdt: bdt, price_usd: usd, price_mode: bdt || usd ? "fixed" : "on_request", show_price: !!(bdt || usd) }).eq("id", editingOther);
+    if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+    if (files.length) {
+      if ($("#oReplace").checked) await sb.from("artwork_images").delete().eq("artwork_id", editingOther);
+      let n = $("#oReplace").checked ? 0 : 100; for (const f of files) { const p = await upFile("collection", f); if (p) await sb.from("artwork_images").insert({ artwork_id: editingOther, path: p, sort: n++, alt_en: `${artist}: ${title}` }); }
+    }
+    resetOther(); await load(); await loadClient(); return toast("সংরক্ষণ হয়েছে। এই কাজ যে লিংকে আছে সেখানে নতুন তথ্য দেখাবে");
+  }
   if (!artist || !title || !files.length) return toast("শিল্পীর নাম, কাজের নাম আর ছবি দিন");
   const num = (id) => ($(id).value === "" ? null : +$(id).value);
   const bdt = num("#oBdt"), usd = num("#oUsd"), code = Date.now().toString(36).toUpperCase();
@@ -436,6 +481,14 @@ $("#oSave").onclick = async () => {
   toast("যোগ হয়েছে এবং এই লিংকের জন্য বাছাই করা হয়েছে");
 };
 $("#cOther").onclick = async (e) => {
+  const ed = e.target.closest("[data-editother]");
+  if (ed) {
+    e.preventDefault(); const w = others.find((x) => x.id === ed.dataset.editother); editingOther = w.id;
+    const v = { "#oArtist": w.artist_name, "#oTitle": w.title_en, "#oYear": w.year, "#oMedium": w.medium, "#oH": w.height_cm, "#oW": w.width_cm, "#oBdt": w.price_bdt, "#oUsd": w.price_usd, "#oDesc": w.description_en };
+    for (const [id, x] of Object.entries(v)) $(id).value = x ?? "";
+    $("#oImgs").value = ""; $("#oReplaceWrap").hidden = false; $("#oCancel").hidden = false; $("#oSave").textContent = "পরিবর্তন সংরক্ষণ";
+    $("#oAdd").open = true; $("#oArtist").scrollIntoView({ behavior: "smooth", block: "center" }); return;
+  }
   const b = e.target.closest("[data-delother]"); if (!b) return; e.preventDefault();
   if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "নিশ্চিত?"; return; }
   await sb.from("artworks").delete().eq("id", b.dataset.delother); await load(); loadClient();
@@ -446,6 +499,13 @@ $("#cCreate").onclick = async () => {
   const days = +$("#cDays").value || 30, bidding = $("#cMode").value === "bidding";
   const row = { client_name: $("#cName").value || null, note: $("#cNote").value || null, artwork_ids: ids, show_prices: $("#cPrices").checked, expires_at: new Date(Date.now() + days * 864e5).toISOString() };
   if (bidding) Object.assign(row, { mode: "bidding", bid_currency: $("#cCur").value, show_top_bid: $("#cTop").checked, intro_en: $("#cIntroEn").value || null, intro_bn: $("#cIntroBn").value || null });
+  if (editingLink) {
+    if (!bidding) row.mode = "view";
+    row.updated_at = new Date().toISOString();
+    const { error } = await sb.from("client_collections").update(row).eq("id", editingLink);
+    if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+    toast("পরিবর্তন সংরক্ষণ হয়েছে। একই লিংকে এখন নতুন তথ্য দেখাবে"); resetLinkForm(); return loadClient();
+  }
   const { data, error } = await sb.from("client_collections").insert(row).select().single();
   if (error) return toast(error.message);
   const link = `${location.origin}/c/?t=${data.token}`;
