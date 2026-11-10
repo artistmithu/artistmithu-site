@@ -540,6 +540,8 @@ async function loadProfile() {
   ${PROFILE_FIELDS.map(([k, t, ph, r]) => `<strong>${t}</strong><div class="row"><label>ইংরেজি<textarea data-k="${k}" data-l="en" rows="${r}" placeholder="${ph}">${esc(C[k]?.en || "")}</textarea></label><label>বাংলা<textarea data-k="${k}" data-l="bn" rows="${r}">${esc(C[k]?.bn || "")}</textarea></label></div>`).join("")}
   <button id="saveProfile">লেখা সংরক্ষণ</button>
   <hr><strong>হোম পেজের প্রথম ছবি</strong> <span class="s">(দিলে উপরের "প্রথম বড় ছবি" কাজের বদলে এটা দেখাবে)</span><div class="imgs">${C.hero_image?.en ? `<figure><img src="${pub(C.hero_image.en)}" alt=""></figure> <button class="danger" id="delHero">সরিয়ে দিন</button>` : ""}</div><input type="file" id="upHero" accept="image/*">
+  <hr><strong>হোম পেজে "যাত্রা"-র পাশের ছবি</strong> <span class="s">(না দিলে সেলফ পোর্ট্রেট দেখাবে)</span><div class="imgs">${C.journey_image?.en ? `<figure><img src="${pub(C.journey_image.en)}" alt=""></figure> <button class="danger" id="delJourney">সরিয়ে দিন</button>` : ""}</div><input type="file" id="upJourney" accept="image/*">
+  <div class="row"><label>ছবির ক্যাপশন (ইংরেজি)<input id="jCapEn" value="${esc(C.journey_caption?.en || "")}"></label><label>ছবির ক্যাপশন (বাংলা)<input id="jCapBn" value="${esc(C.journey_caption?.bn || "")}"></label><button class="alt" id="saveJCap" type="button">ক্যাপশন সংরক্ষণ</button></div>
   <hr><strong>আপনার ছবি (পোর্ট্রেট)</strong><div class="imgs">${C.portrait?.en ? `<figure><img src="${pub(C.portrait.en)}" alt=""></figure>` : ""}</div><input type="file" id="upPortrait" accept="image/*">
   <hr><strong>সিভি (PDF)</strong> ${C.cv_pdf?.en ? `<a href="${pub(C.cv_pdf.en)}" target="_blank">বর্তমান সিভি দেখুন</a>` : `<span class="s">এখনো দেওয়া হয়নি</span>`}<br><input type="file" id="upCv" accept="application/pdf">
   <hr><strong>স্টুডিও ও অধ্যায়ের ছবি</strong> <span class="s">("কোথায় দেখাবে" থেকে বেছে নিন: স্টুডিওর ছবি পরিচিতি পাতায় দেখায়, অধ্যায়ের ছবি সেই অধ্যায়ের পাতায়। একসাথে কয়েকটি ছবি দিতে পারেন।)</span>
@@ -553,6 +555,9 @@ async function loadProfile() {
   };
   $("#upHero").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("hero_image", p); toast("ছবি যোগ হয়েছে"); loadProfile(); } };
   $("#delHero") && ($("#delHero").onclick = async () => { await setKey("hero_image", null); loadProfile(); });
+  $("#upJourney").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("journey_image", p); toast("ছবি যোগ হয়েছে"); loadProfile(); } };
+  $("#delJourney") && ($("#delJourney").onclick = async () => { await setKey("journey_image", null); loadProfile(); });
+  $("#saveJCap").onclick = async () => { const { error } = await sb.from("site_content").upsert({ key: "journey_caption", en: $("#jCapEn").value.trim() || null, bn: $("#jCapBn").value.trim() || null, updated_at: new Date().toISOString() }); toast(error ? error.message : "সংরক্ষণ হয়েছে"); };
   $("#upPortrait").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("portrait", p); toast("ছবি যোগ হয়েছে"); loadProfile(); } };
   $("#upCv").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("cv_pdf", p); toast("সিভি যোগ হয়েছে"); loadProfile(); } };
   $("#upStudio").onchange = async (e) => {

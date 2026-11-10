@@ -229,3 +229,4 @@ form.bid .msg.ok{background:var(--ok);color:#fff;padding:8px 10px;border-radius:
 .card .desc{font-size:14px;line-height:1.55}.card .desc p{margin:6px 0}.card .desc summary{cursor:pointer;color:var(--accent);font-size:14px}
 .card dl.bidinfo{background:var(--accent-soft);border-radius:6px;padding:8px 10px}
 .card dl.facts dt,.card dl.facts dd{font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:14px}
+.journey-wrap .portrait small span[lang="bn"]{font-family:var(--f-body);font-size:13px}

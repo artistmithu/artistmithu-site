@@ -192,6 +192,12 @@ const featured = works.filter((w) => w.featured && w !== heroWork && w !== selfW
 const heroPhoto = C.hero_image?.en; // a photo uploaded in admin wins over the hero work
 const heroImg = heroPhoto ? { path: heroPhoto } : heroWork?.images[0];
 // Journey timeline: one line per step, "YEAR  text" (two spaces or a tab between them), edited in admin.
+// Picture beside the journey timeline: a photo chosen in admin, else the self-portrait when it is not already the hero.
+const journeyPic = (() => {
+  const ph = C.journey_image?.en, cap = C.journey_caption;
+  if (ph) return `<a class="portrait" href="/chapters/roots/"><img src="${img(ph)}" alt="${esc(cap?.en || "Tanvirul Islam Mithu")}" loading="lazy">${cap?.en || cap?.bn ? `<small>${bi([esc(cap.en || cap.bn), esc(cap.bn || cap.en)])}</small>` : ""}</a>`;
+  return selfWork?.images[0] && selfWork !== heroWork ? `<a class="portrait" href="/works/${selfWork.slug}/"><img src="${img(selfWork.images[0].path)}" alt="${esc(selfWork.title_en)}" loading="lazy"><small>${esc(selfWork.title_en)}${selfWork.year ? `, ${selfWork.year}` : ""}</small></a>` : "";
+})();
 const journeyList = (t) => `<ol class="journey">${lines(t).map((l) => { const m = l.match(/^(\S+)(?:\s{2,}|\t)(.+)$/); return m ? `<li><b>${m[1]}</b><span>${m[2]}</span></li>` : `<li><span>${l}</span></li>`; }).join("")}</ol>`;
 
 files["index.html"] = page({
@@ -207,8 +213,8 @@ files["index.html"] = page({
   <p><a class="btn" href="#journey">${bi(["Follow the journey", "যাত্রাটা দেখুন"])}</a></p></div>
   ${heroPhoto ? `<a class="hero-img" href="/works/"><img src="${img(heroPhoto)}" alt="Works by Tanvirul Islam Mithu on an exhibition wall"></a>` : heroImg ? `<a class="hero-img" href="/works/${heroWork.slug}/"><img src="${img(heroImg.path)}" alt="${esc(heroWork.title_en)}"></a>` : ""}
   </div></section>
-  <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap${selfWork?.images[0] && selfWork !== heroWork ? "" : " solo"}">
-  ${selfWork?.images[0] && selfWork !== heroWork ? `<a class="portrait" href="/works/${selfWork.slug}/"><img src="${img(selfWork.images[0].path)}" alt="${esc(selfWork.title_en)}" loading="lazy"><small>${esc(selfWork.title_en)}${selfWork.year ? `, ${selfWork.year}` : ""}</small></a>` : ""}
+  <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap${journeyPic ? "" : " solo"}">
+  ${journeyPic}
   <div>${biText(C.journey, journeyList)}<p><a href="/about/">${bi(["Full biography and CV", "পূর্ণ জীবনী ও সিভি"])} →</a></p></div></div></section>
   ${(() => { // From the archive: the earliest show with press coverage, led by its first clipping.
     const e = exhibitions.filter((x) => x.slug && x.published !== false && (x.press || []).some((c) => c.kind !== "sponsor")).sort((x, y) => String(x.start_date).localeCompare(String(y.start_date)))[0];
