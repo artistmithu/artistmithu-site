@@ -86,7 +86,7 @@ function priceText(w, { note = false } = {}) {
   return bi([en, bn]) + ship;
 }
 
-function page({ title, desc, path, body, image, jsonld }) {
+function page({ title, desc, path, body, image, jsonld, bare = false }) {
   const url = SITE + path;
   return `<!doctype html>
 <html lang="en" data-lang="en">
@@ -108,8 +108,8 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="brand" href="/"><img src="/assets/logo.jpg" alt="" width="44" height="44"><span>Artistmithu<small>${bi(["Tanvirul Islam Mithu", "তানভীরুল ইসলাম মিঠু"])}</small></span></a>
-  <nav class="main">
+  ${bare ? `<span class="brand"><img src="/assets/logo.jpg" alt="" width="44" height="44"><span>Artistmithu<small>${bi(["Tanvirul Islam Mithu", "তানভীরুল ইসলাম মিঠু"])}</small></span></span>` : `<a class="brand" href="/"><img src="/assets/logo.jpg" alt="" width="44" height="44"><span>Artistmithu<small>${bi(["Tanvirul Islam Mithu", "তানভীরুল ইসলাম মিঠু"])}</small></span></a>`}
+  ${bare ? "" : `<nav class="main">
     <a href="/works/">${bi(["Works", "কাজ"])}</a>
     <a href="/chapters/">${bi(["Chapters", "অধ্যায়"])}</a>
     <a href="/shows/">${bi(["Shows", "প্রদর্শনী"])}</a>
@@ -117,17 +117,17 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
     ${posts.length ? `<a href="/journal/">${bi(["Journal", "জার্নাল"])}</a>` : ""}
     <a href="/about/">${bi(["About", "পরিচিতি"])}</a>
     <a href="/contact/">${bi(["Contact", "যোগাযোগ"])}</a>
-  </nav>
+  </nav>`}
   <button class="lang" id="langBtn" type="button"><span lang="bn">English</span><span lang="en">বাংলা</span></button>
 </div></header>
 <main>${body}</main>
-<footer><div class="wrap">
+${bare ? `<footer><div class="wrap"><p class="note">${bi(["This page is private: only people with this link can see it.", "এই পাতাটি ব্যক্তিগত: শুধু যাঁর কাছে লিংক আছে তিনিই দেখতে পারেন।"])} <a href="/" target="_blank" rel="noopener">artistmithu.com ↗</a></p></div></footer>` : `<footer><div class="wrap">
   <form class="subscribe" id="subscribe"><label for="subEmail">${bi(["New works and shows by email", "নতুন কাজ ও প্রদর্শনীর খবর ইমেইলে"])}</label>
     <div><input id="subEmail" type="email" required placeholder="you@example.com"><button type="submit">${bi(["Subscribe", "সাবস্ক্রাইব"])}</button></div>
     <p class="note" id="subNote" hidden></p></form>
   <div class="social"><a href="https://www.facebook.com/artistmithu2022" rel="noopener">Facebook</a> · <a href="https://www.instagram.com/artistmithu/" rel="noopener">Instagram</a> · <a href="https://twitter.com/artistmithu" rel="noopener">X</a> · <a href="https://www.youtube.com/@artistmithu" rel="noopener">YouTube</a>
   <p class="note">© ${new Date().getFullYear()} Tanvirul Islam Mithu · <a href="/admin/" rel="nofollow" style="color:inherit">${bi(["Studio login", "স্টুডিও লগইন"])}</a></p></div>
-</div></footer>
+</div></footer>`}
 <div class="tray" id="tray" hidden><div class="wrap"><strong id="trayCount"></strong><a class="btn light" id="trayEnquire" href="/contact/">${bi(["Enquire about these", "এগুলো নিয়ে জিজ্ঞাসা"])}</a><button type="button" class="btn ghost" id="trayClear">${bi(["Clear", "মুছুন"])}</button></div></div>
 <script>window.CFG=${JSON.stringify({ url: SUPABASE_URL, key: SUPABASE_KEY, wa: WHATSAPP })}</script>
 <script src="/assets/site.js?v=${BUILD}" defer></script>
@@ -352,6 +352,7 @@ files["c/index.html"] = page({
   title: "Selected for you | Tanvirul Islam Mithu",
   desc: "A private selection of works.",
   path: "/c/",
+  bare: true, // private links: no site menu, so a bidder never leaves the bidding page by accident
   body: `<div class="wrap"><p class="eyebrow">${bi(["Selected for you by the artist", "শিল্পী আপনার জন্য বাছাই করেছেন"])}</p><h1 class="page-title" id="cTitle">${bi(["Works chosen for you", "আপনার জন্য নির্বাচিত কাজ"])}</h1><p class="lead" id="cNote"></p><div id="cIntro" class="intro" hidden></div><div class="rules" id="cRules" hidden></div><div class="grid" id="cGrid"><p class="note">Loading…</p></div></div>`,
 });
 
