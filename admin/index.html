@@ -198,6 +198,7 @@ function edit(w) {
   <div class="row"><label>অধ্যায়<select name="series_id"><option value="">—</option>${series.map((s) => `<option value="${s.id}" ${s.id === w.series_id ? "selected" : ""}>${esc(s.title_en)}</option>`).join("")}</select></label>
    <label>সাল<input name="year" type="number" value="${v("year")}"></label><label>মাধ্যম<input name="medium" value="${v("medium")}" placeholder="Acrylic on canvas"></label><label>সংস্করণ (প্রিন্ট)<input name="edition" value="${v("edition")}" placeholder="12/50"></label>
    ${"kind" in w || !w.id ? `<label>ধরন<select name="kind"><option value="">—</option>${[["painting","পেইন্টিং"],["drawing","ড্রইং"],["mixed","মিশ্র মাধ্যম"],["print","প্রিন্ট"],["other","অন্যান্য"]].map(([k, t]) => `<option value="${k}" ${w.kind === k ? "selected" : ""}>${t}</option>`).join("")}</select></label>` : ""}</div>
+  ${"collection_en" in w || !w.id ? `<div class="row"><label>কোথায় সংরক্ষিত (ইংরেজি)<input name="collection_en" value="${v("collection_en")}" placeholder="Bangladesh National Museum"></label><label>কোথায় সংরক্ষিত (বাংলা)<input name="collection_bn" value="${v("collection_bn")}" placeholder="বাংলাদেশ জাতীয় জাদুঘর"></label></div>` : ""}
   <div class="row"><label>উচ্চতা (সেমি)<input name="height_cm" type="number" step="0.1" value="${v("height_cm")}"></label><label>প্রস্থ (সেমি)<input name="width_cm" type="number" step="0.1" value="${v("width_cm")}"></label>
   </div>
   <div class="panel" style="padding:10px">

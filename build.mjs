@@ -263,6 +263,7 @@ for (const w of works) {
         <dl class="spec">
           <dt>${bi(["Inventory", "ইনভেন্টরি"])}</dt><dd class="mono">${esc(w.inv_no)}</dd>
           ${w.year ? `<dt>${bi(["Year", "সাল"])}</dt><dd>${w.year}</dd>` : ""}
+          ${w.collection_en || w.collection_bn ? `<dt>${bi(["Collection", "সংগ্রহ"])}</dt><dd>${bi([esc(w.collection_en || w.collection_bn), esc(w.collection_bn || w.collection_en)])}</dd>` : ""}
           ${w.medium ? `<dt>${bi(["Medium", "মাধ্যম"])}</dt><dd>${esc(w.medium)}</dd>` : ""}
           <dt>${bi(["Size", "মাপ"])}</dt><dd>${sizeText(w)}${w.size_class ? ` · ${bi(SIZE[w.size_class])}` : ""}</dd>
           ${w.edition ? `<dt>${bi(["Edition", "সংস্করণ"])}</dt><dd>${esc(w.edition)}</dd>` : ""}
@@ -391,6 +392,11 @@ ordered.forEach((e, i) => {
       </div>
     </div>
     ${e.sponsor_en || e.sponsor_bn ? `<aside class="sponsor"><span class="eyebrow">${bi(["Sponsor", "পৃষ্ঠপোষক"])}</span><p>${bi([esc(e.sponsor_en || e.sponsor_bn), esc(e.sponsor_bn || e.sponsor_en)])}</p>${clips(e, "sponsor", "sponsor-photos")}</aside>` : ""}
+    ${(() => { // Where works from this show are held now.
+      const held = {}; list.filter((w) => w.collection_en || w.collection_bn).forEach((w) => (held[w.collection_en || w.collection_bn] ||= { bn: w.collection_bn || w.collection_en, l: [] }).l.push(w));
+      const ks = Object.keys(held); if (!ks.length) return "";
+      return `<aside class="sponsor"><span class="eyebrow">${bi(["In collections", "যেখানে সংরক্ষিত"])}</span>${ks.map((k) => `<p><b>${bi([esc(k), esc(held[k].bn)])}:</b> ${held[k].l.map((w) => `<a href="/works/${w.slug}/">${esc(w.title_en)}</a>`).join(", ")}</p>`).join("")}</aside>`;
+    })()}
     ${list.length ? `<h2 class="sec">${bi(["Works in this show", "এই শো-এর কাজ"])}</h2><div class="grid">${list.map(card).join("")}</div>` : ""}
     ${(e.press || []).some((x) => x.kind !== "sponsor") ? `<h2 class="sec">${bi(["In the press", "পত্রিকায়"])}</h2>${clips(e, "press", "press")}` : ""}
     ${(e.images || []).length ? `<h2 class="sec">${bi(["Photos from the exhibition", "প্রদর্শনীর ছবি"])}</h2><div class="studio">${e.images.map((x) => `<figure><a href="${img(x)}" target="_blank" rel="noopener"><img src="${img(x)}" alt="${esc(e.title)}" loading="lazy"></a></figure>`).join("")}</div>` : ""}

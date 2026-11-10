@@ -51,3 +51,10 @@ grant execute on function public.get_collection(text) to anon, authenticated;
 alter table public.exhibitions add column if not exists press jsonb not null default '[]'::jsonb, add column if not exists sponsor_en text, add column if not exists sponsor_bn text;
 -- Data (applied): home hero = Self Portrait TIM-1997-1481 (removed from Evolving Lines); wall photo unset; Media Life hidden as an empty chapter.
 -- Data (applied): Experiments, 1996–97 chapter (series 'experiments', sort 2) with TIM-EXP-001..014 under experiments/.
+
+-- 010 (applied): where a work is held.
+alter table public.artworks add column if not exists collection_en text, add column if not exists collection_bn text;
+-- artworks_public re-created with collection_en, collection_bn appended (same where clause as above).
+-- Data: Station -2 and Untitled -> Bangladesh National Museum; Landscape and new My Room-1 -> Ekushey Television;
+-- new Drawing 6 (catalogue image) opens the first solo show page; catalogue cover added to its press list.
+-- Helper edge function "thumbs" (token-guarded) was deployed to compare images; remove with the import token.
