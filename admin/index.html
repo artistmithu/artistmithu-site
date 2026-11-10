@@ -52,12 +52,17 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
 </section>
 
 <section id="app" hidden>
-  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button></nav>
+  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button></nav>
 
   <div data-pane="works">
     <div class="row" style="margin-bottom:10px"><input id="q" placeholder="নাম বা ইনভেন্টরি দিয়ে খুঁজুন"><select id="fStatus"><option value="">সব</option><option value="nosize">মাপ নেই</option><option value="available">উপলব্ধ</option><option value="sold">বিক্রিত</option><option value="draft">অপ্রকাশিত</option></select><button id="newWork">+ নতুন কাজ</button></div>
     <div id="editor" class="panel" hidden></div>
     <div id="works" class="list"></div>
+  </div>
+  <div data-pane="shows" hidden>
+    <div class="row" style="margin-bottom:10px"><button id="newShow">+ নতুন প্রদর্শনী</button></div>
+    <div id="showEditor" class="panel" hidden></div>
+    <div id="shows" class="list"></div>
   </div>
   <div data-pane="inq" hidden><div id="inq" class="list"></div></div>
   <div data-pane="client" hidden>
@@ -120,7 +125,7 @@ async function onSession(session) {
 document.querySelectorAll("nav.tabs button").forEach((b) => (b.onclick = () => {
   document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-pressed", x === b));
   document.querySelectorAll("[data-pane]").forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
-  ({ inq: loadInq, client: loadClient, subs: loadSubs })[b.dataset.tab]?.();
+  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs })[b.dataset.tab]?.();
 }));
 
 async function load() {
@@ -180,7 +185,7 @@ function edit(w) {
    ${hasMode ? "" : `<label class="check"><input type="checkbox" name="show_price" ${w.show_price ? "checked" : ""}> সাইটে দাম দেখাবে</label>`}
    <label class="check"><input type="checkbox" name="featured" ${w.featured ? "checked" : ""}> হোমপেজে দেখাবে</label>
    <label class="check"><input type="checkbox" name="published" ${w.published ? "checked" : ""}> প্রকাশিত</label></div>
-  <label>বর্ণনা<textarea name="description_en" rows="3">${v("description_en")}</textarea></label>
+  <div class="row"><label>বর্ণনা (ইংরেজি)<textarea name="description_en" rows="3">${v("description_en")}</textarea></label><label>বর্ণনা (বাংলা)<textarea name="description_bn" rows="3">${v("description_bn")}</textarea></label></div>
   <div><strong>ছবি</strong> <span class="s">(প্রথম ছবিটি মূল ছবি; বড় ছবি দিন, কমপক্ষে ২০০০ পিক্সেল)</span>
    <div class="imgs">${[...(w.artwork_images || [])].sort((a, b) => a.sort - b.sort).map((i) => `<figure><img src="${pub(i.path)}" alt=""><button class="danger" data-delimg="${i.id}">মুছুন</button></figure>`).join("")}</div>
    ${w.id ? `<input type="file" id="upload" accept="image/*" multiple>` : `<p class="s">ছবি যোগ করতে আগে কাজটি সংরক্ষণ করুন।</p>`}</div>
@@ -226,6 +231,75 @@ function edit(w) {
       if (dims[0] && dims[0] < 1600) toast("ছবিটি ছোট (" + dims[0] + "px)। বড় ছবি দিলে ভালো দেখাবে।");
     }
     await load(); edit(works.find((x) => x.id === w.id));
+  });
+}
+
+// Shows (exhibitions and web shows) ------------------------------------------------
+let showsData = [], showLinks = [];
+const KINDS = { "web-show": "ওয়েব শো", solo: "একক প্রদর্শনী", group: "যৌথ প্রদর্শনী", "art-fair": "আর্ট ফেয়ার" };
+async function loadShows() {
+  const [e, l] = await Promise.all([
+    sb.from("exhibitions").select("*").order("start_date", { ascending: false, nullsFirst: false }),
+    sb.from("exhibition_works").select("*"),
+  ]);
+  if (e.error || l.error) { $("#shows").innerHTML = `<p class="panel">প্রদর্শনীর তালিকা আনা যায়নি: ${esc((e.error || l.error).message)}। ডেটাবেস আপডেট (002) চালানো না হলে এটা দেখাবে।</p>`; return; }
+  showsData = e.data || []; showLinks = l.data || [];
+  $("#shows").innerHTML = showsData.map((x) => { const n = showLinks.filter((k) => k.exhibition_id === x.id).length;
+    return `<div class="item"><img src="${x.cover_path ? pub(x.cover_path) : ""}" alt="">
+    <div><div class="t">${esc(x.title)}<span class="pill ${x.published === false ? "draft" : "available"}">${x.published === false ? "অপ্রকাশিত" : KINDS[x.kind] || x.kind}</span></div>
+    <div class="s">${x.start_date || "তারিখ নেই"}${x.end_date ? " – " + x.end_date : ""} · ${n}টি কাজ${x.slug ? ` · <span class="mono">/shows/${esc(x.slug)}/</span>` : ""}</div></div>
+    <button class="alt" data-eshow="${x.id}">সম্পাদনা</button></div>`; }).join("") || "<p>এখনো কোনো প্রদর্শনী নেই।</p>";
+}
+$("#shows").onclick = (e) => { const id = e.target.dataset.eshow; if (id) editShow(showsData.find((x) => x.id === id)); };
+$("#newShow").onclick = () => editShow({ kind: "web-show", published: true });
+
+function editShow(x) {
+  const E = $("#showEditor"); E.hidden = false; E.scrollIntoView({ behavior: "smooth" });
+  const v = (k) => esc(x[k] ?? "");
+  const linked = showLinks.filter((k) => k.exhibition_id === x.id).sort((a, b) => a.sort - b.sort).map((k) => k.artwork_id);
+  E.innerHTML = `<strong>${x.id ? "প্রদর্শনী সম্পাদনা" : "নতুন প্রদর্শনী"}</strong>
+  <div class="row"><label>নাম (ইংরেজি)<input name="title" value="${v("title")}"></label><label>নাম (বাংলা)<input name="title_bn" value="${v("title_bn")}"></label>
+   <label>ধরন<select name="kind">${Object.entries(KINDS).map(([k, t]) => `<option value="${k}" ${x.kind === k ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+   <label>ঠিকানার অংশ (slug)<input name="slug" value="${v("slug")}" placeholder="lines-of-life-2014"></label></div>
+  <div class="row"><label>শুরুর তারিখ<input name="start_date" type="date" value="${v("start_date")}"></label><label>শেষের তারিখ<input name="end_date" type="date" value="${v("end_date")}"></label>
+   <label>স্থান / গ্যালারি<input name="venue" value="${v("venue")}"></label><label>শহর<input name="city" value="${v("city")}"></label><label>দেশ<input name="country" value="${v("country")}"></label></div>
+  <label>বক্তব্য (ইংরেজি)<textarea name="statement_en" rows="5">${v("statement_en")}</textarea></label>
+  <label>বক্তব্য (বাংলা)<textarea name="statement_bn" rows="5">${v("statement_bn")}</textarea></label>
+  <div class="row"><label>YouTube লিংক<input name="youtube_url" value="${v("youtube_url")}"></label><label>মূল ওয়েব শো-এর লিংক<input name="original_url" value="${v("original_url")}"></label><label>আর্কাইভ (Wayback) লিংক<input name="wayback_url" value="${v("wayback_url")}"></label></div>
+  <div class="row"><label>ক্রম (বড় সংখ্যা আগে)<input name="sort" type="number" value="${v("sort") || 0}"></label><label class="check"><input type="checkbox" name="published" ${x.published !== false ? "checked" : ""}> প্রকাশিত</label></div>
+  <div><strong>প্রচ্ছদ ছবি</strong> ${x.cover_path ? `<div class="imgs"><figure><img src="${pub(x.cover_path)}" alt=""></figure></div>` : ""}${x.id ? `<input type="file" id="coverUp" accept="image/*">` : `<p class="s">ছবি দিতে আগে সংরক্ষণ করুন।</p>`}</div>
+  ${x.id ? `<div><strong>এই প্রদর্শনীর কাজ</strong> <span class="s">(টিক দিন; ক্রম = যে ক্রমে টিক দিয়েছেন)</span>
+   <input id="pickQ" placeholder="কাজ খুঁজুন" style="margin:6px 0"><div class="pick" id="showPick">${works.map((w) => { const im = (w.artwork_images || [])[0]; return `<label data-t="${esc((w.title_en + " " + (w.inv_no || "")).toLowerCase())}"><input type="checkbox" value="${w.id}" ${linked.includes(w.id) ? "checked" : ""}> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${esc(w.title_en)} <span class="s">${w.year || ""}</span></label>`; }).join("")}</div></div>` : ""}
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="saveShow">সংরক্ষণ</button><button class="alt" id="closeShow">বন্ধ</button>${x.id ? `<button class="danger" id="delShow">প্রদর্শনী মুছুন</button>` : ""}</div>`;
+  let order = [...linked];
+  E.querySelectorAll("#showPick input").forEach((c) => (c.onchange = () => { order = c.checked ? [...order.filter((i) => i !== c.value), c.value] : order.filter((i) => i !== c.value); }));
+  $("#pickQ") && ($("#pickQ").oninput = (ev) => { const q = ev.target.value.toLowerCase(); E.querySelectorAll("#showPick label").forEach((l) => (l.hidden = q && !l.dataset.t.includes(q))); });
+  $("#closeShow").onclick = () => (E.hidden = true);
+  $("#saveShow").onclick = async () => {
+    const row = {};
+    E.querySelectorAll("[name]").forEach((el) => { row[el.name] = el.type === "checkbox" ? el.checked : el.value === "" ? null : el.type === "number" ? +el.value : el.value; });
+    if (!row.title) return toast("নাম দরকার");
+    if (!row.slug) row.slug = `${row.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}${row.start_date ? "-" + row.start_date.slice(0, 4) : ""}`;
+    const q = x.id ? sb.from("exhibitions").update(row).eq("id", x.id).select().single() : sb.from("exhibitions").insert(row).select().single();
+    const { data, error } = await q;
+    if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+    if (x.id) {
+      const del = await sb.from("exhibition_works").delete().eq("exhibition_id", x.id);
+      if (del.error) return toast("কাজের তালিকা সংরক্ষণ হয়নি: " + del.error.message);
+      if (order.length) { const ins = await sb.from("exhibition_works").insert(order.map((id, i) => ({ exhibition_id: x.id, artwork_id: id, sort: i }))); if (ins.error) return toast("কাজের তালিকা সংরক্ষণ হয়নি: " + ins.error.message); }
+    }
+    toast("সংরক্ষণ হয়েছে"); await loadShows(); editShow(showsData.find((s) => s.id === data.id));
+  };
+  $("#delShow") && ($("#delShow").onclick = async () => {
+    if ($("#delShow").dataset.sure !== "1") { $("#delShow").dataset.sure = "1"; $("#delShow").textContent = "নিশ্চিত? আবার চাপুন (কাজগুলো মুছবে না)"; return; }
+    await sb.from("exhibitions").delete().eq("id", x.id); E.hidden = true; toast("মুছে ফেলা হয়েছে"); loadShows();
+  });
+  $("#coverUp") && ($("#coverUp").onchange = async (ev) => {
+    const f = ev.target.files[0]; if (!f) return;
+    const path = `shows/${x.id}/${Date.now()}-${f.name.replace(/[^a-zA-Z0-9.]+/g, "-")}`;
+    const up = await sb.storage.from("artworks").upload(path, f, { contentType: f.type });
+    if (up.error) return toast("আপলোড হয়নি: " + up.error.message);
+    await sb.from("exhibitions").update({ cover_path: path }).eq("id", x.id); await loadShows(); editShow(showsData.find((s) => s.id === x.id));
   });
 }
 
