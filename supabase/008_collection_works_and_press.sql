@@ -50,3 +50,4 @@ grant execute on function public.get_collection(text) to anon, authenticated;
 -- 009 (applied): press clippings and sponsor on shows.
 alter table public.exhibitions add column if not exists press jsonb not null default '[]'::jsonb, add column if not exists sponsor_en text, add column if not exists sponsor_bn text;
 -- Data (applied): home hero = Self Portrait TIM-1997-1481 (removed from Evolving Lines); wall photo unset; Media Life hidden as an empty chapter.
+-- Data (applied): Experiments, 1996–97 chapter (series 'experiments', sort 2) with TIM-EXP-001..014 under experiments/.
