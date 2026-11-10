@@ -8,7 +8,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || "https://msbgnvltxoxrnvuriiez.s
 // Publishable key: safe to ship in the browser; row level security protects the data.
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_vxt7vC2yHGGhMON90ZFnBw_PehR5Qod";
 const SITE = "https://artistmithu.com";
-const WHATSAPP = process.env.WHATSAPP_NUMBER || ""; // e.g. 8801XXXXXXXXX
+const WHATSAPP = process.env.WHATSAPP_NUMBER || "8801714133725"; // studio WhatsApp, from the artist's portfolio
 const OUT = "dist";
 
 const api = async (path) => {
