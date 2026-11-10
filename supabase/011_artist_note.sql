@@ -27,3 +27,4 @@ returns json language sql stable security definer set search_path = public as $$
 $$;
 grant execute on function public.get_collection(text) to anon, authenticated;
 -- Data (applied): COL-MWAMVVL9 artist name split into name + artist_note; title bracket fixed.
+-- Data (applied): Roots corrections from Vaab: Branch in a pot first (first class work), Bottles second, ROOTS-020 retitled New Market chicken bazaar, pencil media for 004/010-013.
