@@ -87,7 +87,7 @@
   document.addEventListener("click", (e) => {
     const f = e.target.closest(".fav"); if (f) toggle(f.closest(".card").dataset.id);
     const d = e.target.closest(".fav-detail"); if (d) { toggle(d.closest(".detail").dataset.id); d.textContent = sel.includes(d.closest(".detail").dataset.id) ? "✓" : say("Add to shortlist", "পছন্দের তালিকায়"); }
-    const s = e.target.closest(".share"); if (s) { const u = location.href; if (navigator.share) navigator.share({ title: document.title, url: u }).catch(() => {}); else navigator.clipboard?.writeText(u).then(() => (s.textContent = say("Link copied", "লিংক কপি হয়েছে"))); }
+    const s = e.target.closest(".share"); if (s) { const u = s.dataset.url || location.href; if (navigator.share) navigator.share({ title: document.title, url: u }).catch(() => {}); else navigator.clipboard?.writeText(u).then(() => (s.textContent = say("Link copied", "লিংক কপি হয়েছে"))); }
   });
   document.getElementById("trayClear")?.addEventListener("click", () => { sel = []; store.set("shortlist", sel); renderSel(); });
   renderSel();

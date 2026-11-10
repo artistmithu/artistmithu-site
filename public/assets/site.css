@@ -234,3 +234,6 @@ form.bid .msg.ok{background:var(--ok);color:#fff;padding:8px 10px;border-radius:
 .card .thumbs button{padding:0;border:2px solid transparent;border-radius:4px;background:none;width:56px;height:56px;overflow:hidden}
 .card .thumbs button.on{border-color:var(--accent)}
 .card .thumbs img{width:100%;height:100%;object-fit:cover}
+.sharebar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:14px 0 4px;font-size:14px}
+.sharebar a,.sharebar button{border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--sheet);color:var(--ink);text-decoration:none;font-size:14px}
+.sharebar a:hover,.sharebar button:hover{border-color:var(--accent);color:var(--accent)}

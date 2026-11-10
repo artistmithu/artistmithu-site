@@ -7,7 +7,9 @@ import { dirname, join } from "node:path";
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://msbgnvltxoxrnvuriiez.supabase.co";
 // Publishable key: safe to ship in the browser; row level security protects the data.
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_vxt7vC2yHGGhMON90ZFnBw_PehR5Qod";
-const SITE = "https://artistmithu.com";
+// Public address used in share previews (Facebook reads og:url and goes there), canonical links and the sitemap.
+// Set SITE_URL to https://artistmithu.com in the Cloudflare build settings once the domain points at this site.
+const SITE = (process.env.SITE_URL || "https://artistmithu-site.artistmithu.workers.dev").replace(/\/$/, "");
 const WHATSAPP = process.env.WHATSAPP_NUMBER || "8801714133725"; // studio WhatsApp, from the artist's portfolio
 const OUT = "dist";
 const BUILD = Date.now().toString(36); // added to asset URLs so browsers fetch fresh CSS/JS after each publish
@@ -86,7 +88,7 @@ function priceText(w, { note = false } = {}) {
   return bi([en, bn]) + ship;
 }
 
-function page({ title, desc, path, body, image, jsonld, bare = false }) {
+function page({ title, desc, path, body, image, imageW, imageH, imageAlt, ogType = "website", jsonld, bare = false }) {
   const url = SITE + path;
   return `<!doctype html>
 <html lang="en" data-lang="en">
@@ -96,9 +98,9 @@ function page({ title, desc, path, body, image, jsonld, bare = false }) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
-<meta property="og:type" content="website"><meta property="og:title" content="${esc(title)}">
+<meta property="og:type" content="${ogType}"><meta property="og:site_name" content="Artistmithu: Tanvirul Islam Mithu"><meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
-${image ? `<meta property="og:image" content="${image}"><meta name="twitter:card" content="summary_large_image">` : ""}
+${image ? `<meta property="og:image" content="${image}"><meta property="og:image:secure_url" content="${image}">${imageW ? `<meta property="og:image:width" content="${imageW}"><meta property="og:image:height" content="${imageH}">` : ""}<meta property="og:image:alt" content="${esc(imageAlt || title)}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(desc)}"><meta name="twitter:image" content="${image}">` : ""}
 <link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#18203a">
 <link rel="icon" href="/assets/logo.jpg" type="image/jpeg"><link rel="apple-touch-icon" href="/assets/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -295,14 +297,16 @@ booksShown().forEach((b, i, all) => {
 
 for (const w of works) {
   const main = w.images[0];
-  const desc = `${w.title_en}${w.year ? ` (${w.year})` : ""}, ${w.medium || "artwork"}${w.height_cm ? `, ${+w.height_cm} × ${+w.width_cm} cm` : ""} by Tanvirul Islam Mithu.`;
+  const about = w.description_en && w.description_en !== w.title_en && !/\|/.test(w.description_en) ? ` ${w.description_en.replace(/\s+/g, " ").slice(0, 160)}${w.description_en.length > 160 ? "…" : ""}` : "";
+  const desc = `${w.title_en}${w.year ? ` (${w.year})` : ""}, ${w.medium || "artwork"}${w.height_cm ? `, ${+w.height_cm} × ${+w.width_cm} cm` : ""} by Tanvirul Islam Mithu.${about}`;
+  const pageUrl = `${SITE}/works/${w.slug}/`;
   const waText = encodeURIComponent(`Hello, I am interested in "${w.title_en}" (${w.inv_no}). ${SITE}/works/${w.slug}/`);
   const related = works.filter((x) => x.series_id === w.series_id && x.id !== w.id).slice(0, 4);
   files[`works/${w.slug}/index.html`] = page({
     title: `${w.title_en}${w.year ? `, ${w.year}` : ""} | Tanvirul Islam Mithu`,
     desc,
     path: `/works/${w.slug}/`,
-    image: main ? img(main.path) : undefined,
+    image: main ? img(main.path) : undefined, imageW: main?.width, imageH: main?.height, imageAlt: `${w.title_en} by Tanvirul Islam Mithu`, ogType: "article",
     jsonld: { "@context": "https://schema.org", "@type": "VisualArtwork", name: w.title_en, creator: { "@type": "Person", name: "Tanvirul Islam Mithu" }, dateCreated: w.year || undefined, artMedium: w.medium || undefined, height: w.height_cm ? { "@type": "Distance", name: `${+w.height_cm} cm` } : undefined, width: w.width_cm ? { "@type": "Distance", name: `${+w.width_cm} cm` } : undefined, image: main ? img(main.path) : undefined, url: `${SITE}/works/${w.slug}/` },
     body: `<div class="wrap"><p class="eyebrow"><a href="/works/">${bi(["Works", "কাজ"])}</a>${w.series ? ` / <a href="/chapters/${w.series.slug}/">${esc(w.series.title_en)}</a>` : ""}</p>
     <div class="detail" data-id="${w.id}">
@@ -320,12 +324,16 @@ for (const w of works) {
           <dt>${bi(["Status", "অবস্থা"])}</dt><dd><span class="pill ${w.status}">${bi(STATUS[w.status])}</span></dd>
           ${priceText(w) ? `<dt>${bi(["Price", "দাম"])}</dt><dd class="price">${priceText(w, { note: true })}</dd>` : ""}
         </dl>
-        ${w.description_en && w.description_en !== w.title_en ? `<p class="lead">${esc(w.description_en)}</p>` : ""}
+        ${w.description_en && w.description_en !== w.title_en && !/\|/.test(w.description_en) ? `<p class="lead">${esc(w.description_en)}</p>` : ""}
         <div class="actions">
           <a class="btn" href="https://wa.me/${WHATSAPP}?text=${waText}" rel="noopener">${bi(["Enquire on WhatsApp", "WhatsApp-এ জিজ্ঞাসা"])}</a>
           <button type="button" class="btn alt fav-detail">${bi(["Add to shortlist", "পছন্দের তালিকায়"])}</button>
-          <button type="button" class="btn alt share">${bi(["Share", "শেয়ার"])}</button>
         </div>
+        <div class="sharebar"><span class="note">${bi(["Share this work", "কাজটি শেয়ার করুন"])}</span>
+          <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://wa.me/?text=${encodeURIComponent(`${w.title_en} by Tanvirul Islam Mithu ${pageUrl}`)}" target="_blank" rel="noopener">WhatsApp</a>
+          ${main ? `<a href="${img(main.path)}" download="${esc(w.slug)}.jpg" target="_blank" rel="noopener" title="For Instagram: save the picture and post it, with this page's link in your bio or story">${bi(["Picture for Instagram", "ইনস্টাগ্রামের জন্য ছবি"])}</a>` : ""}
+          <button type="button" class="share" data-url="${pageUrl}">${bi(["Copy link", "লিংক কপি"])}</button></div>
         ${w.height_cm ? `<div class="scale" data-h="${+w.height_cm}" data-w="${+w.width_cm}"><h4>${bi(["Size next to a 170 cm person", "১৭০ সেমি মানুষের পাশে আকার"])}</h4></div>` : ""}
         <form class="enq" data-artwork="${w.id}"><strong>${bi(["Or send a message", "অথবা বার্তা পাঠান"])}</strong>
           <input name="name" required placeholder="Name / নাম"><input name="contact" required placeholder="Email or phone / ইমেইল বা ফোন">
