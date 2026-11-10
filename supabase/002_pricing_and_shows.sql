@@ -32,24 +32,30 @@ create table if not exists public.exhibition_works (
 );
 create index if not exists exhibition_works_artwork on public.exhibition_works (artwork_id);
 alter table public.exhibition_works enable row level security;
-drop policy if exists "public read exhibition works" on public.exhibition_works;
-create policy "public read exhibition works" on public.exhibition_works for select using (true);
-drop policy if exists "admin write exhibition works" on public.exhibition_works;
-create policy "admin write exhibition works" on public.exhibition_works for all
-  using (public.is_admin()) with check (public.is_admin());
-
-drop policy if exists "public read exhibitions" on public.exhibitions;
-create policy "public read exhibitions" on public.exhibitions for select using (published or public.is_admin());
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename = 'exhibition_works' and policyname = 'public read exhibition works') then
+    create policy "public read exhibition works" on public.exhibition_works for select using (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'exhibition_works' and policyname = 'admin write exhibition works') then
+    create policy "admin write exhibition works" on public.exhibition_works for all
+      using (public.is_admin()) with check (public.is_admin());
+  end if;
+  if exists (select 1 from pg_policies where tablename = 'exhibitions' and policyname = 'public read exhibitions') then
+    alter policy "public read exhibitions" on public.exhibitions using (published or public.is_admin());
+  else
+    create policy "public read exhibitions" on public.exhibitions for select using (published or public.is_admin());
+  end if;
+end $$;
 
 -- Public view: prices only when the work is priced (fixed or range).
-drop view if exists public.artworks_public;
-create view public.artworks_public with (security_invoker = true) as
+-- New columns go at the end so the view can be replaced in place.
+create or replace view public.artworks_public with (security_invoker = true) as
   select id, inv_no, slug, title_en, title_bn, series_id, year, medium, support,
          height_cm, width_cm, depth_cm, size_class, framed, status, edition,
          description_en, description_bn, featured, sort,
-         case when price_mode <> 'on_request' or show_price then price_mode else 'on_request' end as price_mode,
          case when price_mode <> 'on_request' or show_price then price_bdt end as price_bdt,
          case when price_mode <> 'on_request' or show_price then price_usd end as price_usd,
+         case when price_mode <> 'on_request' or show_price then price_mode else 'on_request' end as price_mode,
          case when price_mode = 'range' then price_bdt_max end as price_bdt_max,
          case when price_mode = 'range' then price_usd_max end as price_usd_max
   from public.artworks where published;

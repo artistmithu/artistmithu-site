@@ -298,7 +298,8 @@ const shows = exhibitions.filter((e) => e.slug && e.published !== false);
 const worksById = Object.fromEntries(works.map((w) => [w.id, w]));
 const yt = (u) => { const m = String(u || "").match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : null; };
 const showCover = (e) => e.cover_path ? img(e.cover_path) : (() => { const l = showLinks.find((x) => x.exhibition_id === e.id && worksById[x.artwork_id]?.images[0]); return l ? img(worksById[l.artwork_id].images[0].path) : null; })();
-const dateRange = (e) => [e.start_date, e.end_date].filter(Boolean).map((d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })).join(" – ");
+// A show known only by its year is stored as 1 January with no end date: show just the year.
+const dateRange = (e) => !e.end_date && /-01-01$/.test(e.start_date || "") ? e.start_date.slice(0, 4) : [e.start_date, e.end_date].filter(Boolean).map((d) => new Date(d + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })).join(" – ");
 const byYear = {};
 for (const e of shows) (byYear[e.start_date ? e.start_date.slice(0, 4) : "—"] ||= []).push(e);
 

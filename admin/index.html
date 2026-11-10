@@ -90,7 +90,7 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pub = (p) => `${URL_}/storage/v1/object/public/artworks/${p}`;
 const toast = (m) => { const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 2500); };
-let works = [], series = [];
+let works = [], series = [], notes = {};
 let hasMode = false; // true once migration 002 (price_mode) is applied
 const fxRate = () => { try { return +localStorage.getItem("fx") || 122; } catch { return 122; } };
 
@@ -138,6 +138,8 @@ async function load() {
     return;
   }
   series = s.data || []; works = w.data || [];
+  const n = await sb.from("import_notes").select("inv_no,note");
+  notes = Object.fromEntries((n.data || []).map((x) => [x.inv_no, x.note]));
   hasMode = works.length > 0 && "price_mode" in works[0];
   renderWorks();
 }
@@ -150,7 +152,7 @@ function renderWorks() {
     const im = [...(w.artwork_images || [])].sort((a, b) => a.sort - b.sort)[0];
     return `<div class="item"><img src="${im ? pub(im.path) : ""}" alt="">
       <div><div class="t">${esc(w.title_en)}<span class="pill ${w.published ? w.status : "draft"}">${w.published ? statusBn[w.status] : "অপ্রকাশিত"}</span></div>
-      <div class="s"><span class="mono">${esc(w.inv_no)}</span> · ${w.year || "সাল নেই"} · ${esc(w.medium || "")} · ${w.height_cm ? `${+w.height_cm}×${+w.width_cm} সেমি` : "<b>মাপ নেই</b>"} · ${w.price_bdt ? "৳" + w.price_bdt : "দাম নেই"}</div></div>
+      <div class="s"><span class="mono">${esc(w.inv_no)}</span> · ${w.year || "সাল নেই"} · ${esc(w.medium || "")} · ${w.height_cm ? `${+w.height_cm}×${+w.width_cm} সেমি` : "<b>মাপ নেই</b>"}${notes[w.inv_no] ? " · ⚑ যাচাই দরকার" : ""} · ${w.price_bdt ? "৳" + w.price_bdt : "দাম নেই"}</div></div>
       <button class="alt" data-edit="${w.id}">সম্পাদনা</button></div>`;
   }).join("") || "<p>কিছু পাওয়া যায়নি।</p>";
 }
@@ -162,6 +164,7 @@ function edit(w) {
   const E = $("#editor"); E.hidden = false; E.scrollIntoView({ behavior: "smooth" });
   const v = (k) => esc(w[k] ?? "");
   E.innerHTML = `<strong>${w.id ? "কাজ সম্পাদনা" : "নতুন কাজ"}</strong>
+  ${notes[w.inv_no] ? `<p class="s" style="background:#fff6dc;padding:6px 8px;border-radius:6px">পুরোনো সাইট থেকে আনার সময়ের নোট: ${esc(notes[w.inv_no])}</p>` : ""}
   <div class="row"><label>শিরোনাম (ইংরেজি)<input name="title_en" value="${v("title_en")}"></label><label>শিরোনাম (বাংলা)<input name="title_bn" value="${v("title_bn")}"></label><label>ইনভেন্টরি নম্বর<input name="inv_no" value="${v("inv_no")}"></label></div>
   <div class="row"><label>অধ্যায়<select name="series_id"><option value="">—</option>${series.map((s) => `<option value="${s.id}" ${s.id === w.series_id ? "selected" : ""}>${esc(s.title_en)}</option>`).join("")}</select></label>
    <label>সাল<input name="year" type="number" value="${v("year")}"></label><label>মাধ্যম<input name="medium" value="${v("medium")}" placeholder="Acrylic on canvas"></label><label>সংস্করণ (প্রিন্ট)<input name="edition" value="${v("edition")}" placeholder="12/50"></label></div>
