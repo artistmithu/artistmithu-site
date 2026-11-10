@@ -159,7 +159,9 @@
         const intro = document.getElementById("cIntro");
         const text = (bn() ? data.intro_bn || data.intro_en : data.intro_en || data.intro_bn) || "";
         intro.hidden = false;
-        intro.innerHTML = `<img src="/assets/logo.jpg" alt="" width="64" height="64"><div><strong>${data.artworks.some((x) => x.artist_name) ? say("From the collection of Tanvirul Islam Mithu", "তানভীরুল ইসলাম মিঠুর সংগ্রহ থেকে") : "Tanvirul Islam Mithu"}</strong><p>${esc(text) || say("Painter and visual artist, Dhaka. MFA in Drawing and Painting, University of Dhaka. First solo exhibition in 2001; Bangladesh's first solo web show in 2013.", "চিত্রশিল্পী, ঢাকা। ঢাকা বিশ্ববিদ্যালয় থেকে ড্রইং ও পেইন্টিংয়ে স্নাতকোত্তর। প্রথম একক প্রদর্শনী ২০০১, দেশের প্রথম একক ওয়েব শো ২০১৩।")}</p><a href="/about/">${say("About the artist", "শিল্পী সম্পর্কে")}</a></div>`;
+        const allOthers = data.artworks.length && data.artworks.every((x) => x.artist_name);
+        const collText = say("These works by other artists come from the private collection of the painter Tanvirul Islam Mithu, Dhaka. The artist, title, medium, size and story of each work are given under its picture.", "এই কাজগুলো ঢাকার চিত্রশিল্পী তানভীরুল ইসলাম মিঠুর ব্যক্তিগত সংগ্রহের, অন্য শিল্পীদের আঁকা। প্রতিটি ছবির নিচে শিল্পীর নাম, কাজের নাম, মাধ্যম, মাপ আর বিবরণ দেওয়া আছে।");
+        intro.innerHTML = `<img src="/assets/logo.jpg" alt="" width="64" height="64"><div><strong>${data.artworks.some((x) => x.artist_name) ? say("From the collection of Tanvirul Islam Mithu", "তানভীরুল ইসলাম মিঠুর সংগ্রহ থেকে") : "Tanvirul Islam Mithu"}</strong><p>${esc(text) || (allOthers ? collText : say("Painter and visual artist, Dhaka. MFA in Drawing and Painting, University of Dhaka. First solo exhibition in 2001; Bangladesh's first solo web show in 2013.", "চিত্রশিল্পী, ঢাকা। ঢাকা বিশ্ববিদ্যালয় থেকে ড্রইং ও পেইন্টিংয়ে স্নাতকোত্তর। প্রথম একক প্রদর্শনী ২০০১, দেশের প্রথম একক ওয়েব শো ২০১৩।"))}</p><a href="/about/">${say("About the artist", "শিল্পী সম্পর্কে")}</a></div>`;
         const rules = document.getElementById("cRules"); rules.hidden = false;
         const closes = data.closes_at ? new Date(data.closes_at).toLocaleString(bn() ? "bn-BD" : "en-GB", { day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
         // Short rules: three lines a collector can take in at a glance.
@@ -172,16 +174,19 @@
       }
       const bidBox = (a) => {
         if (a.status === "sold" || a.status === "nfs") return "";
-        const top = a.top_bid != null ? `${say("Top bid", "সর্বোচ্চ দাম")}: <b>${cur}${fmt(a.top_bid)}</b>` : a.start_bid != null ? `${say("Starting bid", "শুরুর দাম")}: <b>${cur}${fmt(a.start_bid)}</b>` : say("No bids yet", "এখনো কোনো দাম পড়েনি");
-        return `<form class="bid" data-id="${a.id}"><p class="note top">${top}${a.bid_count ? ` · ${a.bid_count} ${say("bids", "টি দাম")}` : ""}</p>
+        const min = a.top_bid != null ? a.top_bid + 1 : a.start_bid;
+        const top = `<dl class="bidinfo">${a.start_bid != null ? `<dt>${say("Starting bid", "শুরুর দাম")}</dt><dd>${cur}${fmt(a.start_bid)}</dd>` : ""}
+          ${data.show_top_bid ? `<dt>${say("Top bid now", "এখন সর্বোচ্চ দাম")}</dt><dd>${a.top_bid != null ? `<b>${cur}${fmt(a.top_bid)}</b> <small>(${a.bid_count} ${say(a.bid_count === 1 ? "bid" : "bids", "টি দাম")})</small>` : say("No bids yet", "এখনো কোনো দাম পড়েনি")}</dd>` : ""}
+          ${min != null ? `<dt>${say("You can bid from", "আপনি দিতে পারেন")}</dt><dd><b>${cur}${fmt(min)}</b>${say(" or more", " বা বেশি")}</dd>` : ""}</dl>`;
+        return `<form class="bid" data-id="${a.id}"><div class="top">${top}</div>
           <input name="amount" type="number" inputmode="numeric" min="1" required placeholder="${say("Your offer", "আপনার দাম")} (${cur.trim()})">
           <input name="name" required placeholder="${say("Your name", "আপনার নাম")}" autocomplete="name"><input name="contact" required placeholder="${say("Phone or email", "ফোন বা ইমেইল")}" autocomplete="tel">
           <button class="btn" type="submit">${say("Place bid", "দাম জমা দিন")}</button><p class="note msg" hidden></p></form>`;
       };
       cGrid.innerHTML = data.artworks.map((a) => `<article class="card"><a class="frame" href="${a.images?.[0] ? img(a.images[0]) : "#"}" target="_blank" rel="noopener">${a.images?.[0] ? `<img src="${img(a.images[0])}" alt="${esc(a.title_en)}">` : ""}</a>
-        ${a.artist_name ? `<p class="note artist">${esc(a.artist_name)}</p>` : ""}<div class="meta"><h3>${esc(a.title_en)}</h3><span class="yr">${a.year || ""}</span></div>
-        ${a.description_en ? `<p class="note">${esc(a.description_en)}</p>` : ""}
-        <div class="sub">${esc(a.medium || "")}${a.height_cm ? ` · ${+a.height_cm} × ${+a.width_cm} cm` : ""}</div>
+        ${a.artist_name ? `<div class="artistline"><span class="label">${say("Artist", "শিল্পী")}</span><strong>${esc(a.artist_name)}</strong>${a.artist_note ? `<p>${esc(a.artist_note)}</p>` : ""}</div>` : ""}<div class="meta"><h3>${esc(a.title_en)}</h3><span class="yr">${a.year || ""}</span></div>
+        <dl class="facts">${a.medium ? `<dt>${say("Medium", "মাধ্যম")}</dt><dd>${esc(a.medium)}</dd>` : ""}${a.height_cm ? `<dt>${say("Size", "মাপ")}</dt><dd>${+a.height_cm} × ${+a.width_cm} cm <small>(${(a.height_cm / 2.54).toFixed(1)} × ${(a.width_cm / 2.54).toFixed(1)} in)</small></dd>` : ""}${a.year ? `<dt>${say("Year", "সাল")}</dt><dd>${a.year}</dd>` : ""}</dl>
+        ${a.description_en ? (() => { const ps = String(a.description_en).split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean).map((x) => `<p>${esc(x).replace(/\n/g, "<br>")}</p>`); return `<div class="desc">${ps[0]}${ps.length > 1 ? `<details><summary>${say("Read more", "আরও পড়ুন")}</summary>${ps.slice(1).join("")}</details>` : ""}</div>`; })() : ""}
         <div class="sub"><span class="pill ${a.status}">${({ available: say("Available", "উপলব্ধ"), reserved: say("Reserved", "সংরক্ষিত"), sold: say("Sold", "বিক্রিত"), nfs: say("Not for sale", "বিক্রির জন্য নয়") })[a.status] || a.status}</span>${bidding ? "" : `<span class="price">${priceOf(a)}</span>`}</div>
         ${bidding ? bidBox(a) : `<a class="btn" href="https://wa.me/${wa}?text=${encodeURIComponent(`About ${a.artist_name ? `${a.artist_name}, ` : ""}${a.title_en} (${a.inv_no})`)}">WhatsApp</a>`}</article>`).join("");
       if (bidding) {
@@ -199,7 +204,7 @@
             // Thank-you note for 3 seconds, then the form is fresh again (name and contact are remembered on this device).
             store.set("bidder", { name: f.elements.namedItem("name").value, contact: f.contact.value });
             msg.classList.add("ok"); msg.textContent = say("✓ Thank you, your bid is in. The artist will contact you.", "✓ ধন্যবাদ, আপনার দাম জমা হয়েছে। শিল্পী আপনার সাথে যোগাযোগ করবেন।");
-            if (res.top != null) f.querySelector(".top").innerHTML = `${say("Top bid", "সর্বোচ্চ দাম")}: <b>${cur}${fmt(res.top)}</b>`;
+            if (res.top != null) { const a = data.artworks.find((x) => x.id === f.dataset.id); a.top_bid = res.top; a.bid_count = (a.bid_count || 0) + 1; const tmp = document.createElement("div"); tmp.innerHTML = bidBox(a); f.querySelector(".top").innerHTML = tmp.querySelector(".top").innerHTML; }
             f.amount.value = ""; btn.disabled = true;
             setTimeout(() => { msg.hidden = true; msg.classList.remove("ok"); msg.textContent = ""; btn.disabled = false; f.amount.blur(); }, 3000);
           } else msg.textContent = ({

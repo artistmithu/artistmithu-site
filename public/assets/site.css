@@ -221,3 +221,11 @@ ol.journey b{font-family:var(--f-mono);font-size:14px}
 .rules ol{margin:4px 0 0;padding-left:20px}.rules li{margin:2px 0}
 form.bid .msg.ok{background:var(--ok);color:#fff;padding:8px 10px;border-radius:6px;font-weight:600;animation:bidok .2s ease-out}
 @keyframes bidok{from{opacity:0;transform:translateY(-4px)}}
+/* Client rooms: whose work it is and what can be bid, at a glance */
+.card .artistline{margin:10px 0 2px}.card .artistline .label{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.card .artistline strong{font-size:17px}.card .artistline p{margin:2px 0 0;font-size:14px;color:var(--ink-soft)}
+.card dl.facts,.card dl.bidinfo{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0;font-size:14px}
+.card dl dt{color:var(--ink-soft)}.card dl dd{margin:0}
+.card .desc{font-size:14px;line-height:1.55}.card .desc p{margin:6px 0}.card .desc summary{cursor:pointer;color:var(--accent);font-size:14px}
+.card dl.bidinfo{background:var(--accent-soft);border-radius:6px;padding:8px 10px}
+.card dl.facts dt,.card dl.facts dd{font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:14px}

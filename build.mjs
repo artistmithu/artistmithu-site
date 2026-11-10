@@ -10,6 +10,7 @@ const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_vxt
 const SITE = "https://artistmithu.com";
 const WHATSAPP = process.env.WHATSAPP_NUMBER || "8801714133725"; // studio WhatsApp, from the artist's portfolio
 const OUT = "dist";
+const BUILD = Date.now().toString(36); // added to asset URLs so browsers fetch fresh CSS/JS after each publish
 
 const api = async (path) => {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -102,7 +103,7 @@ ${image ? `<meta property="og:image" content="${image}"><meta name="twitter:card
 <link rel="icon" href="/assets/logo.jpg" type="image/jpeg"><link rel="apple-touch-icon" href="/assets/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@300;500;700;800&family=Hind+Siliguri:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/site.css?v=${BUILD}">
 ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script>` : ""}
 </head>
 <body>
@@ -129,7 +130,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
 </div></footer>
 <div class="tray" id="tray" hidden><div class="wrap"><strong id="trayCount"></strong><a class="btn light" id="trayEnquire" href="/contact/">${bi(["Enquire about these", "এগুলো নিয়ে জিজ্ঞাসা"])}</a><button type="button" class="btn ghost" id="trayClear">${bi(["Clear", "মুছুন"])}</button></div></div>
 <script>window.CFG=${JSON.stringify({ url: SUPABASE_URL, key: SUPABASE_KEY, wa: WHATSAPP })}</script>
-<script src="/assets/site.js" defer></script>
+<script src="/assets/site.js?v=${BUILD}" defer></script>
 </body></html>`;
 }
 
