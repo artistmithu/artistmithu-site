@@ -142,9 +142,11 @@ const KINDS = { painting: ["Paintings", "পেইন্টিং"], drawing: ["
 // each series in date order. Visitors can switch to a plain year-by-year view.
 const byYearThenSort = (a, b) => (a.year || 9999) - (b.year || 9999) || (a.sort || 0) - (b.sort || 0) || String(a.inv_no).localeCompare(String(b.inv_no));
 const span = (list) => { const ys = list.map((w) => w.year).filter(Boolean); if (!ys.length) return ""; const a = Math.min(...ys), b = Math.max(...ys); return a === b ? `${a}` : `${a}–${b}`; };
+// Captioned photo grid: studio photos (no chapter) on About, chapter photos on their chapter page.
+const photoGrid = (list, heading) => list.length ? `<h2 class="sec">${bi(heading)}</h2><div class="studio">${list.map((p) => `<figure><a href="${img(p.path)}" target="_blank" rel="noopener"><img src="${img(p.path)}" alt="${esc(p.caption_en || heading[0])}" loading="lazy"></a>${p.caption_en || p.caption_bn ? `<figcaption>${bi([esc(p.caption_en || p.caption_bn), esc(p.caption_bn || p.caption_en)])}</figcaption>` : ""}</figure>`).join("")}</div>` : "";
 const seriesGroups = () => {
   const groups = series.map((s) => ({ s, list: works.filter((w) => w.series_id === s.id).sort(byYearThenSort) })).filter((g) => g.list.length);
-  const first = (g) => Math.min(...g.list.map((w) => w.year || 9999));
+  const first = (g) => (g.s.slug === "roots" ? 0 : Math.min(...g.list.map((w) => w.year || 9999))); // Roots is the earliest chapter even where works are undated
   groups.sort((a, b) => first(a) - first(b) || (a.s.sort || 99) - (b.s.sort || 99));
   const other = works.filter((w) => !w.series).sort(byYearThenSort);
   if (other.length) groups.push({ s: { slug: "other", title_en: "Other works", title_bn: "অন্যান্য কাজ" }, list: other });
@@ -187,7 +189,7 @@ files["index.html"] = page({
   </div></section>
   <section class="wrap"><h2 class="sec">${bi(["Selected works", "নির্বাচিত কাজ"])}</h2><div class="grid">${featured.map(card).join("")}</div></section>
   <section class="wrap"><h2 class="sec">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h2><div class="chapters">
-  ${series.map((s) => { const n = works.filter((w) => w.series_id === s.id); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
+  ${series.map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
   </div></section>
   ${posts.length ? `<section class="wrap"><h2 class="sec">${bi(["From the journal", "জার্নাল থেকে"])}</h2><div class="shows">${posts.slice(0, 3).map((p) => `<a class="show" href="/journal/${p.slug}/">${p.cover_path ? `<img src="${img(p.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(p.title_en)}</strong></a>`).join("")}</div></section>` : ""}`,
 });
@@ -199,14 +201,14 @@ files["works/index.html"] = page({
   body: `<div class="wrap"><h1 class="page-title">${bi(["Works", "কাজ"])}</h1>
   <p class="lead">${bi([`${works.length} works in ${seriesGroups().length} series, from the earliest drawings to the latest web shows.`, `${works.length}টি কাজ, ${seriesGroups().length}টি সিরিজে: প্রথম দিকের ড্রইং থেকে সাম্প্রতিক ওয়েব শো পর্যন্ত।`])}</p>
   <nav class="jump">${seriesGroups().map((g) => `<a href="#s-${g.s.slug}">${bi([esc(g.s.title_en), esc(g.s.title_bn || g.s.title_en)])}</a>`).join("")}</nav></div>
-  ${filters()}<div class="wrap" id="grid">${seriesGroups().map((g) => `<section class="wgroup" id="s-${g.s.slug}"><header><h2>${bi([esc(g.s.title_en), esc(g.s.title_bn || g.s.title_en)])}</h2><span class="note">${span(g.list)} · ${g.list.length} ${bi(["works", "টি কাজ"])}${g.s.slug !== "other" ? ` · <a href="/chapters/${g.s.slug}/">${bi(["About this series", "এই সিরিজ সম্পর্কে"])}</a>` : ""}</span></header>${g.s.description_en ? `<p class="lead">${bi([esc(g.s.description_en), esc(g.s.description_bn || g.s.description_en)])}</p>` : ""}<div class="grid">${g.list.map(card).join("")}</div></section>`).join("")}</div>`,
+  ${filters()}<div class="wrap" id="grid">${seriesGroups().map((g) => `<section class="wgroup" id="s-${g.s.slug}"><header><h2>${bi([esc(g.s.title_en), esc(g.s.title_bn || g.s.title_en)])}</h2><span class="note">${span(g.list) ? `${span(g.list)} · ` : ""}${g.list.length} ${bi(["works", "টি কাজ"])}${g.s.slug !== "other" ? ` · <a href="/chapters/${g.s.slug}/">${bi(["About this series", "এই সিরিজ সম্পর্কে"])}</a>` : ""}</span></header>${g.s.description_en ? `<p class="lead">${bi([esc(g.s.description_en), esc(g.s.description_bn || g.s.description_en)])}</p>` : ""}<div class="grid">${g.list.map(card).join("")}</div></section>`).join("")}</div>`,
 });
 
 files["chapters/index.html"] = page({
   title: "Chapters | Tanvirul Islam Mithu",
   desc: "The series and chapters of Tanvirul Islam Mithu's practice, from Roots and the early drawings to Lines of Life and Lines of Image.",
   path: "/chapters/",
-  body: `<div class="wrap"><h1 class="page-title">${bi(["Chapters", "অধ্যায়"])}</h1><div class="chapters">${series.map((s) => { const n = works.filter((w) => w.series_id === s.id); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} works</span></a>`; }).join("")}</div></div>`,
+  body: `<div class="wrap"><h1 class="page-title">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h1><div class="chapters">${series.map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} works</span></a>`; }).join("")}</div></div>`,
 });
 
 for (const s of series) {
@@ -216,7 +218,9 @@ for (const s of series) {
     desc: s.description_en || `${s.title_en}: ${list.length} works by Tanvirul Islam Mithu.`,
     path: `/chapters/${s.slug}/`,
     body: `<div class="wrap"><p class="eyebrow"><a href="/chapters/">${bi(["Chapters", "অধ্যায়"])}</a></p><h1 class="page-title">${esc(s.title_en)} <small lang="bn">${esc(s.title_bn || "")}</small></h1>
-    ${s.description_en ? `<p class="lead">${esc(s.description_en)}</p>` : ""}
+    ${s.description_en ? `<p class="lead">${bi([esc(s.description_en), esc(s.description_bn || s.description_en)])}</p>` : ""}
+    ${photoGrid(studio.filter((p) => p.series_id === s.id), ["Photographs", "ছবি ও স্মৃতি"])}
+    ${list.length ? `<h2 class="sec">${bi(["Works", "কাজ"])}</h2>` : ""}
     ${list.length ? `<div class="grid">${list.map(card).join("")}</div>` : `<p class="note">${bi(["Works for this chapter are being added.", "এই অধ্যায়ের কাজ যোগ করা হচ্ছে।"])}</p>`}</div>`,
   });
 }
@@ -415,7 +419,7 @@ files["about/index.html"] = page({
   <div class="about-top">${portrait ? `<img class="portrait" src="${img(portrait)}" alt="Tanvirul Islam Mithu">` : ""}
   <div class="prose">${C.statement ? `<blockquote class="statement">${biText(C.statement, paras)}</blockquote>` : ""}${biText(C.bio, paras)}
   ${C.cv_pdf?.en ? `<p><a class="btn" href="${img(C.cv_pdf.en)}" download>${bi(["Download CV (PDF)", "সিভি ডাউনলোড (PDF)"])}</a></p>` : ""}</div></div>
-  ${studio.length ? `<h2 class="sec">${bi(["In the studio", "স্টুডিওতে"])}</h2><div class="studio">${studio.map((p) => `<figure><a href="${img(p.path)}" target="_blank" rel="noopener"><img src="${img(p.path)}" alt="${esc(p.caption_en || "Studio")}" loading="lazy"></a>${p.caption_en || p.caption_bn ? `<figcaption>${bi([esc(p.caption_en || p.caption_bn), esc(p.caption_bn || p.caption_en)])}</figcaption>` : ""}</figure>`).join("")}</div>` : ""}
+  ${photoGrid(studio.filter((p) => !p.series_id), ["In the studio", "স্টুডিওতে"])}
   <div class="cvgrid">
   ${C.education ? `<section><h2 class="sec">${bi(["Education", "শিক্ষা"])}</h2>${biList(C.education)}</section>` : ""}
   <section><h2 class="sec">${bi(["Solo exhibitions and web shows", "একক প্রদর্শনী ও ওয়েব শো"])}</h2><ul class="ex">${soloShows.map(showLine).join("")}</ul></section>
