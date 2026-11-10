@@ -80,7 +80,7 @@ function page({ title, desc, path, body, image, jsonld }) {
 <meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 ${image ? `<meta property="og:image" content="${image}"><meta name="twitter:card" content="summary_large_image">` : ""}
 <link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#18203a">
-<link rel="icon" href="/assets/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/icon-192.png">
+<link rel="icon" href="/assets/logo.jpg" type="image/jpeg"><link rel="apple-touch-icon" href="/assets/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@300;500;700;800&family=Hind+Siliguri:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/assets/site.css">
@@ -88,7 +88,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="brand" href="/">Tanvirul Islam Mithu<small>${bi(["Painter · Dhaka", "চিত্রশিল্পী · ঢাকা"])}</small></a>
+  <a class="brand" href="/"><img src="/assets/logo.jpg" alt="" width="44" height="44"><span>Artistmithu<small>${bi(["Tanvirul Islam Mithu", "তানভীরুল ইসলাম মিঠু"])}</small></span></a>
   <nav class="main">
     <a href="/works/">${bi(["Works", "কাজ"])}</a>
     <a href="/chapters/">${bi(["Chapters", "অধ্যায়"])}</a>
@@ -115,7 +115,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
 
 function card(w) {
   const im = w.images[0];
-  return `<article class="card" data-size="${w.size_class || "unknown"}" data-series="${w.series?.slug || ""}" data-status="${w.status}" data-id="${w.id}">
+  return `<article class="card" data-size="${w.size_class || "unknown"}" data-series="${w.series?.slug || ""}" data-status="${w.status}" data-kind="${w.kind || ""}" data-year="${w.year || ""}" data-id="${w.id}">
   <a class="frame" href="/works/${w.slug}/">${im ? `<img src="${img(im.path)}" alt="${esc(w.title_en)}" loading="lazy"${im.width ? ` width="${im.width}" height="${im.height}"` : ""}>` : ""}</a>
   <button type="button" class="fav" aria-pressed="false" aria-label="Shortlist">+</button>
   <div class="meta"><h3><a href="/works/${w.slug}/">${esc(w.title_en)}</a>${w.title_bn ? `<small lang="bn">${esc(w.title_bn)}</small>` : ""}</h3><span class="yr">${w.year || ""}</span></div>
@@ -124,15 +124,31 @@ function card(w) {
 </article>`;
 }
 
+const KINDS = { painting: ["Paintings", "পেইন্টিং"], drawing: ["Drawings", "ড্রইং"], mixed: ["Mixed media", "মিশ্র মাধ্যম"], print: ["Prints", "প্রিন্ট"] };
+// Works are shown the way galleries present an artist: grouped into bodies of work (series), oldest series first,
+// each series in date order. Visitors can switch to a plain year-by-year view.
+const byYearThenSort = (a, b) => (a.year || 9999) - (b.year || 9999) || (a.sort || 0) - (b.sort || 0) || String(a.inv_no).localeCompare(String(b.inv_no));
+const span = (list) => { const ys = list.map((w) => w.year).filter(Boolean); if (!ys.length) return ""; const a = Math.min(...ys), b = Math.max(...ys); return a === b ? `${a}` : `${a}–${b}`; };
+const seriesGroups = () => {
+  const groups = series.map((s) => ({ s, list: works.filter((w) => w.series_id === s.id).sort(byYearThenSort) })).filter((g) => g.list.length);
+  const first = (g) => Math.min(...g.list.map((w) => w.year || 9999));
+  groups.sort((a, b) => first(a) - first(b) || (a.s.sort || 99) - (b.s.sort || 99));
+  const other = works.filter((w) => !w.series).sort(byYearThenSort);
+  if (other.length) groups.push({ s: { slug: "other", title_en: "Other works", title_bn: "অন্যান্য কাজ" }, list: other });
+  return groups;
+};
 const filters = () => `<div class="controls"><div class="wrap">
+ <div class="group" data-arrange><span class="label">${bi(["Arrange", "সাজান"])}</span>
+  <button class="chip" data-v="series" aria-pressed="true">${bi(["By series", "সিরিজ অনুযায়ী"])}</button>
+  <button class="chip" data-v="year" aria-pressed="false">${bi(["By year", "সাল অনুযায়ী"])}</button></div>
  <div class="group" data-filter="size"><span class="label">${bi(["Size", "আকার"])}</span>
   <button class="chip" data-v="all" aria-pressed="true">${bi(["All", "সব"])}</button>
   <button class="chip" data-v="small" aria-pressed="false">${bi(SIZE.small)} &lt;40cm</button>
   <button class="chip" data-v="medium" aria-pressed="false">${bi(SIZE.medium)} 40–90</button>
   <button class="chip" data-v="large" aria-pressed="false">${bi(SIZE.large)} &gt;90cm</button></div>
- <div class="group" data-filter="series"><span class="label">${bi(["Chapter", "অধ্যায়"])}</span>
+ <div class="group" data-filter="kind"><span class="label">${bi(["Type", "ধরন"])}</span>
   <button class="chip" data-v="all" aria-pressed="true">${bi(["All", "সব"])}</button>
-  ${series.filter((s) => works.some((w) => w.series_id === s.id)).map((s) => `<button class="chip" data-v="${s.slug}" aria-pressed="false">${bi([esc(s.title_en), esc(s.title_bn || s.title_en)])}</button>`).join("")}</div>
+  ${Object.entries(KINDS).filter(([k]) => works.some((w) => w.kind === k)).map(([k, t]) => `<button class="chip" data-v="${k}" aria-pressed="false">${bi(t)}</button>`).join("")}</div>
  <div class="group" data-filter="status"><span class="label">${bi(["Status", "অবস্থা"])}</span>
   <button class="chip" data-v="all" aria-pressed="true">${bi(["All", "সব"])}</button>
   <button class="chip" data-v="available" aria-pressed="false">${bi(["For sale", "বিক্রির জন্য"])}</button></div>
@@ -148,7 +164,7 @@ files["index.html"] = page({
   desc: "Paintings and drawings by Bangladeshi artist Tanvirul Islam Mithu: forty years of lines, from Dhaka streets to the Janogon series. View sizes and prices, and enquire directly.",
   path: "/",
   image: heroImg ? img(heroImg.path) : undefined,
-  jsonld: { "@context": "https://schema.org", "@type": "Person", name: "Tanvirul Islam Mithu", alternateName: "Artist Mithu", jobTitle: "Visual Artist", url: SITE, alumniOf: "University of Dhaka", sameAs: ["https://www.facebook.com/artistmithu2022", "https://www.instagram.com/artistmithu/", "https://twitter.com/artistmithu", "https://www.youtube.com/@artistmithu"] },
+  jsonld: { "@context": "https://schema.org", "@type": "Person", name: "Tanvirul Islam Mithu", alternateName: ["Artistmithu", "Artist Mithu", "তানভীরুল ইসলাম মিঠু"], jobTitle: "Visual Artist", url: SITE, alumniOf: "University of Dhaka", sameAs: ["https://www.facebook.com/artistmithu2022", "https://www.instagram.com/artistmithu/", "https://twitter.com/artistmithu", "https://www.youtube.com/@artistmithu"] },
   body: `<section class="hero"><div class="wrap">
   <div><h1>${bi(["Forty years of <b>lines</b>, in one place", "চল্লিশ বছরের <b>রেখা</b>, এক জায়গায়"])}</h1>
   <p>${bi(["Pen, watercolor, oil and acrylic: the people, streets and life of Dhaka. See size, medium, year and price for every work, shortlist what you like and talk to the artist directly.", "কাগজে কলম, জলরং, তেলরং আর অ্যাক্রিলিকে ঢাকার মানুষ, রাস্তা ও জীবনের ছবি। প্রতিটি কাজের মাপ, মাধ্যম, সাল ও দাম দেখুন, পছন্দের কাজ বেছে সরাসরি শিল্পীর সাথে কথা বলুন।"])}</p>
@@ -166,18 +182,21 @@ files["works/index.html"] = page({
   title: "Works | Tanvirul Islam Mithu",
   desc: "All available and archived works by Tanvirul Islam Mithu, filterable by size, chapter and availability.",
   path: "/works/",
-  body: `<div class="wrap"><h1 class="page-title">${bi(["Works", "কাজ"])}</h1></div>${filters()}<div class="wrap"><div class="grid" id="grid">${works.map(card).join("")}</div></div>`,
+  body: `<div class="wrap"><h1 class="page-title">${bi(["Works", "কাজ"])}</h1>
+  <p class="lead">${bi([`${works.length} works in ${seriesGroups().length} series, from the earliest drawings to the latest web shows.`, `${works.length}টি কাজ, ${seriesGroups().length}টি সিরিজে: প্রথম দিকের ড্রইং থেকে সাম্প্রতিক ওয়েব শো পর্যন্ত।`])}</p>
+  <nav class="jump">${seriesGroups().map((g) => `<a href="#s-${g.s.slug}">${bi([esc(g.s.title_en), esc(g.s.title_bn || g.s.title_en)])}</a>`).join("")}</nav></div>
+  ${filters()}<div class="wrap" id="grid">${seriesGroups().map((g) => `<section class="wgroup" id="s-${g.s.slug}"><header><h2>${bi([esc(g.s.title_en), esc(g.s.title_bn || g.s.title_en)])}</h2><span class="note">${span(g.list)} · ${g.list.length} ${bi(["works", "টি কাজ"])}${g.s.slug !== "other" ? ` · <a href="/chapters/${g.s.slug}/">${bi(["About this series", "এই সিরিজ সম্পর্কে"])}</a>` : ""}</span></header>${g.s.description_en ? `<p class="lead">${bi([esc(g.s.description_en), esc(g.s.description_bn || g.s.description_en)])}</p>` : ""}<div class="grid">${g.list.map(card).join("")}</div></section>`).join("")}</div>`,
 });
 
 files["chapters/index.html"] = page({
   title: "Chapters | Tanvirul Islam Mithu",
-  desc: "Four chapters of Tanvirul Islam Mithu's practice: Roots, Evolving Lines, Media Life and Lines of Life.",
+  desc: "The series and chapters of Tanvirul Islam Mithu's practice, from Roots and the early drawings to Lines of Life and Lines of Image.",
   path: "/chapters/",
   body: `<div class="wrap"><h1 class="page-title">${bi(["Chapters", "অধ্যায়"])}</h1><div class="chapters">${series.map((s) => { const n = works.filter((w) => w.series_id === s.id); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} works</span></a>`; }).join("")}</div></div>`,
 });
 
 for (const s of series) {
-  const list = works.filter((w) => w.series_id === s.id);
+  const list = works.filter((w) => w.series_id === s.id).sort(byYearThenSort);
   files[`chapters/${s.slug}/index.html`] = page({
     title: `${s.title_en} | Tanvirul Islam Mithu`,
     desc: s.description_en || `${s.title_en}: ${list.length} works by Tanvirul Islam Mithu.`,
@@ -258,7 +277,7 @@ files["c/index.html"] = page({
   title: "Selected for you | Tanvirul Islam Mithu",
   desc: "A private selection of works.",
   path: "/c/",
-  body: `<div class="wrap"><p class="eyebrow">${bi(["Selected for you by the artist", "শিল্পী আপনার জন্য বাছাই করেছেন"])}</p><h1 class="page-title" id="cTitle">${bi(["Works chosen for you", "আপনার জন্য নির্বাচিত কাজ"])}</h1><p class="lead" id="cNote"></p><div class="grid" id="cGrid"><p class="note">Loading…</p></div></div>`,
+  body: `<div class="wrap"><p class="eyebrow">${bi(["Selected for you by the artist", "শিল্পী আপনার জন্য বাছাই করেছেন"])}</p><h1 class="page-title" id="cTitle">${bi(["Works chosen for you", "আপনার জন্য নির্বাচিত কাজ"])}</h1><p class="lead" id="cNote"></p><div id="cIntro" class="intro" hidden></div><p class="note" id="cRules" hidden></p><div class="grid" id="cGrid"><p class="note">Loading…</p></div></div>`,
 });
 
 files["404.html"] = page({ title: "Page not found | Tanvirul Islam Mithu", desc: "Page not found", path: "/404", body: `<div class="wrap prose"><h1 class="page-title">${bi(["Page not found", "পাতাটি পাওয়া যায়নি"])}</h1><p><a href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></div>` });
@@ -375,6 +394,13 @@ files["_headers"] = "/assets/*\n  Cache-Control: public, max-age=86400\n/admin/*
 await rm(OUT, { recursive: true, force: true });
 await cp("public", OUT, { recursive: true });
 await cp("admin", join(OUT, "admin"), { recursive: true });
+// The artist's logo (moved from the old WordPress site into storage) becomes the site icon.
+try {
+  if (fx) throw new Error("offline");
+  const r = await fetch(img("site/logo-270.jpg"));
+  if (!r.ok) throw new Error(String(r.status));
+  await writeFile(join(OUT, "assets/logo.jpg"), Buffer.from(await r.arrayBuffer()));
+} catch (e) { console.log("Logo not fetched, using the placeholder icon:", e.message); await cp("public/assets/icon-512.png", join(OUT, "assets/logo.jpg")); }
 for (const [p, content] of Object.entries(files)) {
   const f = join(OUT, p);
   await mkdir(dirname(f), { recursive: true });

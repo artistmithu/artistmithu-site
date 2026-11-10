@@ -6,6 +6,7 @@
   const rest = (path, opts = {}) => fetch(`${url}/rest/v1/${path}`, { ...opts, headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", ...(opts.headers || {}) } });
   const bn = () => root.dataset.lang === "bn";
   const say = (en, b) => (bn() ? b : en);
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   // Language
   root.dataset.lang = store.get("lang", "en");
@@ -14,8 +15,9 @@
     root.dataset.lang = bn() ? "en" : "bn"; root.lang = root.dataset.lang; store.set("lang", root.dataset.lang); updateCount();
   });
 
-  // Filters on /works/
-  const state = { size: "all", series: "all", status: "all" };
+  // Filters and arrangement on /works/
+  const state = { size: "all", kind: "all", status: "all" };
+  const grid = document.getElementById("grid");
   const cards = () => [...document.querySelectorAll("#grid .card")];
   function updateCount() {
     const el = document.getElementById("count"); if (!el) return;
@@ -24,8 +26,9 @@
   }
   function applyFilters() {
     cards().forEach((c) => {
-      c.hidden = !((state.size === "all" || c.dataset.size === state.size) && (state.series === "all" || c.dataset.series === state.series) && (state.status === "all" || c.dataset.status === state.status));
+      c.hidden = !((state.size === "all" || c.dataset.size === state.size) && (state.kind === "all" || c.dataset.kind === state.kind) && (state.status === "all" || c.dataset.status === state.status));
     });
+    document.querySelectorAll("#grid .wgroup").forEach((g) => (g.hidden = !g.querySelector(".card:not([hidden])")));
     updateCount();
   }
   document.querySelectorAll(".group[data-filter]").forEach((g) => {
@@ -36,6 +39,39 @@
       applyFilters();
     });
   });
+  // "By series" is the page as built. "By year" moves the same cards into year sections, newest first.
+  const seriesView = grid ? [...grid.children] : [];
+  let yearView = null;
+  function arrange(mode) {
+    if (!grid) return;
+    const all = cards();
+    if (mode === "year") {
+      if (!yearView) {
+        const by = {};
+        all.forEach((c) => (by[c.dataset.year || "—"] ||= []).push(c));
+        yearView = Object.keys(by).sort((a, b) => (b === "—") - (a === "—") || b - a).map((y) => {
+          const sec = document.createElement("section"); sec.className = "wgroup";
+          sec.innerHTML = `<header><h2>${y === "—" ? say("Undated", "সাল অজানা") : y}</h2><span class="note">${by[y].length} ${say("works", "টি কাজ")}</span></header><div class="grid"></div>`;
+          sec._cards = by[y]; return sec;
+        });
+      }
+      yearView.forEach((sec) => sec.querySelector(".grid").append(...sec._cards));
+      grid.replaceChildren(...yearView);
+    } else {
+      seriesView.forEach((sec) => { const g = sec.querySelector(".grid"); if (g && sec._cards) g.append(...sec._cards); });
+      grid.replaceChildren(...seriesView);
+    }
+    document.querySelector(".jump")?.toggleAttribute("hidden", mode === "year");
+    store.set("arrange", mode); applyFilters();
+  }
+  seriesView.forEach((sec) => (sec._cards = [...sec.querySelectorAll(".card")]));
+  const arr = document.querySelector(".group[data-arrange]");
+  arr?.addEventListener("click", (e) => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    arr.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    arrange(b.dataset.v);
+  });
+  if (arr && store.get("arrange", "series") === "year") arr.querySelector('[data-v="year"]')?.click();
   applyFilters();
 
   // Shortlist (per visitor) -> enquiry
@@ -114,11 +150,57 @@
         const b = amt(a.price_bdt, a.price_bdt_max, nB, "৳ ", m === "range"), u = amt(a.price_usd, a.price_usd_max, nU, "US$ ", m === "range");
         return (bn() ? [b, u] : [u, b]).filter(Boolean).join(" · ");
       };
-      cGrid.innerHTML = data.artworks.map((a) => `<article class="card"><a class="frame" href="${a.images?.[0] ? img(a.images[0]) : "#"}" target="_blank" rel="noopener">${a.images?.[0] ? `<img src="${img(a.images[0])}" alt="${a.title_en}">` : ""}</a>
-        <div class="meta"><h3>${a.title_en}</h3><span class="yr">${a.year || ""}</span></div>
-        <div class="sub">${a.medium || ""}${a.height_cm ? ` · ${+a.height_cm} × ${+a.width_cm} cm` : ""}</div>
-        <div class="sub"><span class="pill ${a.status}">${({ available: say("Available", "উপলব্ধ"), reserved: say("Reserved", "সংরক্ষিত"), sold: say("Sold", "বিক্রিত"), nfs: say("Not for sale", "বিক্রির জন্য নয়") })[a.status] || a.status}</span><span class="price">${priceOf(a)}</span></div>
-        <a class="btn" href="https://wa.me/${wa}?text=${encodeURIComponent(`About ${a.title_en} (${a.inv_no})`)}">WhatsApp</a></article>`).join("");
+      const bidding = data.mode === "bidding";
+      const cur = data.currency === "USD" ? "US$ " : "৳ ", fmt = data.currency === "USD" ? nU : nB;
+      if (bidding) {
+        document.getElementById("cTitle").textContent = data.client_name ? say(`Private bidding for ${data.client_name}`, `${data.client_name}-এর জন্য ব্যক্তিগত বিডিং`) : say("Private bidding", "ব্যক্তিগত বিডিং");
+        const intro = document.getElementById("cIntro");
+        const text = (bn() ? data.intro_bn || data.intro_en : data.intro_en || data.intro_bn) || "";
+        intro.hidden = false;
+        intro.innerHTML = `<img src="/assets/logo.jpg" alt="" width="64" height="64"><div><strong>Tanvirul Islam Mithu</strong><p>${esc(text) || say("Painter and visual artist, Dhaka. MFA in Drawing and Painting, University of Dhaka. First solo exhibition in 2001; Bangladesh's first solo web show in 2013.", "চিত্রশিল্পী, ঢাকা। ঢাকা বিশ্ববিদ্যালয় থেকে ড্রইং ও পেইন্টিংয়ে স্নাতকোত্তর। প্রথম একক প্রদর্শনী ২০০১, দেশের প্রথম একক ওয়েব শো ২০১৩।")}</p><a href="/about/">${say("About the artist", "শিল্পী সম্পর্কে")}</a></div>`;
+        const rules = document.getElementById("cRules"); rules.hidden = false;
+        const closes = data.closes_at ? new Date(data.closes_at).toLocaleString(bn() ? "bn-BD" : "en-GB", { day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
+        rules.textContent = say(
+          `Write your offer under any work. Bids are in ${data.currency === "USD" ? "US dollars" : "taka"}${data.show_top_bid ? " and must be higher than the current top bid" : " and are sealed: only the artist sees them"}.${closes ? ` Bidding closes ${closes}.` : ""} The artist will contact the winning bidder.`,
+          `পছন্দের কাজের নিচে আপনার দাম লিখুন। দাম ${data.currency === "USD" ? "ডলারে" : "টাকায়"}${data.show_top_bid ? ", বর্তমান সর্বোচ্চ দামের চেয়ে বেশি হতে হবে" : "; শুধু শিল্পী দেখবেন"}।${closes ? ` বিডিং শেষ: ${closes}।` : ""} সর্বোচ্চ দামদাতার সাথে শিল্পী যোগাযোগ করবেন।`);
+      }
+      const bidBox = (a) => {
+        if (a.status === "sold" || a.status === "nfs") return "";
+        const top = a.top_bid != null ? `${say("Top bid", "সর্বোচ্চ দাম")}: <b>${cur}${fmt(a.top_bid)}</b>` : a.start_bid != null ? `${say("Starting bid", "শুরুর দাম")}: <b>${cur}${fmt(a.start_bid)}</b>` : say("No bids yet", "এখনো কোনো দাম পড়েনি");
+        return `<form class="bid" data-id="${a.id}"><p class="note top">${top}${a.bid_count ? ` · ${a.bid_count} ${say("bids", "টি দাম")}` : ""}</p>
+          <input name="amount" type="number" inputmode="numeric" min="1" required placeholder="${say("Your offer", "আপনার দাম")} (${cur.trim()})">
+          <input name="name" required placeholder="${say("Your name", "আপনার নাম")}" autocomplete="name"><input name="contact" required placeholder="${say("Phone or email", "ফোন বা ইমেইল")}" autocomplete="tel">
+          <button class="btn" type="submit">${say("Place bid", "দাম জমা দিন")}</button><p class="note msg" hidden></p></form>`;
+      };
+      cGrid.innerHTML = data.artworks.map((a) => `<article class="card"><a class="frame" href="${a.images?.[0] ? img(a.images[0]) : "#"}" target="_blank" rel="noopener">${a.images?.[0] ? `<img src="${img(a.images[0])}" alt="${esc(a.title_en)}">` : ""}</a>
+        <div class="meta"><h3>${esc(a.title_en)}</h3><span class="yr">${a.year || ""}</span></div>
+        <div class="sub">${esc(a.medium || "")}${a.height_cm ? ` · ${+a.height_cm} × ${+a.width_cm} cm` : ""}</div>
+        <div class="sub"><span class="pill ${a.status}">${({ available: say("Available", "উপলব্ধ"), reserved: say("Reserved", "সংরক্ষিত"), sold: say("Sold", "বিক্রিত"), nfs: say("Not for sale", "বিক্রির জন্য নয়") })[a.status] || a.status}</span>${bidding ? "" : `<span class="price">${priceOf(a)}</span>`}</div>
+        ${bidding ? bidBox(a) : `<a class="btn" href="https://wa.me/${wa}?text=${encodeURIComponent(`About ${a.title_en} (${a.inv_no})`)}">WhatsApp</a>`}</article>`).join("");
+      if (bidding) {
+        // Remember the bidder's name and contact for the next bid on this device.
+        const me = store.get("bidder", {});
+        cGrid.querySelectorAll("form.bid").forEach((f) => { if (me.name) f.elements.namedItem("name").value = me.name; if (me.contact) f.contact.value = me.contact; });
+        cGrid.addEventListener("submit", async (e) => {
+          const f = e.target.closest("form.bid"); if (!f) return; e.preventDefault();
+          const msg = f.querySelector(".msg"), btn = f.querySelector("button"); btn.disabled = true;
+          const body = { p_token: t, p_artwork_id: f.dataset.id, p_name: f.elements.namedItem("name").value, p_contact: f.contact.value, p_amount: +f.amount.value };
+          const r = await rest("rpc/place_bid", { method: "POST", body: JSON.stringify(body) });
+          const res = r.ok ? await r.json() : { ok: false, error: "network" };
+          btn.disabled = false; msg.hidden = false;
+          if (res.ok) {
+            store.set("bidder", { name: f.elements.namedItem("name").value, contact: f.contact.value });
+            msg.textContent = say("Thank you, your bid is in. The artist will contact you.", "ধন্যবাদ, আপনার দাম জমা হয়েছে। শিল্পী আপনার সাথে যোগাযোগ করবেন।");
+            if (res.top != null) f.querySelector(".top").innerHTML = `${say("Top bid", "সর্বোচ্চ দাম")}: <b>${cur}${fmt(res.top)}</b>`;
+            f.amount.value = "";
+          } else msg.textContent = ({
+            too_low: say(`Please offer at least ${cur}${fmt(res.min)}.`, `অনুগ্রহ করে কমপক্ষে ${cur}${fmt(res.min)} লিখুন।`),
+            closed: say("Bidding for this link has closed.", "এই লিংকের বিডিং শেষ হয়ে গেছে।"),
+            details: say("Please write your name and a phone number or email.", "আপনার নাম আর ফোন বা ইমেইল লিখুন।"),
+            unavailable: say("This work is no longer available.", "এই কাজটি আর পাওয়া যাচ্ছে না।"),
+          })[res.error] || say("Could not send. Please try again.", "পাঠানো যায়নি, আবার চেষ্টা করুন।");
+        });
+      }
     })();
   }
 
