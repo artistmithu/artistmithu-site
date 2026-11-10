@@ -126,14 +126,14 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
 </body></html>`;
 }
 
-function card(w) {
+function card(w, { plain = false } = {}) { // plain: picture, title and medium only (home page)
   const im = w.images[0];
   return `<article class="card" data-size="${w.size_class || "unknown"}" data-series="${w.series?.slug || ""}" data-status="${w.status}" data-kind="${w.kind || ""}" data-year="${w.year || ""}" data-id="${w.id}">
   <a class="frame" href="/works/${w.slug}/">${im ? `<img src="${img(im.path)}" alt="${esc(w.title_en)}" loading="lazy"${im.width ? ` width="${im.width}" height="${im.height}"` : ""}>` : ""}</a>
-  <button type="button" class="fav" aria-pressed="false" aria-label="Shortlist">+</button>
+  ${plain ? "" : `<button type="button" class="fav" aria-pressed="false" aria-label="Shortlist">+</button>`}
   <div class="meta"><h3><a href="/works/${w.slug}/">${esc(w.title_en)}</a>${w.title_bn ? `<small lang="bn">${esc(w.title_bn)}</small>` : ""}</h3><span class="yr">${w.year || ""}</span></div>
   <div class="sub">${esc(w.medium || "")}${w.height_cm ? ` · ${+w.height_cm} × ${+w.width_cm} cm` : ""}</div>
-  <div class="sub"><span class="pill ${w.status}">${bi(STATUS[w.status])}</span><span class="price">${priceText(w)}</span></div>
+  ${plain ? "" : `<div class="sub"><span class="pill ${w.status}">${bi(STATUS[w.status])}</span><span class="price">${priceText(w)}</span></div>`}
 </article>`;
 }
 
@@ -171,26 +171,36 @@ const filters = () => `<div class="controls"><div class="wrap">
 </div></div>`;
 
 const files = {};
-const featured = works.filter((w) => w.featured).slice(0, 6);
-const heroImg = featured[0]?.images[0];
+// Home page: the hero work is chosen in admin (site_content "hero" = inventory number); the self-portrait
+// opens the journey section further down. Neither repeats in "Selected works".
+const isSelf = (w) => /self.?portrait/i.test(w.title_en || "");
+const heroWork = works.find((w) => w.inv_no === C.hero?.en?.trim()) || works.find((w) => w.featured && !isSelf(w) && w.images[0]);
+const selfWork = works.find((w) => w.featured && isSelf(w)) || works.find((w) => isSelf(w) && w.images[0]);
+const featured = works.filter((w) => w.featured && w !== heroWork && w !== selfWork).slice(0, 6);
+const heroImg = heroWork?.images[0];
+// Journey timeline: one line per step, "YEAR  text" (two spaces or a tab between them), edited in admin.
+const journeyList = (t) => `<ol class="journey">${lines(t).map((l) => { const m = l.match(/^(\S+)(?:\s{2,}|\t)(.+)$/); return m ? `<li><b>${m[1]}</b><span>${m[2]}</span></li>` : `<li><span>${l}</span></li>`; }).join("")}</ol>`;
 
 files["index.html"] = page({
   title: "Tanvirul Islam Mithu | Bangladeshi Painter & Visual Artist",
-  desc: "Paintings and drawings by Bangladeshi artist Tanvirul Islam Mithu: forty years of lines, from Dhaka streets to the Janogon series. View sizes and prices, and enquire directly.",
+  desc: "Paintings and drawings by Bangladeshi artist Tanvirul Islam Mithu: forty years of lines, from student drawings and a 1991 meeting with S. M. Sultan to Bangladesh's first solo web show and the Lines of Life scrolls.",
   path: "/",
   image: heroImg ? img(heroImg.path) : undefined,
   jsonld: { "@context": "https://schema.org", "@type": "Person", name: "Tanvirul Islam Mithu", alternateName: ["Artistmithu", "Artist Mithu", "তানভীরুল ইসলাম মিঠু"], jobTitle: "Visual Artist", birthDate: "1976", url: SITE, alumniOf: "University of Dhaka", sameAs: ["https://www.facebook.com/artistmithu2022", "https://www.instagram.com/artistmithu/", "https://twitter.com/artistmithu", "https://www.youtube.com/@artistmithu"] },
   body: `<section class="hero"><div class="wrap">
   <div><h1>${bi(["Forty years of <b>lines</b>, in one place", "চল্লিশ বছরের <b>রেখা</b>, এক জায়গায়"])}</h1>
-  <p>${bi(["Pen, watercolor, oil and acrylic: the people, streets and life of Dhaka. See size, medium, year and price for every work, shortlist what you like and talk to the artist directly.", "কাগজে কলম, জলরং, তেলরং আর অ্যাক্রিলিকে ঢাকার মানুষ, রাস্তা ও জীবনের ছবি। প্রতিটি কাজের মাপ, মাধ্যম, সাল ও দাম দেখুন, পছন্দের কাজ বেছে সরাসরি শিল্পীর সাথে কথা বলুন।"])}</p>
+  <p>${bi(["A boy copying illustrations from books. A meeting with S. M. Sultan in Narail. Life drawing at the Faculty of Fine Arts in Dhaka. Bangladesh's first solo web show, and scroll drawings made together with hundreds of people. This is one artist's journey, told in line.", "বই থেকে ছবি দেখে আঁকা এক কিশোর। নড়াইলে এস এম সুলতানের সাথে দেখা। ঢাকা চারুকলায় জীবন থেকে আঁকা। দেশের প্রথম একক ওয়েব শো, আর শত মানুষের সাথে মিলে আঁকা দীর্ঘ স্ক্রল। রেখায় বলা একজন শিল্পীর যাত্রা।"])}</p>
   <div class="facts"><div><strong>40+</strong>${bi(["years of practice", "বছরের চর্চা"])}</div><div><strong>2013</strong>${bi(["Bangladesh's first solo web show", "দেশের প্রথম একক ওয়েব শো"])}</div><div><strong>${works.length}</strong>${bi(["works online", "কাজ অনলাইনে"])}</div></div>
-  <p><a class="btn" href="/works/">${bi(["See the works", "কাজগুলো দেখুন"])}</a></p></div>
-  ${heroImg ? `<a class="hero-img" href="/works/${featured[0].slug}/"><img src="${img(heroImg.path)}" alt="${esc(featured[0].title_en)}"></a>` : ""}
+  <p><a class="btn" href="#journey">${bi(["Follow the journey", "যাত্রাটা দেখুন"])}</a></p></div>
+  ${heroImg ? `<a class="hero-img" href="/works/${heroWork.slug}/"><img src="${img(heroImg.path)}" alt="${esc(heroWork.title_en)}"></a>` : ""}
   </div></section>
-  <section class="wrap"><h2 class="sec">${bi(["Selected works", "নির্বাচিত কাজ"])}</h2><div class="grid">${featured.map(card).join("")}</div></section>
+  <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap">
+  ${selfWork?.images[0] ? `<a class="portrait" href="/works/${selfWork.slug}/"><img src="${img(selfWork.images[0].path)}" alt="${esc(selfWork.title_en)}" loading="lazy"><small>${esc(selfWork.title_en)}${selfWork.year ? `, ${selfWork.year}` : ""}</small></a>` : ""}
+  <div>${biText(C.journey, journeyList)}<p><a href="/about/">${bi(["Full biography and CV", "পূর্ণ জীবনী ও সিভি"])} →</a></p></div></div></section>
   <section class="wrap"><h2 class="sec">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h2><div class="chapters">
   ${series.map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
   </div></section>
+  <section class="wrap"><h2 class="sec">${bi(["Selected works", "নির্বাচিত কাজ"])}</h2><div class="grid">${featured.map((w) => card(w, { plain: true })).join("")}</div><p><a class="btn" href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></section>
   ${posts.length ? `<section class="wrap"><h2 class="sec">${bi(["From the journal", "জার্নাল থেকে"])}</h2><div class="shows">${posts.slice(0, 3).map((p) => `<a class="show" href="/journal/${p.slug}/">${p.cover_path ? `<img src="${img(p.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(p.title_en)}</strong></a>`).join("")}</div></section>` : ""}`,
 });
 
