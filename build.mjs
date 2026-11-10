@@ -177,7 +177,8 @@ const isSelf = (w) => /self.?portrait/i.test(w.title_en || "");
 const heroWork = works.find((w) => w.inv_no === C.hero?.en?.trim()) || works.find((w) => w.featured && !isSelf(w) && w.images[0]);
 const selfWork = works.find((w) => w.featured && isSelf(w)) || works.find((w) => isSelf(w) && w.images[0]);
 const featured = works.filter((w) => w.featured && w !== heroWork && w !== selfWork).slice(0, 6);
-const heroImg = heroWork?.images[0];
+const heroPhoto = C.hero_image?.en; // a photo uploaded in admin wins over the hero work
+const heroImg = heroPhoto ? { path: heroPhoto } : heroWork?.images[0];
 // Journey timeline: one line per step, "YEAR  text" (two spaces or a tab between them), edited in admin.
 const journeyList = (t) => `<ol class="journey">${lines(t).map((l) => { const m = l.match(/^(\S+)(?:\s{2,}|\t)(.+)$/); return m ? `<li><b>${m[1]}</b><span>${m[2]}</span></li>` : `<li><span>${l}</span></li>`; }).join("")}</ol>`;
 
@@ -192,7 +193,7 @@ files["index.html"] = page({
   <p>${bi(["A boy copying illustrations from books. A meeting with S. M. Sultan in Narail. Life drawing at the Faculty of Fine Arts in Dhaka. Bangladesh's first solo web show, and scroll drawings made together with hundreds of people. This is one artist's journey, told in line.", "বই থেকে ছবি দেখে আঁকা এক কিশোর। নড়াইলে এস এম সুলতানের সাথে দেখা। ঢাকা চারুকলায় জীবন থেকে আঁকা। দেশের প্রথম একক ওয়েব শো, আর শত মানুষের সাথে মিলে আঁকা দীর্ঘ স্ক্রল। রেখায় বলা একজন শিল্পীর যাত্রা।"])}</p>
   <div class="facts"><div><strong>40+</strong>${bi(["years of practice", "বছরের চর্চা"])}</div><div><strong>2013</strong>${bi(["Bangladesh's first solo web show", "দেশের প্রথম একক ওয়েব শো"])}</div><div><strong>${works.length}</strong>${bi(["works online", "কাজ অনলাইনে"])}</div></div>
   <p><a class="btn" href="#journey">${bi(["Follow the journey", "যাত্রাটা দেখুন"])}</a></p></div>
-  ${heroImg ? `<a class="hero-img" href="/works/${heroWork.slug}/"><img src="${img(heroImg.path)}" alt="${esc(heroWork.title_en)}"></a>` : ""}
+  ${heroPhoto ? `<a class="hero-img" href="/works/"><img src="${img(heroPhoto)}" alt="Works by Tanvirul Islam Mithu on an exhibition wall"></a>` : heroImg ? `<a class="hero-img" href="/works/${heroWork.slug}/"><img src="${img(heroImg.path)}" alt="${esc(heroWork.title_en)}"></a>` : ""}
   </div></section>
   <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap">
   ${selfWork?.images[0] ? `<a class="portrait" href="/works/${selfWork.slug}/"><img src="${img(selfWork.images[0].path)}" alt="${esc(selfWork.title_en)}" loading="lazy"><small>${esc(selfWork.title_en)}${selfWork.year ? `, ${selfWork.year}` : ""}</small></a>` : ""}

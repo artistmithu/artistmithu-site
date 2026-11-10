@@ -413,6 +413,7 @@ async function loadProfile() {
   P.innerHTML = `<p class="s">এখানে লেখা "পরিচিতি" পাতায় দেখাবে। প্রদর্শনীর তালিকা "প্রদর্শনী" ট্যাব থেকে আপনাআপনি আসে। বাংলা ঘর খালি রাখলে দুই ভাষাতেই ইংরেজি লেখা দেখাবে।</p>
   ${PROFILE_FIELDS.map(([k, t, ph, r]) => `<strong>${t}</strong><div class="row"><label>ইংরেজি<textarea data-k="${k}" data-l="en" rows="${r}" placeholder="${ph}">${esc(C[k]?.en || "")}</textarea></label><label>বাংলা<textarea data-k="${k}" data-l="bn" rows="${r}">${esc(C[k]?.bn || "")}</textarea></label></div>`).join("")}
   <button id="saveProfile">লেখা সংরক্ষণ</button>
+  <hr><strong>হোম পেজের প্রথম ছবি</strong> <span class="s">(দিলে উপরের "প্রথম বড় ছবি" কাজের বদলে এটা দেখাবে)</span><div class="imgs">${C.hero_image?.en ? `<figure><img src="${pub(C.hero_image.en)}" alt=""></figure> <button class="danger" id="delHero">সরিয়ে দিন</button>` : ""}</div><input type="file" id="upHero" accept="image/*">
   <hr><strong>আপনার ছবি (পোর্ট্রেট)</strong><div class="imgs">${C.portrait?.en ? `<figure><img src="${pub(C.portrait.en)}" alt=""></figure>` : ""}</div><input type="file" id="upPortrait" accept="image/*">
   <hr><strong>সিভি (PDF)</strong> ${C.cv_pdf?.en ? `<a href="${pub(C.cv_pdf.en)}" target="_blank">বর্তমান সিভি দেখুন</a>` : `<span class="s">এখনো দেওয়া হয়নি</span>`}<br><input type="file" id="upCv" accept="application/pdf">
   <hr><strong>স্টুডিও ও অধ্যায়ের ছবি</strong> <span class="s">("কোথায় দেখাবে" থেকে বেছে নিন: স্টুডিওর ছবি পরিচিতি পাতায় দেখায়, অধ্যায়ের ছবি সেই অধ্যায়ের পাতায়। একসাথে কয়েকটি ছবি দিতে পারেন।)</span>
@@ -424,6 +425,8 @@ async function loadProfile() {
     const { error } = await sb.from("site_content").upsert(rows);
     toast(error ? "সংরক্ষণ হয়নি: " + error.message : "সংরক্ষণ হয়েছে। সাইটে দেখাতে \"সাইটে প্রকাশ করুন\" চাপুন");
   };
+  $("#upHero").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("hero_image", p); toast("ছবি যোগ হয়েছে"); loadProfile(); } };
+  $("#delHero") && ($("#delHero").onclick = async () => { await setKey("hero_image", null); loadProfile(); });
   $("#upPortrait").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("portrait", p); toast("ছবি যোগ হয়েছে"); loadProfile(); } };
   $("#upCv").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("cv_pdf", p); toast("সিভি যোগ হয়েছে"); loadProfile(); } };
   $("#upStudio").onchange = async (e) => {
