@@ -177,7 +177,7 @@ files["index.html"] = page({
   desc: "Paintings and drawings by Bangladeshi artist Tanvirul Islam Mithu: forty years of lines, from Dhaka streets to the Janogon series. View sizes and prices, and enquire directly.",
   path: "/",
   image: heroImg ? img(heroImg.path) : undefined,
-  jsonld: { "@context": "https://schema.org", "@type": "Person", name: "Tanvirul Islam Mithu", alternateName: ["Artistmithu", "Artist Mithu", "তানভীরুল ইসলাম মিঠু"], jobTitle: "Visual Artist", url: SITE, alumniOf: "University of Dhaka", sameAs: ["https://www.facebook.com/artistmithu2022", "https://www.instagram.com/artistmithu/", "https://twitter.com/artistmithu", "https://www.youtube.com/@artistmithu"] },
+  jsonld: { "@context": "https://schema.org", "@type": "Person", name: "Tanvirul Islam Mithu", alternateName: ["Artistmithu", "Artist Mithu", "তানভীরুল ইসলাম মিঠু"], jobTitle: "Visual Artist", birthDate: "1976", url: SITE, alumniOf: "University of Dhaka", sameAs: ["https://www.facebook.com/artistmithu2022", "https://www.instagram.com/artistmithu/", "https://twitter.com/artistmithu", "https://www.youtube.com/@artistmithu"] },
   body: `<section class="hero"><div class="wrap">
   <div><h1>${bi(["Forty years of <b>lines</b>, in one place", "চল্লিশ বছরের <b>রেখা</b>, এক জায়গায়"])}</h1>
   <p>${bi(["Pen, watercolor, oil and acrylic: the people, streets and life of Dhaka. See size, medium, year and price for every work, shortlist what you like and talk to the artist directly.", "কাগজে কলম, জলরং, তেলরং আর অ্যাক্রিলিকে ঢাকার মানুষ, রাস্তা ও জীবনের ছবি। প্রতিটি কাজের মাপ, মাধ্যম, সাল ও দাম দেখুন, পছন্দের কাজ বেছে সরাসরি শিল্পীর সাথে কথা বলুন।"])}</p>
