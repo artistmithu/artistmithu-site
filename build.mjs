@@ -37,6 +37,18 @@ const [series, works, images, exhibitions] = fx ? [fx.series, fx.works, fx.image
 // YouTube channel index (data/videos.json, collected from youtube.com/@artistmithu).
 const VID = JSON.parse(await (await import("node:fs/promises")).readFile("data/videos.json", "utf8"));
 const showLinks = fx ? fx.exhibition_works || [] : await api("exhibition_works?select=*&order=sort").catch(() => []);
+// About / CV text, studio photos and journal posts (edited in admin). Missing tables just mean empty sections.
+const [contentRows, studio, posts] = fx ? [fx.site_content || [], fx.studio_photos || [], fx.posts || []] : await Promise.all([
+  api("site_content?select=*").catch(() => []),
+  api("studio_photos?select=*&order=sort,created_at").catch(() => []),
+  api("posts?select=*&published=eq.true&order=published_at.desc").catch(() => []),
+]);
+const C = Object.fromEntries(contentRows.map((r) => [r.key, r]));
+const paras = (t) => esc(t || "").split(/\n\s*\n/).filter((x) => x.trim()).map((x) => `<p>${x.trim().replace(/\n/g, "<br>")}</p>`).join("");
+const lines = (t) => esc(t || "").split(/\n/).map((x) => x.trim()).filter(Boolean);
+// Text in both languages: shows the Bangla only if it was written, otherwise the English for both.
+const biText = (r, fmt) => !r ? "" : r.bn && r.bn.trim() && r.en ? `<div lang="en">${fmt(r.en)}</div><div lang="bn">${fmt(r.bn)}</div>` : fmt(r.en || r.bn);
+const biList = (r) => biText(r, (t) => `<ul class="cv">${lines(t).map((l) => `<li>${l}</li>`).join("")}</ul>`);
 const seriesById = Object.fromEntries(series.map((s) => [s.id, s]));
 for (const w of works) {
   w.images = images.filter((i) => i.artwork_id === w.id);
@@ -94,6 +106,7 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld)}</script
     <a href="/chapters/">${bi(["Chapters", "অধ্যায়"])}</a>
     <a href="/shows/">${bi(["Shows", "প্রদর্শনী"])}</a>
     <a href="/videos/">${bi(["Videos", "ভিডিও"])}</a>
+    ${posts.length ? `<a href="/journal/">${bi(["Journal", "জার্নাল"])}</a>` : ""}
     <a href="/about/">${bi(["About", "পরিচিতি"])}</a>
     <a href="/contact/">${bi(["Contact", "যোগাযোগ"])}</a>
   </nav>
@@ -175,7 +188,8 @@ files["index.html"] = page({
   <section class="wrap"><h2 class="sec">${bi(["Selected works", "নির্বাচিত কাজ"])}</h2><div class="grid">${featured.map(card).join("")}</div></section>
   <section class="wrap"><h2 class="sec">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h2><div class="chapters">
   ${series.map((s) => { const n = works.filter((w) => w.series_id === s.id); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
-  </div></section>`,
+  </div></section>
+  ${posts.length ? `<section class="wrap"><h2 class="sec">${bi(["From the journal", "জার্নাল থেকে"])}</h2><div class="shows">${posts.slice(0, 3).map((p) => `<a class="show" href="/journal/${p.slug}/">${p.cover_path ? `<img src="${img(p.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(p.title_en)}</strong></a>`).join("")}</div></section>` : ""}`,
 });
 
 files["works/index.html"] = page({
@@ -250,18 +264,6 @@ for (const w of works) {
   });
 }
 
-files["about/index.html"] = page({
-  title: "About | Tanvirul Islam Mithu",
-  desc: "Biography of Bangladeshi painter Tanvirul Islam Mithu: University of Dhaka, first solo exhibition in 2001, Bangladesh's first solo web show in 2013.",
-  path: "/about/",
-  body: `<div class="wrap prose"><h1 class="page-title">${bi(["About", "পরিচিতি"])}</h1>
-  <p>Tanvirul Islam Mithu began drawing as a child, copying illustrations from books. In 1991 he met S.M. Sultan in Narail, who gave him a signed pencil sketch. He studied Drawing and Painting at the University of Dhaka from 1992 and graduated in 2001, the year of his first solo exhibition.</p>
-  <p>Around 2000 he moved into graphic design and media. In 2013 he took part in the USA Media Fellowship, and on 16 December 2013 he opened <em>Transparent Boundary</em>, Bangladesh's first solo web show. He launched <em>Lines of Life</em> in 2017 and has since held seven web shows.</p>
-  <h2 class="sec">${bi(["Exhibitions and web shows", "প্রদর্শনী ও ওয়েব শো"])}</h2>
-  ${exhibitions.length ? `<ul class="ex">${exhibitions.map((e) => `<li><span class="mono">${e.start_date ? e.start_date.slice(0, 4) : ""}</span> ${e.slug ? `<a href="/shows/${e.slug}/">${esc(e.title)}</a>` : esc(e.title)}${e.venue ? `, ${esc(e.venue)}` : ""}${e.city ? `, ${esc(e.city)}` : ""}</li>`).join("")}</ul>` : `<p class="note">List coming soon.</p>`}
-  </div>`,
-});
-
 files["contact/index.html"] = page({
   title: "Contact | Tanvirul Islam Mithu",
   desc: "Contact Tanvirul Islam Mithu about artworks, commissions and exhibitions.",
@@ -322,13 +324,23 @@ const dateRange = (e) => !e.end_date && /-01-01$/.test(e.start_date || "") ? e.s
 const byYear = {};
 for (const e of shows) (byYear[e.start_date ? e.start_date.slice(0, 4) : "—"] ||= []).push(e);
 
+const soloShows = shows.filter((e) => e.kind !== "group" && e.kind !== "art-fair");
+const groupShows = shows.filter((e) => e.kind === "group" || e.kind === "art-fair");
+const yearsOf = (list) => { const by = {}; for (const e of list) (by[e.start_date ? e.start_date.slice(0, 4) : "—"] ||= []).push(e); return by; };
+const showCard = (e) => { const c = showCover(e); const n = showLinks.filter((x) => x.exhibition_id === e.id && worksById[x.artwork_id]).length; return `<a class="show" href="/shows/${e.slug}/">${c ? `<img src="${c}" alt="" loading="lazy">` : `<span class="empty"></span>`}<span class="eyebrow">${bi(KIND[e.kind] || [e.kind, e.kind])}</span><strong>${esc(e.title)}</strong>${e.title_bn ? `<small lang="bn">${esc(e.title_bn)}</small>` : ""}<span class="note">${dateRange(e)}${n ? ` · ${n} works` : ""}</span></a>`; };
+const showLine = (e) => `<li><span class="mono">${dateRange(e)}</span> <a href="/shows/${e.slug}/">${esc(e.title)}</a>${[e.venue, e.city, e.country].filter(Boolean).length ? `, ${esc([e.venue, e.city, e.country].filter(Boolean).join(", "))}` : ""}</li>`;
 files["shows/index.html"] = page({
   title: "Shows | Tanvirul Islam Mithu",
-  desc: "Web shows and exhibitions by Tanvirul Islam Mithu, from Transparent Boundary (2013), Bangladesh's first solo web show, to today.",
+  desc: "Solo exhibitions, web shows and group exhibitions by Tanvirul Islam Mithu, from Transparent Boundary (2013), Bangladesh's first solo web show, to today.",
   path: "/shows/",
   body: `<div class="wrap"><h1 class="page-title">${bi(["Shows", "প্রদর্শনী"])}</h1>
-  <p class="lead">${bi(["Since 2013 Mithu has opened his solo shows on the web first. Each show below keeps its statement, works and video.", "২০১৩ সাল থেকে মিঠু তাঁর একক প্রদর্শনী প্রথমে ওয়েবে খুলে আসছেন। নিচের প্রতিটি শো-তে আছে তার বক্তব্য, কাজ ও ভিডিও।"])}</p>
-  ${shows.length ? Object.keys(byYear).sort().reverse().map((y) => `<h2 class="sec mono-year">${y}</h2><div class="shows">${byYear[y].map((e) => { const c = showCover(e); const n = showLinks.filter((x) => x.exhibition_id === e.id && worksById[x.artwork_id]).length; return `<a class="show" href="/shows/${e.slug}/">${c ? `<img src="${c}" alt="" loading="lazy">` : `<span class="empty"></span>`}<span class="eyebrow">${bi(KIND[e.kind] || [e.kind, e.kind])}</span><strong>${esc(e.title)}</strong>${e.title_bn ? `<small lang="bn">${esc(e.title_bn)}</small>` : ""}<span class="note">${dateRange(e)}${n ? ` · ${n} works` : ""}</span></a>`; }).join("")}</div>`).join("") : `<p class="note">${bi(["The show archive is being added.", "প্রদর্শনীর আর্কাইভ যোগ করা হচ্ছে।"])}</p>`}
+  <p class="lead">${bi(["Since 2013 Mithu has opened his solo shows on the web first. Each show keeps its statement, works and video.", "২০১৩ সাল থেকে মিঠু তাঁর একক প্রদর্শনী প্রথমে ওয়েবে খুলে আসছেন। প্রতিটি শো-তে আছে তার বক্তব্য, কাজ ও ভিডিও।"])}</p>
+  <nav class="jump"><a href="#solo">${bi(["Solo exhibitions and web shows", "একক প্রদর্শনী ও ওয়েব শো"])}</a>${groupShows.length ? `<a href="#group">${bi(["Group exhibitions", "যৌথ প্রদর্শনী"])}</a>` : ""}</nav>
+  <section class="wgroup" id="solo"><header><h2>${bi(["Solo exhibitions and web shows", "একক প্রদর্শনী ও ওয়েব শো"])}</h2><span class="note">${soloShows.length}</span></header>
+  ${soloShows.length ? Object.entries(yearsOf(soloShows)).sort(([a], [b]) => b.localeCompare(a)).map(([y, l]) => `<h3 class="mono-year">${y}</h3><div class="shows">${l.map(showCard).join("")}</div>`).join("") : `<p class="note">${bi(["The show archive is being added.", "প্রদর্শনীর আর্কাইভ যোগ করা হচ্ছে।"])}</p>`}</section>
+  ${groupShows.length ? `<section class="wgroup" id="group"><header><h2>${bi(["Group exhibitions", "যৌথ প্রদর্শনী"])}</h2><span class="note">${groupShows.length}</span></header>
+  ${groupShows.some((e) => showCover(e)) ? `<div class="shows">${groupShows.filter((e) => showCover(e)).map(showCard).join("")}</div>` : ""}
+  <ul class="ex">${groupShows.map(showLine).join("")}</ul></section>` : ""}
   </div>`,
 });
 
@@ -367,7 +379,7 @@ for (const w of works) {
   if (inShows.length && files[f]) files[f] = files[f].replace("<!--SHOWS-->", `<dt>${bi(["Shown in", "প্রদর্শিত"])}</dt><dd>${inShows.map((e) => `<a href="/shows/${e.slug}/">${esc(e.title)}</a>`).join(", ")}</dd>`);
 }
 
-const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...series.map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
+const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...(posts.length ? ["/journal/", ...posts.map((p) => `/journal/${p.slug}/`)] : []), ...series.map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
 files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${SITE}${u}</loc></url>`).join("")}</urlset>`;
 files["robots.txt"] = `User-agent: *\nDisallow: /admin/\nDisallow: /c/\nSitemap: ${SITE}/sitemap.xml\n`;
 // Old WordPress URLs -> new pages
@@ -390,6 +402,56 @@ files["_redirects"] = [
   "/category/* /shows/ 301",
 ].join("\n") + "\n";
 files["_headers"] = "/assets/*\n  Cache-Control: public, max-age=86400\n/admin/*\n  X-Robots-Tag: noindex\n/c/*\n  X-Robots-Tag: noindex\n";
+
+// About / CV ------------------------------------------------------------------------
+const portrait = C.portrait?.en;
+files["about/index.html"] = page({
+  title: "About and CV | Tanvirul Islam Mithu",
+  desc: "Biography and CV of Bangladeshi painter Tanvirul Islam Mithu (Artistmithu): education, solo exhibitions and web shows, group exhibitions, awards and collections.",
+  path: "/about/",
+  image: portrait ? img(portrait) : undefined,
+  body: `<div class="wrap about"><h1 class="page-title">${bi(["About", "পরিচিতি"])}</h1>
+  <div class="about-top">${portrait ? `<img class="portrait" src="${img(portrait)}" alt="Tanvirul Islam Mithu">` : ""}
+  <div class="prose">${C.statement ? `<blockquote class="statement">${biText(C.statement, paras)}</blockquote>` : ""}${biText(C.bio, paras)}
+  ${C.cv_pdf?.en ? `<p><a class="btn" href="${img(C.cv_pdf.en)}" download>${bi(["Download CV (PDF)", "সিভি ডাউনলোড (PDF)"])}</a></p>` : ""}</div></div>
+  ${studio.length ? `<h2 class="sec">${bi(["In the studio", "স্টুডিওতে"])}</h2><div class="studio">${studio.map((p) => `<figure><a href="${img(p.path)}" target="_blank" rel="noopener"><img src="${img(p.path)}" alt="${esc(p.caption_en || "Studio")}" loading="lazy"></a>${p.caption_en || p.caption_bn ? `<figcaption>${bi([esc(p.caption_en || p.caption_bn), esc(p.caption_bn || p.caption_en)])}</figcaption>` : ""}</figure>`).join("")}</div>` : ""}
+  <div class="cvgrid">
+  ${C.education ? `<section><h2 class="sec">${bi(["Education", "শিক্ষা"])}</h2>${biList(C.education)}</section>` : ""}
+  <section><h2 class="sec">${bi(["Solo exhibitions and web shows", "একক প্রদর্শনী ও ওয়েব শো"])}</h2><ul class="ex">${soloShows.map(showLine).join("")}</ul></section>
+  ${groupShows.length ? `<section><h2 class="sec">${bi(["Group exhibitions", "যৌথ প্রদর্শনী"])}</h2><ul class="ex">${groupShows.map(showLine).join("")}</ul></section>` : ""}
+  ${C.awards ? `<section><h2 class="sec">${bi(["Awards and fellowships", "পুরস্কার ও ফেলোশিপ"])}</h2>${biList(C.awards)}</section>` : ""}
+  ${C.collections ? `<section><h2 class="sec">${bi(["Collections", "সংগ্রহ"])}</h2>${biList(C.collections)}</section>` : ""}
+  </div></div>`,
+});
+
+// Journal ----------------------------------------------------------------------------
+const postDate = (p) => fmtDate(p.published_at);
+const postCard = (p) => `<a class="show" href="/journal/${p.slug}/">${p.cover_path ? `<img src="${img(p.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<span class="eyebrow">${postDate(p)}</span><strong>${esc(p.title_en)}</strong>${p.title_bn ? `<small lang="bn">${esc(p.title_bn)}</small>` : ""}</a>`;
+if (posts.length) {
+  files["journal/index.html"] = page({
+    title: "Journal | Tanvirul Islam Mithu",
+    desc: "News, new works, exhibitions and studio notes from Tanvirul Islam Mithu.",
+    path: "/journal/",
+    body: `<div class="wrap"><h1 class="page-title">${bi(["Journal", "জার্নাল"])}</h1><div class="shows">${posts.map(postCard).join("")}</div></div>`,
+  });
+  posts.forEach((p, i) => {
+    const v = yt(p.youtube_url);
+    files[`journal/${p.slug}/index.html`] = page({
+      title: `${p.title_en} | Tanvirul Islam Mithu`,
+      desc: (p.body_en || p.title_en).replace(/\s+/g, " ").slice(0, 155),
+      path: `/journal/${p.slug}/`,
+      image: p.cover_path ? img(p.cover_path) : undefined,
+      jsonld: { "@context": "https://schema.org", "@type": "BlogPosting", headline: p.title_en, datePublished: p.published_at, author: { "@type": "Person", name: "Tanvirul Islam Mithu" }, image: p.cover_path ? img(p.cover_path) : undefined, url: `${SITE}/journal/${p.slug}/` },
+      body: `<article class="wrap prose post"><p class="eyebrow"><a href="/journal/">${bi(["Journal", "জার্নাল"])}</a> · ${postDate(p)}</p>
+      <h1 class="page-title">${bi([esc(p.title_en), esc(p.title_bn || p.title_en)])}</h1>
+      ${p.cover_path ? `<img class="cover" src="${img(p.cover_path)}" alt="">` : ""}
+      ${biText({ en: p.body_en, bn: p.body_bn }, paras)}
+      ${v ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${v}" title="${esc(p.title_en)}" loading="lazy" allowfullscreen></iframe></div>` : ""}
+      ${(p.images || []).map((x) => `<img class="cover" src="${img(x)}" alt="" loading="lazy">`).join("")}
+      <nav class="prevnext">${posts[i + 1] ? `<a href="/journal/${posts[i + 1].slug}/">← ${esc(posts[i + 1].title_en)}</a>` : "<span></span>"}${posts[i - 1] ? `<a href="/journal/${posts[i - 1].slug}/">${esc(posts[i - 1].title_en)} →</a>` : ""}</nav></article>`,
+    });
+  });
+}
 
 await rm(OUT, { recursive: true, force: true });
 await cp("public", OUT, { recursive: true });

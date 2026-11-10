@@ -52,7 +52,7 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
 </section>
 
 <section id="app" hidden>
-  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button></nav>
+  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button><button data-tab="profile" aria-pressed="false">পরিচিতি ও সিভি</button><button data-tab="journal" aria-pressed="false">জার্নাল</button></nav>
 
   <div data-pane="works">
     <div class="row" style="margin-bottom:10px"><input id="q" placeholder="নাম বা ইনভেন্টরি দিয়ে খুঁজুন"><select id="fStatus"><option value="">সব</option><option value="nosize">মাপ নেই</option><option value="available">উপলব্ধ</option><option value="sold">বিক্রিত</option><option value="draft">অপ্রকাশিত</option></select><button id="newWork">+ নতুন কাজ</button></div>
@@ -87,6 +87,12 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
     <div id="bidPanel" class="panel" hidden></div>
   </div>
   <div data-pane="subs" hidden><div id="subs" class="list"></div></div>
+  <div data-pane="profile" hidden><div id="profile" class="panel"></div></div>
+  <div data-pane="journal" hidden>
+    <div class="row" style="margin-bottom:10px"><button id="newPost">+ নতুন লেখা</button></div>
+    <div id="postEditor" class="panel" hidden></div>
+    <div id="posts" class="list"></div>
+  </div>
 </section>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -134,7 +140,7 @@ async function onSession(session) {
 document.querySelectorAll("nav.tabs button").forEach((b) => (b.onclick = () => {
   document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-pressed", x === b));
   document.querySelectorAll("[data-pane]").forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
-  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs })[b.dataset.tab]?.();
+  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs, profile: loadProfile, journal: loadPosts })[b.dataset.tab]?.();
 }));
 
 async function load() {
@@ -370,6 +376,101 @@ $("#cCreate").onclick = async () => {
   $("#cOut").textContent = link; navigator.clipboard?.writeText(link).then(() => toast("লিংক তৈরি ও কপি হয়েছে"));
   loadClient();
 };
+
+// About / CV ---------------------------------------------------------------------
+const PROFILE_FIELDS = [
+  ["statement", "শিল্পী বক্তব্য", "কয়েক লাইনে আপনার কাজের মূল ভাবনা", 4],
+  ["bio", "জীবনী", "অনুচ্ছেদের মাঝে একটি খালি লাইন রাখুন", 8],
+  ["education", "শিক্ষা", "প্রতি লাইনে একটি: সাল, ডিগ্রি, প্রতিষ্ঠান", 3],
+  ["awards", "পুরস্কার ও ফেলোশিপ", "প্রতি লাইনে একটি", 4],
+  ["collections", "সংগ্রহ", "যেখানে আপনার কাজ সংগ্রহে আছে, প্রতি লাইনে একটি", 4],
+];
+async function upFile(folder, f) {
+  const path = `${folder}/${Date.now()}-${f.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-")}`;
+  const { error } = await sb.storage.from("artworks").upload(path, f, { contentType: f.type });
+  if (error) { toast("আপলোড হয়নি: " + error.message); return null; }
+  return path;
+}
+async function loadProfile() {
+  const [{ data: rows }, { data: photos }] = await Promise.all([sb.from("site_content").select("*"), sb.from("studio_photos").select("*").order("sort").order("created_at")]);
+  const C = Object.fromEntries((rows || []).map((r) => [r.key, r]));
+  const P = $("#profile");
+  P.innerHTML = `<p class="s">এখানে লেখা "পরিচিতি" পাতায় দেখাবে। প্রদর্শনীর তালিকা "প্রদর্শনী" ট্যাব থেকে আপনাআপনি আসে। বাংলা ঘর খালি রাখলে দুই ভাষাতেই ইংরেজি লেখা দেখাবে।</p>
+  ${PROFILE_FIELDS.map(([k, t, ph, r]) => `<strong>${t}</strong><div class="row"><label>ইংরেজি<textarea data-k="${k}" data-l="en" rows="${r}" placeholder="${ph}">${esc(C[k]?.en || "")}</textarea></label><label>বাংলা<textarea data-k="${k}" data-l="bn" rows="${r}">${esc(C[k]?.bn || "")}</textarea></label></div>`).join("")}
+  <button id="saveProfile">লেখা সংরক্ষণ</button>
+  <hr><strong>আপনার ছবি (পোর্ট্রেট)</strong><div class="imgs">${C.portrait?.en ? `<figure><img src="${pub(C.portrait.en)}" alt=""></figure>` : ""}</div><input type="file" id="upPortrait" accept="image/*">
+  <hr><strong>সিভি (PDF)</strong> ${C.cv_pdf?.en ? `<a href="${pub(C.cv_pdf.en)}" target="_blank">বর্তমান সিভি দেখুন</a>` : `<span class="s">এখনো দেওয়া হয়নি</span>`}<br><input type="file" id="upCv" accept="application/pdf">
+  <hr><strong>স্টুডিওর ছবি</strong> <span class="s">(একসাথে কয়েকটি বেছে নিতে পারেন)</span>
+  <div class="list">${(photos || []).map((x) => `<div class="item"><img src="${pub(x.path)}" alt=""><div class="row"><input data-cap="${x.id}" data-l="en" value="${esc(x.caption_en || "")}" placeholder="ক্যাপশন (ইংরেজি)"><input data-cap="${x.id}" data-l="bn" value="${esc(x.caption_bn || "")}" placeholder="ক্যাপশন (বাংলা)"></div><button class="danger" data-delphoto="${x.id}">মুছুন</button></div>`).join("")}</div>
+  <input type="file" id="upStudio" accept="image/*" multiple> ${(photos || []).length ? `<button class="alt" id="saveCaps">ক্যাপশন সংরক্ষণ</button>` : ""}`;
+  const setKey = (key, en) => sb.from("site_content").upsert({ key, en, updated_at: new Date().toISOString() });
+  $("#saveProfile").onclick = async () => {
+    const rows = PROFILE_FIELDS.map(([k]) => ({ key: k, en: P.querySelector(`[data-k="${k}"][data-l="en"]`).value.trim() || null, bn: P.querySelector(`[data-k="${k}"][data-l="bn"]`).value.trim() || null, updated_at: new Date().toISOString() }));
+    const { error } = await sb.from("site_content").upsert(rows);
+    toast(error ? "সংরক্ষণ হয়নি: " + error.message : "সংরক্ষণ হয়েছে। সাইটে দেখাতে \"সাইটে প্রকাশ করুন\" চাপুন");
+  };
+  $("#upPortrait").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("portrait", p); toast("ছবি যোগ হয়েছে"); loadProfile(); } };
+  $("#upCv").onchange = async (e) => { const p = await upFile("site", e.target.files[0]); if (p) { await setKey("cv_pdf", p); toast("সিভি যোগ হয়েছে"); loadProfile(); } };
+  $("#upStudio").onchange = async (e) => {
+    let n = (photos || []).length;
+    for (const f of e.target.files) { const p = await upFile("studio", f); if (p) await sb.from("studio_photos").insert({ path: p, sort: n++ }); }
+    toast("ছবি যোগ হয়েছে"); loadProfile();
+  };
+  $("#saveCaps") && ($("#saveCaps").onclick = async () => {
+    for (const x of photos || []) await sb.from("studio_photos").update({ caption_en: P.querySelector(`[data-cap="${x.id}"][data-l="en"]`).value || null, caption_bn: P.querySelector(`[data-cap="${x.id}"][data-l="bn"]`).value || null }).eq("id", x.id);
+    toast("ক্যাপশন সংরক্ষণ হয়েছে");
+  });
+  P.querySelectorAll("[data-delphoto]").forEach((b) => (b.onclick = async () => {
+    if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "নিশ্চিত?"; return; }
+    await sb.from("studio_photos").delete().eq("id", b.dataset.delphoto); loadProfile();
+  }));
+}
+
+// Journal ------------------------------------------------------------------------
+let posts = [];
+async function loadPosts() {
+  const { data, error } = await sb.from("posts").select("*").order("published_at", { ascending: false });
+  if (error) { $("#posts").innerHTML = `<p class="panel">${esc(error.message)}</p>`; return; }
+  posts = data || [];
+  $("#posts").innerHTML = posts.map((p) => `<div class="item">${p.cover_path ? `<img src="${pub(p.cover_path)}" alt="">` : "<span></span>"}<div><div class="t">${esc(p.title_en)} <span class="pill ${p.published ? "available" : "draft"}">${p.published ? "প্রকাশিত" : "খসড়া"}</span></div><div class="s">${p.published_at}</div></div><button class="alt" data-editpost="${p.id}">সম্পাদনা</button></div>`).join("") || `<p class="s">এখনো কোনো লেখা নেই। প্রথম লেখা দিলেই সাইটের মেনুতে "জার্নাল" দেখাবে।</p>`;
+}
+$("#posts").onclick = (e) => { const id = e.target.dataset.editpost; if (id) editPost(posts.find((p) => p.id === id)); };
+$("#newPost").onclick = () => editPost({ published: false, published_at: new Date().toISOString().slice(0, 10), images: [] });
+function editPost(p) {
+  const E = $("#postEditor"); E.hidden = false; E.scrollIntoView({ behavior: "smooth" });
+  const v = (k) => esc(p[k] ?? "");
+  E.innerHTML = `<strong>${p.id ? "লেখা সম্পাদনা" : "নতুন লেখা"}</strong>
+  <div class="row"><label>শিরোনাম (ইংরেজি)<input name="title_en" value="${v("title_en")}"></label><label>শিরোনাম (বাংলা)<input name="title_bn" value="${v("title_bn")}"></label><label>তারিখ<input name="published_at" type="date" value="${v("published_at")}"></label></div>
+  <div class="row"><label>লেখা (ইংরেজি)<textarea name="body_en" rows="10" placeholder="অনুচ্ছেদের মাঝে একটি খালি লাইন রাখুন">${v("body_en")}</textarea></label><label>লেখা (বাংলা)<textarea name="body_bn" rows="10">${v("body_bn")}</textarea></label></div>
+  <div class="row"><label>ইউটিউব লিংক (ঐচ্ছিক)<input name="youtube_url" value="${v("youtube_url")}"></label><label class="check"><input type="checkbox" name="published" ${p.published ? "checked" : ""}> প্রকাশিত</label></div>
+  <div><strong>প্রধান ছবি</strong><div class="imgs">${p.cover_path ? `<figure><img src="${pub(p.cover_path)}" alt=""></figure>` : ""}</div>${p.id ? `<input type="file" id="upCover" accept="image/*">` : `<p class="s">ছবি দিতে আগে লেখাটি সংরক্ষণ করুন।</p>`}</div>
+  <div><strong>আরও ছবি</strong><div class="imgs">${(p.images || []).map((x, i) => `<figure><img src="${pub(x)}" alt=""><button class="danger" data-delpimg="${i}">মুছুন</button></figure>`).join("")}</div>${p.id ? `<input type="file" id="upPostImgs" accept="image/*" multiple>` : ""}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="savePost">সংরক্ষণ</button><button class="alt" id="closePost">বন্ধ</button>${p.id ? `<button class="danger" id="delPost">লেখাটি মুছুন</button>` : ""}</div>`;
+  $("#closePost").onclick = () => (E.hidden = true);
+  const reopen = async () => { await loadPosts(); editPost(posts.find((x) => x.id === p.id)); };
+  $("#savePost").onclick = async () => {
+    const row = {};
+    E.querySelectorAll("[name]").forEach((el) => (row[el.name] = el.type === "checkbox" ? el.checked : el.value.trim() === "" ? null : el.value));
+    if (!row.title_en) return toast("ইংরেজি শিরোনাম দরকার");
+    if (!row.published_at) row.published_at = new Date().toISOString().slice(0, 10);
+    row.updated_at = new Date().toISOString();
+    if (!p.id) row.slug = `${row.title_en.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "post"}-${String(Date.now()).slice(-4)}`;
+    const q = p.id ? sb.from("posts").update(row).eq("id", p.id).select().single() : sb.from("posts").insert(row).select().single();
+    const { data, error } = await q;
+    if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+    toast("সংরক্ষণ হয়েছে"); p = data; reopen();
+  };
+  $("#upCover") && ($("#upCover").onchange = async (e) => { const x = await upFile(`journal/${p.id}`, e.target.files[0]); if (x) { await sb.from("posts").update({ cover_path: x }).eq("id", p.id); reopen(); } });
+  $("#upPostImgs") && ($("#upPostImgs").onchange = async (e) => {
+    const add = []; for (const f of e.target.files) { const x = await upFile(`journal/${p.id}`, f); if (x) add.push(x); }
+    await sb.from("posts").update({ images: [...(p.images || []), ...add] }).eq("id", p.id); reopen();
+  });
+  E.querySelectorAll("[data-delpimg]").forEach((b) => (b.onclick = async () => { const imgs = [...(p.images || [])]; imgs.splice(+b.dataset.delpimg, 1); await sb.from("posts").update({ images: imgs }).eq("id", p.id); reopen(); }));
+  $("#delPost") && ($("#delPost").onclick = async () => {
+    if ($("#delPost").dataset.sure !== "1") { $("#delPost").dataset.sure = "1"; $("#delPost").textContent = "নিশ্চিত? আবার চাপুন"; return; }
+    await sb.from("posts").delete().eq("id", p.id); E.hidden = true; loadPosts();
+  });
+}
 
 async function loadSubs() {
   const { data } = await sb.from("subscribers").select("*").order("created_at", { ascending: false });
