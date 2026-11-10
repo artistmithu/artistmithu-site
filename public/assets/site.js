@@ -106,6 +106,8 @@
 
   // Enquiry forms -> inquiries table
   document.querySelectorAll("form.enq").forEach((f) => {
+    const about = new URLSearchParams(location.search).get("about");
+    if (about && f.message && !f.message.value) f.message.value = `About: ${about}\n`;
     f.addEventListener("submit", async (e) => {
       e.preventDefault();
       const fd = new FormData(f), contact = String(fd.get("contact")).trim(), note = f.querySelector(".note");
@@ -203,6 +205,40 @@
         });
       }
     })();
+  }
+
+  // Sketchbook viewer: one page at a time, arrows, keys, swipe, thumbnail strip, #p5 links.
+  const book = document.getElementById("book");
+  if (book) {
+    const pages = JSON.parse(document.getElementById("bookData").textContent);
+    const im = document.getElementById("bookImg"), cap = document.getElementById("bookCap"), no = document.getElementById("bookNo");
+    const strip = document.getElementById("bookStrip"), thumbs = [...strip.querySelectorAll("button")];
+    const title = im.alt.replace(/, page \d+$/, "");
+    let n = 0; const kept = [];
+    im.addEventListener("load", () => book.classList.remove("turning")); im.addEventListener("error", () => book.classList.remove("turning"));
+    const go = (k, push) => {
+      n = Math.max(0, Math.min(pages.length - 1, k));
+      const p = pages[n];
+      if (im.getAttribute("src") !== p.src) { book.classList.add("turning"); im.src = p.src; }
+      im.alt = `${title}, page ${n + 1}`;
+      cap.innerHTML = p.en || p.bn ? `<span lang="en">${p.en || p.bn}</span><span lang="bn">${p.bn || p.en}</span>` : "";
+      no.textContent = n + 1;
+      thumbs.forEach((t, i) => t.classList.toggle("on", i === n));
+      thumbs[n].scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+      [n + 1, n + 2].forEach((i) => { if (pages[i] && !kept[i]) { kept[i] = new Image(); kept[i].src = pages[i].src; } });
+      book.querySelector(".prev").disabled = n === 0; book.querySelector(".next").disabled = n === pages.length - 1;
+      if (push !== false) history.replaceState(null, "", n ? `#p${n + 1}` : location.pathname);
+    };
+    book.querySelector(".prev").onclick = () => go(n - 1);
+    book.querySelector(".next").onclick = () => go(n + 1);
+    strip.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) go(+b.dataset.n); });
+    document.addEventListener("keydown", (e) => { if (e.target.closest("input,textarea")) return; if (e.key === "ArrowRight") go(n + 1); if (e.key === "ArrowLeft") go(n - 1); });
+    let x0 = null;
+    im.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    im.addEventListener("touchend", (e) => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 40) go(n + (dx < 0 ? 1 : -1)); });
+    im.addEventListener("click", (e) => { const r = im.getBoundingClientRect(); go(n + (e.clientX - r.left > r.width / 2 ? 1 : -1)); });
+    const h = location.hash.match(/^#p(\d+)$/);
+    go(h ? +h[1] - 1 : 0, false);
   }
 
   // PWA: installable on phones

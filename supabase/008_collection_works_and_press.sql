@@ -59,3 +59,4 @@ alter table public.artworks add column if not exists collection_en text, add col
 -- new Drawing 6 (catalogue image) opens the first solo show page; catalogue cover added to its press list.
 -- Helper edge function "thumbs" (token-guarded) was deployed to compare images; remove with the import token.
 -- Data (applied): first solo show works TIM-2001-FS-003..009 added from Vaab's photos (no duplicates found by fingerprint)
+-- Data (applied): 43 sketchbook experiments TIM-EXP-101..143 added to Experiments; new Miniatures chapter TIM-MIN-001..026; 4 sketchbooks (220 pages) in 009.

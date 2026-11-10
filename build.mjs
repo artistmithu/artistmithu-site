@@ -44,6 +44,13 @@ const [contentRows, studio, posts] = fx ? [fx.site_content || [], fx.studio_phot
   api("posts?select=*&published=eq.true&order=published_at.desc").catch(() => []),
 ]);
 const C = Object.fromEntries(contentRows.map((r) => [r.key, r]));
+// Sketchbooks: whole books shown page by page.
+const [books, bookPages] = fx ? [fx.sketchbooks || [], fx.sketchbook_pages || []] : await Promise.all([
+  api("sketchbooks?select=*&published=eq.true&order=sort").catch(() => []),
+  api("sketchbook_pages?select=sketchbook_id,path,page_no,caption_en,caption_bn&hidden=eq.false&order=page_no").catch(() => []),
+]);
+const pagesOf = (b) => bookPages.filter((p) => p.sketchbook_id === b.id);
+const booksShown = () => books.filter((b) => pagesOf(b).length);
 const paras = (t) => esc(t || "").split(/\n\s*\n/).filter((x) => x.trim()).map((x) => `<p>${x.trim().replace(/\n/g, "<br>")}</p>`).join("");
 const lines = (t) => esc(t || "").split(/\n/).map((x) => x.trim()).filter(Boolean);
 // Text in both languages: shows the Bangla only if it was written, otherwise the English for both.
@@ -148,8 +155,10 @@ const photoGrid = (list, heading) => list.length ? `<h2 class="sec">${bi(heading
 const chaptersShown = () => series.filter((s) => works.some((w) => w.series_id === s.id));
 const seriesGroups = () => {
   const groups = series.map((s) => ({ s, list: works.filter((w) => w.series_id === s.id).sort(byYearThenSort) })).filter((g) => g.list.length);
-  const first = (g) => (g.s.slug === "roots" ? 0 : Math.min(...g.list.map((w) => w.year || 9999))); // Roots is the earliest chapter even where works are undated
-  groups.sort((a, b) => first(a) - first(b) || (a.s.sort || 99) - (b.s.sort || 99));
+  // Roots is the earliest chapter even where works are undated; another undated chapter sits after the chapter before it in the admin order.
+  const first = (g) => { if (g.s.slug === "roots") return 0; const y = Math.min(...g.list.map((w) => w.year || 9999)); if (y < 9999) return y; const prev = groups.filter((x) => (x.s.sort || 99) < (g.s.sort || 99) && x.list.some((w) => w.year)).pop(); return prev ? Math.min(...prev.list.map((w) => w.year || 9999)) + 0.5 : 9999; };
+  const key = new Map(groups.map((g) => [g, first(g)]));
+  groups.sort((a, b) => key.get(a) - key.get(b) || (a.s.sort || 99) - (b.s.sort || 99));
   const other = works.filter((w) => !w.series).sort(byYearThenSort);
   if (other.length) groups.push({ s: { slug: "other", title_en: "Other works", title_bn: "অন্যান্য কাজ" }, list: other });
   return groups;
@@ -208,7 +217,7 @@ files["index.html"] = page({
   })()}
   <section class="wrap"><h2 class="sec">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h2><div class="chapters">
   ${chaptersShown().map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
-  </div></section>
+  </div>${bookShelf()}</section>
   <section class="wrap"><h2 class="sec">${bi(["Selected works", "নির্বাচিত কাজ"])}</h2><div class="grid">${featured.map((w) => card(w, { plain: true })).join("")}</div><p><a class="btn" href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></section>
   ${posts.length ? `<section class="wrap"><h2 class="sec">${bi(["From the journal", "জার্নাল থেকে"])}</h2><div class="shows">${posts.slice(0, 3).map((p) => `<a class="show" href="/journal/${p.slug}/">${p.cover_path ? `<img src="${img(p.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(p.title_en)}</strong></a>`).join("")}</div></section>` : ""}`,
 });
@@ -227,7 +236,7 @@ files["chapters/index.html"] = page({
   title: "Chapters | Tanvirul Islam Mithu",
   desc: "The series and chapters of Tanvirul Islam Mithu's practice, from Roots and the early drawings to Lines of Life and Lines of Image.",
   path: "/chapters/",
-  body: `<div class="wrap"><h1 class="page-title">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h1><div class="chapters">${chaptersShown().map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} works</span></a>`; }).join("")}</div></div>`,
+  body: `<div class="wrap"><h1 class="page-title">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h1><div class="chapters">${chaptersShown().map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} works</span></a>`; }).join("")}</div>${bookShelf()}</div>`,
 });
 
 for (const s of chaptersShown()) {
@@ -243,6 +252,39 @@ for (const s of chaptersShown()) {
     ${list.length ? `<div class="grid">${list.map(card).join("")}</div>` : `<p class="note">${bi(["Works for this chapter are being added.", "এই অধ্যায়ের কাজ যোগ করা হচ্ছে।"])}</p>`}</div>`,
   });
 }
+
+// Sketchbooks --------------------------------------------------------------------------
+function bookShelf() {
+  const bs = booksShown(); if (!bs.length) return "";
+  return `<h2 class="sec" id="sketchbooks">${bi(["Sketchbooks", "স্কেচখাতা"])}</h2><p class="lead">${bi(["Whole sketchbooks, page by page, as they were drawn.", "পুরো স্কেচখাতা, যেভাবে আঁকা হয়েছিল, পাতার পর পাতা।"])}</p><div class="chapters">${bs.map((b) => { const ps = pagesOf(b); return `<a class="chapter book" href="/sketchbooks/${b.slug}/"><img src="${img(ps[0].path)}" alt="" loading="lazy"><strong>${esc(b.title_en)}</strong><small lang="bn">${esc(b.title_bn || "")}</small><span class="note">${b.period ? `${esc(b.period)} · ` : ""}${ps.length} ${bi(["pages", "পাতা"])}</span></a>`; }).join("")}</div>`;
+}
+if (booksShown().length) files["sketchbooks/index.html"] = page({
+  title: "Sketchbooks | Tanvirul Islam Mithu",
+  desc: "Tanvirul Islam Mithu's sketchbooks and experiment notebooks, page by page.",
+  path: "/sketchbooks/",
+  body: `<div class="wrap"><p class="eyebrow"><a href="/chapters/">${bi(["Chapters", "অধ্যায়"])}</a></p><h1 class="page-title">${bi(["Sketchbooks", "স্কেচখাতা"])}</h1>${bookShelf().replace(/^<h2[^>]*>.*?<\/h2>/, "")}</div>`,
+});
+booksShown().forEach((b, i, all) => {
+  const ps = pagesOf(b), prev = all[i - 1], next = all[i + 1];
+  const data = ps.map((p) => ({ src: img(p.path), en: p.caption_en || "", bn: p.caption_bn || "" }));
+  files[`sketchbooks/${b.slug}/index.html`] = page({
+    title: `${b.title_en} | Tanvirul Islam Mithu`,
+    desc: b.description_en || `${b.title_en}: ${ps.length} pages from Tanvirul Islam Mithu's sketchbook.`,
+    path: `/sketchbooks/${b.slug}/`,
+    image: img(ps[0].path),
+    body: `<div class="wrap"><p class="eyebrow"><a href="/sketchbooks/">${bi(["Sketchbooks", "স্কেচখাতা"])}</a></p>
+    <h1 class="page-title">${esc(b.title_en)} <small lang="bn">${esc(b.title_bn || "")}</small></h1>
+    ${b.description_en ? `<p class="lead">${bi([esc(b.description_en), esc(b.description_bn || b.description_en)])}</p>` : ""}
+    <section class="book" id="book" aria-roledescription="sketchbook" aria-label="${esc(b.title_en)}">
+      <div class="leaf"><button type="button" class="turn prev" aria-label="Previous page">‹</button><figure><img id="bookImg" src="${img(ps[0].path)}" alt="${esc(b.title_en)}, page 1"><figcaption id="bookCap"></figcaption></figure><button type="button" class="turn next" aria-label="Next page">›</button></div>
+      <p class="pageno mono"><span id="bookNo">1</span> / ${ps.length}</p>
+      <div class="strip" id="bookStrip">${ps.map((p, n) => `<button type="button" data-n="${n}" aria-label="Page ${n + 1}"><img src="${img(p.path)}" alt="" loading="lazy"></button>`).join("")}</div>
+      <script type="application/json" id="bookData">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>
+    </section>
+    <p class="note">${bi(["Interested in a page or the whole book?", "কোনো পাতা বা পুরো খাতা নিয়ে আগ্রহী?"])} <a href="/contact/?about=${encodeURIComponent(b.title_en)}">${bi(["Get in touch", "যোগাযোগ করুন"])}</a></p>
+    <nav class="prevnext">${prev ? `<a href="/sketchbooks/${prev.slug}/">← ${esc(prev.title_en)}</a>` : "<span></span>"}${next ? `<a href="/sketchbooks/${next.slug}/">${esc(next.title_en)} →</a>` : ""}</nav></div>`,
+  });
+});
 
 for (const w of works) {
   const main = w.images[0];
@@ -413,7 +455,7 @@ for (const w of works) {
   if (inShows.length && files[f]) files[f] = files[f].replace("<!--SHOWS-->", `<dt>${bi(["Shown in", "প্রদর্শিত"])}</dt><dd>${inShows.map((e) => `<a href="/shows/${e.slug}/">${esc(e.title)}</a>`).join(", ")}</dd>`);
 }
 
-const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...(posts.length ? ["/journal/", ...posts.map((p) => `/journal/${p.slug}/`)] : []), ...chaptersShown().map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
+const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...(posts.length ? ["/journal/", ...posts.map((p) => `/journal/${p.slug}/`)] : []), ...chaptersShown().map((s) => `/chapters/${s.slug}/`), ...(booksShown().length ? ["/sketchbooks/", ...booksShown().map((b) => `/sketchbooks/${b.slug}/`)] : []), ...works.map((w) => `/works/${w.slug}/`)];
 files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${SITE}${u}</loc></url>`).join("")}</urlset>`;
 files["robots.txt"] = `User-agent: *\nDisallow: /admin/\nDisallow: /c/\nSitemap: ${SITE}/sitemap.xml\n`;
 // Old WordPress URLs -> new pages

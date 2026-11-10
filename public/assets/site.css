@@ -200,3 +200,20 @@ ol.journey b{font-family:var(--f-mono);font-size:14px}
 .archive p small{color:var(--ink-soft)}
 @media (max-width:760px){.archive{grid-template-columns:1fr}}
 .journey-wrap.solo{grid-template-columns:minmax(0,1fr);max-width:760px}
+
+/* Sketchbooks: one page at a time, like turning a book */
+.chapter.book img{aspect-ratio:3/4;object-fit:cover;box-shadow:6px 6px 0 -1px var(--sheet),6px 6px 0 0 var(--line)}
+.book{margin:8px 0 18px}
+.book .leaf{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:14px;min-height:60vh}
+.book figure{margin:0;flex:1;display:flex;flex-direction:column;align-items:center}
+.book figure img{max-height:72vh;width:auto;cursor:pointer;transition:opacity .15s;box-shadow:0 1px 6px rgba(0,0,0,.15);background:#fff;user-select:none;-webkit-user-drag:none}
+.book.turning figure img{opacity:.35}
+.book figcaption{font-size:14px;color:var(--ink-soft);margin-top:8px;text-align:center}
+.book .turn{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--paper);font-size:26px;line-height:1}
+.book .turn:disabled{opacity:.3;cursor:default}
+.book .pageno{text-align:center;margin:8px 0;font-size:14px;color:var(--ink-soft)}
+.book .strip{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x proximity}
+.book .strip button{flex:none;padding:0;border:2px solid transparent;border-radius:3px;background:none;scroll-snap-align:center}
+.book .strip button.on{border-color:var(--accent)}
+.book .strip img{height:64px;width:auto}
+@media (max-width:640px){.book .leaf{padding:6px;min-height:0}.book .turn{position:absolute;bottom:8px;z-index:1;background:color-mix(in srgb,var(--paper) 85%,transparent)}.book .turn.prev{left:8px}.book .turn.next{right:8px}.book figure img{max-height:68vh}}

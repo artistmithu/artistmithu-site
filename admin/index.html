@@ -52,7 +52,7 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
 </section>
 
 <section id="app" hidden>
-  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button><button data-tab="profile" aria-pressed="false">পরিচিতি ও সিভি</button><button data-tab="journal" aria-pressed="false">জার্নাল</button></nav>
+  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button><button data-tab="profile" aria-pressed="false">পরিচিতি ও সিভি</button><button data-tab="journal" aria-pressed="false">জার্নাল</button><button data-tab="books" aria-pressed="false">স্কেচখাতা</button></nav>
 
   <div data-pane="works">
     <div class="row" style="margin-bottom:10px"><input id="q" placeholder="নাম বা ইনভেন্টরি দিয়ে খুঁজুন"><select id="fStatus"><option value="">সব</option><option value="nosize">মাপ নেই</option><option value="available">উপলব্ধ</option><option value="sold">বিক্রিত</option><option value="draft">অপ্রকাশিত</option></select><button id="newWork">+ নতুন কাজ</button></div>
@@ -100,6 +100,11 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
   </div>
   <div data-pane="subs" hidden><div id="subs" class="list"></div></div>
   <div data-pane="profile" hidden><div id="profile" class="panel"></div></div>
+  <div data-pane="books" hidden>
+    <p class="s">প্রতিটি খাতা সাইটে বইয়ের মতো পাতা উল্টে দেখা যায় (/sketchbooks/)। কোনো পাতা লুকাতে তার নিচের বাক্সটা খালি করুন। নতুন পাতা দিলে খাতার শেষে যোগ হবে।</p>
+    <div class="row" style="margin-bottom:10px"><button id="newBook">+ নতুন খাতা</button></div>
+    <div id="books"></div>
+  </div>
   <div data-pane="journal" hidden>
     <div class="row" style="margin-bottom:10px"><button id="newPost">+ নতুন লেখা</button></div>
     <div id="postEditor" class="panel" hidden></div>
@@ -152,7 +157,7 @@ async function onSession(session) {
 document.querySelectorAll("nav.tabs button").forEach((b) => (b.onclick = () => {
   document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-pressed", x === b));
   document.querySelectorAll("[data-pane]").forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
-  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs, profile: loadProfile, journal: loadPosts })[b.dataset.tab]?.();
+  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs, profile: loadProfile, journal: loadPosts, books: loadBooks })[b.dataset.tab]?.();
 }));
 
 async function load() {
@@ -549,6 +554,40 @@ function editPost(p) {
     await sb.from("posts").delete().eq("id", p.id); E.hidden = true; loadPosts();
   });
 }
+
+// Sketchbooks -----------------------------------------------------------------------
+async function loadBooks() {
+  const [{ data: books, error }, { data: pages }] = await Promise.all([sb.from("sketchbooks").select("*").order("sort"), sb.from("sketchbook_pages").select("*").order("page_no")]);
+  const B = $("#books");
+  if (error) { B.innerHTML = `<p class="panel">${esc(error.message)}</p>`; return; }
+  B.innerHTML = (books || []).map((b) => { const ps = (pages || []).filter((p) => p.sketchbook_id === b.id); return `<details class="panel" data-book="${b.id}"><summary><strong>${esc(b.title_en)}</strong> <span class="s">${ps.filter((p) => !p.hidden).length} পাতা দেখাচ্ছে${b.published ? "" : " · লুকানো"}</span></summary>
+    <div class="row"><label>নাম (ইংরেজি)<input name="title_en" value="${esc(b.title_en)}"></label><label>নাম (বাংলা)<input name="title_bn" value="${esc(b.title_bn || "")}"></label><label>সময়কাল<input name="period" value="${esc(b.period || "")}" placeholder="যেমন 1996–98"></label><label>ক্রম<input name="sort" type="number" value="${b.sort}"></label></div>
+    <div class="row"><label>বিবরণ (ইংরেজি)<textarea name="description_en" rows="3">${esc(b.description_en || "")}</textarea></label><label>বিবরণ (বাংলা)<textarea name="description_bn" rows="3">${esc(b.description_bn || "")}</textarea></label><label class="check"><input type="checkbox" name="published" ${b.published ? "checked" : ""}> সাইটে দেখাবে</label></div>
+    <div class="imgs">${ps.map((p) => `<figure><img src="${pub(p.path)}" alt="" loading="lazy" style="${p.hidden ? "opacity:.3" : ""}"><label class="s"><input type="checkbox" data-show="${p.id}" ${p.hidden ? "" : "checked"}> পাতা ${p.page_no}</label></figure>`).join("")}</div>
+    <div class="row"><label>নতুন পাতা যোগ করুন<input type="file" data-up="${b.id}" accept="image/*" multiple></label></div>
+    <button data-savebook="${b.id}">সংরক্ষণ</button></details>`; }).join("") || `<p class="s">এখনো কোনো খাতা নেই।</p>`;
+  B.querySelectorAll("[data-savebook]").forEach((btn) => (btn.onclick = async () => {
+    const D = btn.closest("[data-book]"), id = btn.dataset.savebook, row = {};
+    D.querySelectorAll("[name]").forEach((el) => (row[el.name] = el.type === "checkbox" ? el.checked : el.name === "sort" ? +el.value || 0 : el.value.trim() || null));
+    if (!row.title_en) return toast("ইংরেজি নাম দরকার");
+    const { error } = await sb.from("sketchbooks").update(row).eq("id", id);
+    if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+    const ps = (pages || []).filter((p) => p.sketchbook_id === id);
+    for (const p of ps) { const show = D.querySelector(`[data-show="${p.id}"]`).checked; if (show === p.hidden) await sb.from("sketchbook_pages").update({ hidden: !show }).eq("id", p.id); }
+    toast("সংরক্ষণ হয়েছে। সাইটে দেখাতে \"সাইটে প্রকাশ করুন\" চাপুন"); loadBooks();
+  }));
+  B.querySelectorAll("[data-up]").forEach((inp) => (inp.onchange = async () => {
+    const id = inp.dataset.up; let n = Math.max(0, ...(pages || []).filter((p) => p.sketchbook_id === id).map((p) => p.page_no));
+    for (const f of inp.files) { const x = await upFile(`sketchbooks/${id}`, f); if (x) await sb.from("sketchbook_pages").insert({ sketchbook_id: id, path: x, page_no: ++n }); }
+    toast("পাতা যোগ হয়েছে"); loadBooks();
+  }));
+}
+$("#newBook").onclick = async () => {
+  const name = prompt("খাতার নাম (ইংরেজি)"); if (!name) return;
+  const slug = `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50) || "sketchbook"}-${String(Date.now()).slice(-4)}`;
+  const { error } = await sb.from("sketchbooks").insert({ slug, title_en: name, sort: 99 });
+  if (error) return toast(error.message); loadBooks();
+};
 
 async function loadSubs() {
   const { data } = await sb.from("subscribers").select("*").order("created_at", { ascending: false });
