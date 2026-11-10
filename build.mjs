@@ -144,6 +144,8 @@ const byYearThenSort = (a, b) => (a.year || 9999) - (b.year || 9999) || (a.sort 
 const span = (list) => { const ys = list.map((w) => w.year).filter(Boolean); if (!ys.length) return ""; const a = Math.min(...ys), b = Math.max(...ys); return a === b ? `${a}` : `${a}–${b}`; };
 // Captioned photo grid: studio photos (no chapter) on About, chapter photos on their chapter page.
 const photoGrid = (list, heading) => list.length ? `<h2 class="sec">${bi(heading)}</h2><div class="studio">${list.map((p) => `<figure><a href="${img(p.path)}" target="_blank" rel="noopener"><img src="${img(p.path)}" alt="${esc(p.caption_en || heading[0])}" loading="lazy"></a>${p.caption_en || p.caption_bn ? `<figcaption>${bi([esc(p.caption_en || p.caption_bn), esc(p.caption_bn || p.caption_en)])}</figcaption>` : ""}</figure>`).join("")}</div>` : "";
+// Chapters with no works yet stay hidden from the chapter lists.
+const chaptersShown = () => series.filter((s) => works.some((w) => w.series_id === s.id));
 const seriesGroups = () => {
   const groups = series.map((s) => ({ s, list: works.filter((w) => w.series_id === s.id).sort(byYearThenSort) })).filter((g) => g.list.length);
   const first = (g) => (g.s.slug === "roots" ? 0 : Math.min(...g.list.map((w) => w.year || 9999))); // Roots is the earliest chapter even where works are undated
@@ -195,8 +197,8 @@ files["index.html"] = page({
   <p><a class="btn" href="#journey">${bi(["Follow the journey", "যাত্রাটা দেখুন"])}</a></p></div>
   ${heroPhoto ? `<a class="hero-img" href="/works/"><img src="${img(heroPhoto)}" alt="Works by Tanvirul Islam Mithu on an exhibition wall"></a>` : heroImg ? `<a class="hero-img" href="/works/${heroWork.slug}/"><img src="${img(heroImg.path)}" alt="${esc(heroWork.title_en)}"></a>` : ""}
   </div></section>
-  <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap">
-  ${selfWork?.images[0] ? `<a class="portrait" href="/works/${selfWork.slug}/"><img src="${img(selfWork.images[0].path)}" alt="${esc(selfWork.title_en)}" loading="lazy"><small>${esc(selfWork.title_en)}${selfWork.year ? `, ${selfWork.year}` : ""}</small></a>` : ""}
+  <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap${selfWork?.images[0] && selfWork !== heroWork ? "" : " solo"}">
+  ${selfWork?.images[0] && selfWork !== heroWork ? `<a class="portrait" href="/works/${selfWork.slug}/"><img src="${img(selfWork.images[0].path)}" alt="${esc(selfWork.title_en)}" loading="lazy"><small>${esc(selfWork.title_en)}${selfWork.year ? `, ${selfWork.year}` : ""}</small></a>` : ""}
   <div>${biText(C.journey, journeyList)}<p><a href="/about/">${bi(["Full biography and CV", "পূর্ণ জীবনী ও সিভি"])} →</a></p></div></div></section>
   ${(() => { // From the archive: the earliest show with press coverage, led by its first clipping.
     const e = exhibitions.filter((x) => x.slug && x.published !== false && (x.press || []).some((c) => c.kind !== "sponsor")).sort((x, y) => String(x.start_date).localeCompare(String(y.start_date)))[0];
@@ -205,7 +207,7 @@ files["index.html"] = page({
     return `<section class="wrap"><h2 class="sec">${bi(["From the archive", "আর্কাইভ থেকে"])}</h2><a class="archive" href="/shows/${e.slug}/"><img src="${img(c.path)}" alt="${esc(c.source || "")}" loading="lazy"><div><span class="eyebrow">${e.start_date ? e.start_date.slice(0, 4) : ""} · ${esc(e.venue || "")}</span><strong>${bi([esc(e.title), esc(e.title_bn || e.title)])}</strong>${c.headline ? `<p>“${esc(c.headline)}”<br><small>${esc(c.source || "")}${c.date ? `, ${esc(c.date)}` : ""}</small></p>` : ""}${e.sponsor_en ? `<p class="note">${bi([esc(e.sponsor_en), esc(e.sponsor_bn || e.sponsor_en)])}</p>` : ""}<span class="btn">${bi([`Read the story and ${n} press clippings`, `পুরো গল্প ও ${n}টি পত্রিকার খবর`])}</span></div></a></section>`;
   })()}
   <section class="wrap"><h2 class="sec">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h2><div class="chapters">
-  ${series.map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
+  ${chaptersShown().map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
   </div></section>
   <section class="wrap"><h2 class="sec">${bi(["Selected works", "নির্বাচিত কাজ"])}</h2><div class="grid">${featured.map((w) => card(w, { plain: true })).join("")}</div><p><a class="btn" href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></section>
   ${posts.length ? `<section class="wrap"><h2 class="sec">${bi(["From the journal", "জার্নাল থেকে"])}</h2><div class="shows">${posts.slice(0, 3).map((p) => `<a class="show" href="/journal/${p.slug}/">${p.cover_path ? `<img src="${img(p.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(p.title_en)}</strong></a>`).join("")}</div></section>` : ""}`,
@@ -225,10 +227,10 @@ files["chapters/index.html"] = page({
   title: "Chapters | Tanvirul Islam Mithu",
   desc: "The series and chapters of Tanvirul Islam Mithu's practice, from Roots and the early drawings to Lines of Life and Lines of Image.",
   path: "/chapters/",
-  body: `<div class="wrap"><h1 class="page-title">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h1><div class="chapters">${series.map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} works</span></a>`; }).join("")}</div></div>`,
+  body: `<div class="wrap"><h1 class="page-title">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h1><div class="chapters">${chaptersShown().map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} works</span></a>`; }).join("")}</div></div>`,
 });
 
-for (const s of series) {
+for (const s of chaptersShown()) {
   const list = works.filter((w) => w.series_id === s.id).sort(byYearThenSort);
   files[`chapters/${s.slug}/index.html`] = page({
     title: `${s.title_en} | Tanvirul Islam Mithu`,
@@ -405,7 +407,7 @@ for (const w of works) {
   if (inShows.length && files[f]) files[f] = files[f].replace("<!--SHOWS-->", `<dt>${bi(["Shown in", "প্রদর্শিত"])}</dt><dd>${inShows.map((e) => `<a href="/shows/${e.slug}/">${esc(e.title)}</a>`).join(", ")}</dd>`);
 }
 
-const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...(posts.length ? ["/journal/", ...posts.map((p) => `/journal/${p.slug}/`)] : []), ...series.map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
+const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...(posts.length ? ["/journal/", ...posts.map((p) => `/journal/${p.slug}/`)] : []), ...chaptersShown().map((s) => `/chapters/${s.slug}/`), ...works.map((w) => `/works/${w.slug}/`)];
 files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${SITE}${u}</loc></url>`).join("")}</urlset>`;
 files["robots.txt"] = `User-agent: *\nDisallow: /admin/\nDisallow: /c/\nSitemap: ${SITE}/sitemap.xml\n`;
 // Old WordPress URLs -> new pages
@@ -415,7 +417,7 @@ files["_redirects"] = [
   "/index.php/chapters/* /chapters/ 301",
   "/index.php/roots-early-years/* /chapters/roots/ 301",
   "/index.php/evolving-lines/* /chapters/evolving-lines/ 301",
-  "/index.php/media-life/* /chapters/media-life/ 301",
+  "/index.php/media-life/* /chapters/ 301",
   "/index.php/lines-of-life/* /chapters/lines-of-life/ 301",
   "/index.php/biography/* /about/ 301",
   "/index.php/exhibitions/* /shows/ 301",

@@ -199,3 +199,4 @@ ol.journey b{font-family:var(--f-mono);font-size:14px}
 .archive strong{display:block;font-family:var(--f-display);font-size:clamp(24px,3vw,34px);margin:6px 0 10px}
 .archive p small{color:var(--ink-soft)}
 @media (max-width:760px){.archive{grid-template-columns:1fr}}
+.journey-wrap.solo{grid-template-columns:minmax(0,1fr);max-width:760px}
