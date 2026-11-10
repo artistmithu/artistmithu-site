@@ -302,6 +302,10 @@ function editShow(x) {
   <div class="row"><label>ক্রম (বড় সংখ্যা আগে)<input name="sort" type="number" value="${v("sort") || 0}"></label><label class="check"><input type="checkbox" name="published" ${x.published !== false ? "checked" : ""}> প্রকাশিত</label></div>
   <div><strong>প্রচ্ছদ ছবি</strong> ${x.cover_path ? `<div class="imgs"><figure><img src="${pub(x.cover_path)}" alt=""></figure></div>` : ""}${x.id ? `<input type="file" id="coverUp" accept="image/*">` : `<p class="s">ছবি দিতে আগে সংরক্ষণ করুন।</p>`}</div>
   ${x.id && "images" in x ? `<div><strong>প্রদর্শনীর ছবি</strong> <span class="s">(উদ্বোধন, গ্যালারি, আপনার কাজের পাশে আপনি; একসাথে কয়েকটি দেওয়া যায়)</span><div class="imgs">${(x.images || []).map((p, i) => `<figure><img src="${pub(p)}" alt=""><button class="danger" data-delsimg="${i}">মুছুন</button></figure>`).join("")}</div><input type="file" id="showImgsUp" accept="image/*" multiple></div>` : ""}
+  ${x.id && "press" in x ? `<div><strong>পৃষ্ঠপোষক</strong> <span class="s">(যেমন: একুশে টেলিভিশন; খালি রাখলে দেখাবে না)</span><div class="row"><label>ইংরেজি<input name="sponsor_en" value="${v("sponsor_en")}"></label><label>বাংলা<input name="sponsor_bn" value="${v("sponsor_bn")}"></label></div></div>
+  <div><strong>পত্রিকার খবর ও পৃষ্ঠপোষকের ছবি</strong> <span class="s">(পত্রিকার কাটিং "পত্রিকায়" অংশে দেখাবে, পৃষ্ঠপোষকের ছবি পৃষ্ঠপোষক অংশে)</span>
+   <div class="list">${(x.press || []).map((c, i) => `<div class="item"><img src="${pub(c.path)}" alt=""><div class="row"><label>ধরন<select data-pr="${i}" data-f="kind"><option value="press">পত্রিকা</option><option value="sponsor" ${c.kind === "sponsor" ? "selected" : ""}>পৃষ্ঠপোষক</option></select></label><label>পত্রিকার নাম<input data-pr="${i}" data-f="source" value="${esc(c.source || "")}"></label><label>তারিখ<input data-pr="${i}" data-f="date" value="${esc(c.date || "")}" placeholder="20 Oct 2001"></label><label>শিরোনাম<input data-pr="${i}" data-f="headline" value="${esc(c.headline || "")}"></label></div><button class="danger" data-delpr="${i}">মুছুন</button></div>`).join("")}</div>
+   <div class="row"><label>নতুন ছবি<input type="file" id="pressUp" accept="image/*" multiple></label></div>${(x.press || []).length ? `<button class="alt" id="savePress">পত্রিকার তথ্য সংরক্ষণ</button>` : ""}</div>` : ""}
   ${x.id ? `<div><strong>এই প্রদর্শনীর কাজ</strong> <span class="s">(টিক দিন; ক্রম = যে ক্রমে টিক দিয়েছেন)</span>
    <input id="pickQ" placeholder="কাজ খুঁজুন" style="margin:6px 0"><div class="pick" id="showPick">${works.map((w) => { const im = (w.artwork_images || [])[0]; return `<label data-t="${esc((w.title_en + " " + (w.inv_no || "")).toLowerCase())}"><input type="checkbox" value="${w.id}" ${linked.includes(w.id) ? "checked" : ""}> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${esc(w.title_en)} <span class="s">${w.year || ""}</span></label>`; }).join("")}</div></div>` : ""}
   <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="saveShow">সংরক্ষণ</button><button class="alt" id="closeShow">বন্ধ</button>${x.id ? `<button class="danger" id="delShow">প্রদর্শনী মুছুন</button>` : ""}</div>`;
@@ -341,6 +345,20 @@ function editShow(x) {
     for (const f of ev.target.files) { const p = await upFile(`shows/${x.id}`, f); if (p) add.push(p); }
     await sb.from("exhibitions").update({ images: [...(x.images || []), ...add] }).eq("id", x.id); toast("ছবি যোগ হয়েছে"); reShow();
   });
+  $("#pressUp") && ($("#pressUp").onchange = async (ev) => {
+    const add = [];
+    for (const f of ev.target.files) { const p = await upFile(`shows/${x.id}`, f); if (p) add.push({ path: p, kind: "press" }); }
+    await sb.from("exhibitions").update({ press: [...(x.press || []), ...add] }).eq("id", x.id); toast("ছবি যোগ হয়েছে, এখন পত্রিকার নাম ও তারিখ লিখুন"); reShow();
+  });
+  $("#savePress") && ($("#savePress").onclick = async () => {
+    const press = (x.press || []).map((c, i) => { const o = { ...c }; E.querySelectorAll(`[data-pr="${i}"]`).forEach((el) => (o[el.dataset.f] = el.value.trim() || null)); if (/[\u0980-\u09FF]/.test(o.headline || "")) o.lang = "bn"; else delete o.lang; return o; });
+    const { error } = await sb.from("exhibitions").update({ press }).eq("id", x.id); toast(error ? error.message : "সংরক্ষণ হয়েছে"); reShow();
+  });
+  document.querySelectorAll("[data-delpr]").forEach((b) => (b.onclick = async () => {
+    if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "নিশ্চিত?"; return; }
+    const press = [...(x.press || [])]; press.splice(+b.dataset.delpr, 1);
+    await sb.from("exhibitions").update({ press }).eq("id", x.id); reShow();
+  }));
   document.querySelectorAll("[data-delsimg]").forEach((b) => (b.onclick = async () => {
     const imgs = [...(x.images || [])]; imgs.splice(+b.dataset.delsimg, 1);
     await sb.from("exhibitions").update({ images: imgs }).eq("id", x.id); reShow();

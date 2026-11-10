@@ -46,3 +46,6 @@ returns json language sql stable security definer set search_path = public as $$
   where c.token = p_token and (c.expires_at is null or c.expires_at > now())
 $$;
 grant execute on function public.get_collection(text) to anon, authenticated;
+
+-- 009 (applied): press clippings and sponsor on shows.
+alter table public.exhibitions add column if not exists press jsonb not null default '[]'::jsonb, add column if not exists sponsor_en text, add column if not exists sponsor_bn text;

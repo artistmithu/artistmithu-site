@@ -198,6 +198,12 @@ files["index.html"] = page({
   <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap">
   ${selfWork?.images[0] ? `<a class="portrait" href="/works/${selfWork.slug}/"><img src="${img(selfWork.images[0].path)}" alt="${esc(selfWork.title_en)}" loading="lazy"><small>${esc(selfWork.title_en)}${selfWork.year ? `, ${selfWork.year}` : ""}</small></a>` : ""}
   <div>${biText(C.journey, journeyList)}<p><a href="/about/">${bi(["Full biography and CV", "পূর্ণ জীবনী ও সিভি"])} →</a></p></div></div></section>
+  ${(() => { // From the archive: the earliest show with press coverage, led by its first clipping.
+    const e = exhibitions.filter((x) => x.slug && x.published !== false && (x.press || []).some((c) => c.kind !== "sponsor")).sort((x, y) => String(x.start_date).localeCompare(String(y.start_date)))[0];
+    if (!e) return "";
+    const c = e.press.find((x) => x.kind !== "sponsor"), n = e.press.filter((x) => x.kind !== "sponsor").length;
+    return `<section class="wrap"><h2 class="sec">${bi(["From the archive", "আর্কাইভ থেকে"])}</h2><a class="archive" href="/shows/${e.slug}/"><img src="${img(c.path)}" alt="${esc(c.source || "")}" loading="lazy"><div><span class="eyebrow">${e.start_date ? e.start_date.slice(0, 4) : ""} · ${esc(e.venue || "")}</span><strong>${bi([esc(e.title), esc(e.title_bn || e.title)])}</strong>${c.headline ? `<p>“${esc(c.headline)}”<br><small>${esc(c.source || "")}${c.date ? `, ${esc(c.date)}` : ""}</small></p>` : ""}${e.sponsor_en ? `<p class="note">${bi([esc(e.sponsor_en), esc(e.sponsor_bn || e.sponsor_en)])}</p>` : ""}<span class="btn">${bi([`Read the story and ${n} press clippings`, `পুরো গল্প ও ${n}টি পত্রিকার খবর`])}</span></div></a></section>`;
+  })()}
   <section class="wrap"><h2 class="sec">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h2><div class="chapters">
   ${series.map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
   </div></section>
@@ -359,6 +365,8 @@ files["shows/index.html"] = page({
   </div>`,
 });
 
+// Press clippings and sponsor material for a show (exhibitions.press, edited in admin).
+const clips = (e, kind, cls) => { const l = (e.press || []).filter((x) => (x.kind || "press") === kind); return l.length ? `<div class="${cls}">${l.map((x) => `<figure><a href="${img(x.path)}" target="_blank" rel="noopener"><img src="${img(x.path)}" alt="${esc([x.source, x.headline].filter(Boolean).join(": ") || e.title)}" loading="lazy"></a>${x.source || x.headline || x.date ? `<figcaption>${x.source ? `<b>${esc(x.source)}</b>` : ""}${x.date ? ` <span class="mono">${esc(x.date)}</span>` : ""}${x.headline ? `<span${x.lang === "bn" ? ' lang="bn"' : ""}>${esc(x.headline)}</span>` : ""}</figcaption>` : ""}</figure>`).join("")}</div>` : ""; };
 const ordered = [...shows].sort((a, b) => String(a.start_date).localeCompare(String(b.start_date)));
 ordered.forEach((e, i) => {
   const list = showLinks.filter((x) => x.exhibition_id === e.id).sort((a, b) => a.sort - b.sort).map((x) => worksById[x.artwork_id]).filter(Boolean);
@@ -380,7 +388,9 @@ ordered.forEach((e, i) => {
         <p class="links">${e.wayback_url ? `<a href="${esc(e.wayback_url)}" rel="noopener">${bi(["Archived copy of the original page", "মূল পাতার আর্কাইভ কপি"])}</a>` : ""}</p>
       </div>
     </div>
+    ${e.sponsor_en || e.sponsor_bn ? `<aside class="sponsor"><span class="eyebrow">${bi(["Sponsor", "পৃষ্ঠপোষক"])}</span><p>${bi([esc(e.sponsor_en || e.sponsor_bn), esc(e.sponsor_bn || e.sponsor_en)])}</p>${clips(e, "sponsor", "sponsor-photos")}</aside>` : ""}
     ${list.length ? `<h2 class="sec">${bi(["Works in this show", "এই শো-এর কাজ"])}</h2><div class="grid">${list.map(card).join("")}</div>` : ""}
+    ${(e.press || []).some((x) => x.kind !== "sponsor") ? `<h2 class="sec">${bi(["In the press", "পত্রিকায়"])}</h2>${clips(e, "press", "press")}` : ""}
     ${(e.images || []).length ? `<h2 class="sec">${bi(["Photos from the exhibition", "প্রদর্শনীর ছবি"])}</h2><div class="studio">${e.images.map((x) => `<figure><a href="${img(x)}" target="_blank" rel="noopener"><img src="${img(x)}" alt="${esc(e.title)}" loading="lazy"></a></figure>`).join("")}</div>` : ""}
     ${(() => { const vs = VID.videos.filter((v) => v.related_show === e.slug && v.id !== vid).sort(byDate); return vs.length ? `<h2 class="sec">${bi(["Videos and press", "ভিডিও ও সংবাদ"])}</h2><div class="vgrid">${vs.map(vcard).join("")}</div>` : ""; })()}
     <nav class="prevnext">${prev ? `<a href="/shows/${prev.slug}/">← ${esc(prev.title)}</a>` : "<span></span>"}${next ? `<a href="/shows/${next.slug}/">${esc(next.title)} →</a>` : ""}</nav>
