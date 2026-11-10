@@ -182,3 +182,4 @@ ol.journey li{display:grid;grid-template-columns:6.5em 1fr;gap:12px;padding:10px
 ol.journey li::before{content:"";position:absolute;left:-6px;top:17px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
 ol.journey b{font-family:var(--f-mono);font-size:14px}
 @media (max-width:760px){.journey-wrap{grid-template-columns:1fr}.journey-wrap .portrait{max-width:360px}}
+.card .note.artist{margin:8px 0 0;font-weight:700;color:var(--ink)}

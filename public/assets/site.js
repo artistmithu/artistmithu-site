@@ -157,7 +157,7 @@
         const intro = document.getElementById("cIntro");
         const text = (bn() ? data.intro_bn || data.intro_en : data.intro_en || data.intro_bn) || "";
         intro.hidden = false;
-        intro.innerHTML = `<img src="/assets/logo.jpg" alt="" width="64" height="64"><div><strong>Tanvirul Islam Mithu</strong><p>${esc(text) || say("Painter and visual artist, Dhaka. MFA in Drawing and Painting, University of Dhaka. First solo exhibition in 2001; Bangladesh's first solo web show in 2013.", "চিত্রশিল্পী, ঢাকা। ঢাকা বিশ্ববিদ্যালয় থেকে ড্রইং ও পেইন্টিংয়ে স্নাতকোত্তর। প্রথম একক প্রদর্শনী ২০০১, দেশের প্রথম একক ওয়েব শো ২০১৩।")}</p><a href="/about/">${say("About the artist", "শিল্পী সম্পর্কে")}</a></div>`;
+        intro.innerHTML = `<img src="/assets/logo.jpg" alt="" width="64" height="64"><div><strong>${data.artworks.some((x) => x.artist_name) ? say("From the collection of Tanvirul Islam Mithu", "তানভীরুল ইসলাম মিঠুর সংগ্রহ থেকে") : "Tanvirul Islam Mithu"}</strong><p>${esc(text) || say("Painter and visual artist, Dhaka. MFA in Drawing and Painting, University of Dhaka. First solo exhibition in 2001; Bangladesh's first solo web show in 2013.", "চিত্রশিল্পী, ঢাকা। ঢাকা বিশ্ববিদ্যালয় থেকে ড্রইং ও পেইন্টিংয়ে স্নাতকোত্তর। প্রথম একক প্রদর্শনী ২০০১, দেশের প্রথম একক ওয়েব শো ২০১৩।")}</p><a href="/about/">${say("About the artist", "শিল্পী সম্পর্কে")}</a></div>`;
         const rules = document.getElementById("cRules"); rules.hidden = false;
         const closes = data.closes_at ? new Date(data.closes_at).toLocaleString(bn() ? "bn-BD" : "en-GB", { day: "numeric", month: "long", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
         rules.textContent = say(
@@ -173,10 +173,11 @@
           <button class="btn" type="submit">${say("Place bid", "দাম জমা দিন")}</button><p class="note msg" hidden></p></form>`;
       };
       cGrid.innerHTML = data.artworks.map((a) => `<article class="card"><a class="frame" href="${a.images?.[0] ? img(a.images[0]) : "#"}" target="_blank" rel="noopener">${a.images?.[0] ? `<img src="${img(a.images[0])}" alt="${esc(a.title_en)}">` : ""}</a>
-        <div class="meta"><h3>${esc(a.title_en)}</h3><span class="yr">${a.year || ""}</span></div>
+        ${a.artist_name ? `<p class="note artist">${esc(a.artist_name)}</p>` : ""}<div class="meta"><h3>${esc(a.title_en)}</h3><span class="yr">${a.year || ""}</span></div>
+        ${a.description_en ? `<p class="note">${esc(a.description_en)}</p>` : ""}
         <div class="sub">${esc(a.medium || "")}${a.height_cm ? ` · ${+a.height_cm} × ${+a.width_cm} cm` : ""}</div>
         <div class="sub"><span class="pill ${a.status}">${({ available: say("Available", "উপলব্ধ"), reserved: say("Reserved", "সংরক্ষিত"), sold: say("Sold", "বিক্রিত"), nfs: say("Not for sale", "বিক্রির জন্য নয়") })[a.status] || a.status}</span>${bidding ? "" : `<span class="price">${priceOf(a)}</span>`}</div>
-        ${bidding ? bidBox(a) : `<a class="btn" href="https://wa.me/${wa}?text=${encodeURIComponent(`About ${a.title_en} (${a.inv_no})`)}">WhatsApp</a>`}</article>`).join("");
+        ${bidding ? bidBox(a) : `<a class="btn" href="https://wa.me/${wa}?text=${encodeURIComponent(`About ${a.artist_name ? `${a.artist_name}, ` : ""}${a.title_en} (${a.inv_no})`)}">WhatsApp</a>`}</article>`).join("");
       if (bidding) {
         // Remember the bidder's name and contact for the next bid on this device.
         const me = store.get("bidder", {});

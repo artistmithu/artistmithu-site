@@ -79,7 +79,19 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
         <p class="s">"দাম দেখাবে" টিক দিলে কাজের নির্ধারিত দামই শুরুর দাম হবে। মেয়াদ শেষ হলে বিডিং বন্ধ হবে। এই কাজগুলো সাইটে আগের মতোই দেখাবে, কিন্তু সাইটে দাম লেখার কোনো ঘর থাকবে না।</p>
       </div>
       <label class="check"><input type="checkbox" id="cPrices" checked> দাম দেখাবে</label>
+      <strong>আমার কাজ</strong>
       <div id="cPick" class="pick"></div>
+      <strong>আমার সংগ্রহের অন্য শিল্পীর কাজ</strong> <span class="s">(এগুলো কখনো সাইটে দেখাবে না, শুধু যাকে লিংক পাঠাবেন সে দেখবে)</span>
+      <div id="cOther" class="pick"></div>
+      <details id="oAdd" style="margin:8px 0"><summary><b>+ অন্য শিল্পীর কাজ যোগ করুন</b></summary>
+        <div class="row"><label>শিল্পীর নাম *<input id="oArtist" placeholder="যেমন: S. M. Sultan"></label><label>কাজের নাম *<input id="oTitle"></label></div>
+        <div class="row"><label>সাল<input id="oYear" type="number"></label><label>মাধ্যম<input id="oMedium" placeholder="যেমন: Oil on canvas"></label></div>
+        <div class="row"><label>উচ্চতা (সেমি)<input id="oH" type="number" step="0.1"></label><label>প্রস্থ (সেমি)<input id="oW" type="number" step="0.1"></label></div>
+        <div class="row"><label>দাম (টাকা)<input id="oBdt" type="number"></label><label>দাম (ডলার)<input id="oUsd" type="number"></label></div>
+        <label>বিবরণ<textarea id="oDesc" rows="2" placeholder="কাজটি সম্পর্কে, কোথা থেকে সংগ্রহ ইত্যাদি (ক্লায়েন্ট দেখবে)"></textarea></label>
+        <label>ছবি * (একাধিক দিতে পারেন)<input id="oImgs" type="file" accept="image/*" multiple></label>
+        <button class="alt" id="oSave">কাজটি যোগ করুন</button>
+      </details>
       <button id="cCreate">লিংক তৈরি করুন</button>
       <p id="cOut" class="mono"></p>
     </div>
@@ -105,7 +117,7 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pub = (p) => `${URL_}/storage/v1/object/public/artworks/${p}`;
 const toast = (m) => { const t = $("#toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 2500); };
-let works = [], series = [], notes = {};
+let works = [], others = [], series = [], notes = {};
 let hasMode = false; // true once migration 002 (price_mode) is applied
 const fxRate = () => { try { return +localStorage.getItem("fx") || 122; } catch { return 122; } };
 
@@ -152,7 +164,9 @@ async function load() {
     $("#works").innerHTML = `<p class="panel">কাজের তালিকা আনা যায়নি: ${esc((w.error || s.error).message)}. পাতাটা রিলোড করুন; আবার দেখালে এই লেখাটার স্ক্রিনশট পাঠান।</p>`;
     return;
   }
-  series = s.data || []; works = w.data || [];
+  series = s.data || [];
+  // Works by other artists (from the collection) live apart: they only go into private client links.
+  works = (w.data || []).filter((x) => !x.artist_name); others = (w.data || []).filter((x) => x.artist_name);
   const n = await sb.from("import_notes").select("inv_no,note");
   notes = Object.fromEntries((n.data || []).map((x) => [x.inv_no, x.note]));
   hasMode = works.length > 0 && "price_mode" in works[0];
@@ -344,7 +358,10 @@ async function loadInq() {
 }
 
 async function loadClient() {
-  $("#cPick").innerHTML = works.map((w) => { const im = (w.artwork_images || [])[0]; return `<label><input type="checkbox" value="${w.id}"> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${esc(w.title_en)}</label>`; }).join("");
+  const checked = new Set([...document.querySelectorAll("#cPick input:checked, #cOther input:checked")].map((i) => i.value));
+  const tile = (w, del) => { const im = [...(w.artwork_images || [])].sort((a, b) => a.sort - b.sort)[0]; return `<label><input type="checkbox" value="${w.id}" ${checked.has(w.id) ? "checked" : ""}> ${im ? `<img src="${pub(im.path)}" alt="">` : ""}${w.artist_name ? `<b>${esc(w.artist_name)}</b><br>` : ""}${esc(w.title_en)}${del ? ` <button class="danger" type="button" data-delother="${w.id}" style="padding:2px 6px">মুছুন</button>` : ""}</label>`; };
+  $("#cPick").innerHTML = works.map((w) => tile(w)).join("");
+  $("#cOther").innerHTML = others.map((w) => tile(w, true)).join("") || `<p class="s">এখনো কিছু যোগ করা হয়নি।</p>`;
   const [{ data }, b] = await Promise.all([
     sb.from("client_collections").select("*").order("created_at", { ascending: false }),
     sb.from("bids").select("collection_id"),
@@ -364,8 +381,8 @@ async function showBids(id) {
   const byWork = {}; (data || []).forEach((x) => (byWork[x.artwork_id] ||= []).push(x));
   P.hidden = false; P.scrollIntoView({ behavior: "smooth" });
   P.innerHTML = `<strong>${esc(c.client_name || "বিডিং")} · মোট ${(data || []).length}টি দাম</strong>` + c.artwork_ids.map((wid) => {
-    const w = works.find((x) => x.id === wid), list = byWork[wid] || [];
-    return `<div style="margin-top:12px"><div class="t">${esc(w?.title_en || wid)} <span class="s mono">${esc(w?.inv_no || "")}</span></div>
+    const w = works.find((x) => x.id === wid) || others.find((x) => x.id === wid), list = byWork[wid] || [];
+    return `<div style="margin-top:12px"><div class="t">${w?.artist_name ? `${esc(w.artist_name)}: ` : ""}${esc(w?.title_en || wid)} <span class="s mono">${esc(w?.inv_no || "")}</span></div>
       ${list.length ? list.map((x, i) => `<div class="s">${i === 0 ? "🏆 " : ""}<b>${sym}${Number(x.amount).toLocaleString("en-IN")}</b> · ${esc(x.bidder_name)} · <span class="mono">${esc(x.contact)}</span> · ${new Date(x.created_at).toLocaleString("bn-BD")}${x.note ? ` · ${esc(x.note)}` : ""}</div>`).join("") : `<div class="s">এখনো কোনো দাম পড়েনি</div>`}</div>`;
   }).join("") + `<p><button class="alt" id="bidClose">বন্ধ</button></p>`;
   $("#bidClose").onclick = () => (P.hidden = true);
@@ -375,8 +392,32 @@ $("#cList").onclick = (e) => {
   const u = e.target.dataset.copy; if (u) navigator.clipboard.writeText(u).then(() => toast("লিংক কপি হয়েছে"));
   const b = e.target.dataset.bids; if (b) showBids(b);
 };
+$("#oSave").onclick = async () => {
+  const artist = $("#oArtist").value.trim(), title = $("#oTitle").value.trim(), files = [...$("#oImgs").files];
+  if (!artist || !title || !files.length) return toast("শিল্পীর নাম, কাজের নাম আর ছবি দিন");
+  const num = (id) => ($(id).value === "" ? null : +$(id).value);
+  const bdt = num("#oBdt"), usd = num("#oUsd"), code = Date.now().toString(36).toUpperCase();
+  const h = num("#oH"), wd = num("#oW");
+  const row = { artist_name: artist, title_en: title, year: num("#oYear"), medium: $("#oMedium").value.trim() || null, height_cm: h, width_cm: wd,
+    description_en: $("#oDesc").value.trim() || null,
+    price_bdt: bdt, price_usd: usd, price_mode: bdt || usd ? "fixed" : "on_request", show_price: !!(bdt || usd),
+    inv_no: `COL-${code}`, slug: `col-${code.toLowerCase()}`, published: false, status: "available" };
+  $("#oSave").disabled = true;
+  const { data: w, error } = await sb.from("artworks").insert(row).select().single();
+  if (error) { $("#oSave").disabled = false; return toast(error.message); }
+  let n = 0; for (const f of files) { const p = await upFile("collection", f); if (p) await sb.from("artwork_images").insert({ artwork_id: w.id, path: p, sort: n++, alt_en: `${artist}: ${title}` }); }
+  $("#oSave").disabled = false; ["#oArtist", "#oTitle", "#oYear", "#oMedium", "#oH", "#oW", "#oBdt", "#oUsd", "#oDesc", "#oImgs"].forEach((id) => ($(id).value = ""));
+  await load(); await loadClient();
+  const cb = $(`#cOther input[value="${w.id}"]`); if (cb) cb.checked = true;
+  toast("যোগ হয়েছে এবং এই লিংকের জন্য বাছাই করা হয়েছে");
+};
+$("#cOther").onclick = async (e) => {
+  const b = e.target.closest("[data-delother]"); if (!b) return; e.preventDefault();
+  if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "নিশ্চিত?"; return; }
+  await sb.from("artworks").delete().eq("id", b.dataset.delother); await load(); loadClient();
+};
 $("#cCreate").onclick = async () => {
-  const ids = [...document.querySelectorAll("#cPick input:checked")].map((i) => i.value);
+  const ids = [...document.querySelectorAll("#cPick input:checked, #cOther input:checked")].map((i) => i.value);
   if (!ids.length) return toast("অন্তত একটি কাজ বাছাই করুন");
   const days = +$("#cDays").value || 30, bidding = $("#cMode").value === "bidding";
   const row = { client_name: $("#cName").value || null, note: $("#cNote").value || null, artwork_ids: ids, show_prices: $("#cPrices").checked, expires_at: new Date(Date.now() + days * 864e5).toISOString() };
