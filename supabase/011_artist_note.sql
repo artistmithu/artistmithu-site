@@ -32,3 +32,4 @@ grant execute on function public.get_collection(text) to anon, authenticated;
 -- 2026-11-11: site_content email, awards, collections added; bio web-show count fixed (fellowship readiness).
 -- 2026-11-11: statement rewritten (en+bn); scrolls are drawn by the artist daily, not with people; Sultan wrote 'well done' and signed the artist's drawing.
 -- 2026-11-11: from artist CV: Professional Fellows Program, Pre-BFA, workshops, 10 group shows; Lines of Life 2019/2020/2021/2023 works; LLS 2024 hi-res; process reel (site_content process_video).
+-- 2026-11-11: Lines of Life, Red (2026) added and set as home hero.
