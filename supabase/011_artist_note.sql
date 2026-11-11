@@ -30,3 +30,4 @@ grant execute on function public.get_collection(text) to anon, authenticated;
 -- Data (applied): Roots corrections from Vaab: Branch in a pot first (first class work), Bottles second, ROOTS-020 retitled New Market chicken bazaar, pencil media for 004/010-013.
 -- Data (applied): first-solo-2001 cover is now the catalogue cover.
 -- 2026-11-11: site_content email, awards, collections added; bio web-show count fixed (fellowship readiness).
+-- 2026-11-11: statement rewritten (en+bn); scrolls are drawn by the artist daily, not with people; Sultan wrote 'well done' and signed the artist's drawing.

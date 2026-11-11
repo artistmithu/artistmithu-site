@@ -204,14 +204,14 @@ const journeyList = (t) => `<ol class="journey">${lines(t).map((l) => { const m 
 
 files["index.html"] = page({
   title: "Tanvirul Islam Mithu | Bangladeshi Painter & Visual Artist",
-  desc: "Paintings and drawings by Bangladeshi artist Tanvirul Islam Mithu: forty years of lines, from student drawings and a 1991 meeting with S. M. Sultan to Bangladesh's first solo web show and the Lines of Life scrolls.",
+  desc: "Paintings and drawings by Bangladeshi artist Tanvirul Islam Mithu: thirty-five years of lines, from student drawings and a 1991 meeting with S. M. Sultan to Bangladesh's first solo web show and the Lines of Life scrolls.",
   path: "/",
   image: heroImg ? img(heroImg.path) : undefined,
   jsonld: { "@context": "https://schema.org", "@type": "Person", name: "Tanvirul Islam Mithu", alternateName: ["Artistmithu", "Artist Mithu", "তানভীরুল ইসলাম মিঠু"], jobTitle: "Visual Artist", url: SITE, alumniOf: "University of Dhaka", sameAs: ["https://www.facebook.com/artistmithu2022", "https://www.instagram.com/artistmithu/", "https://twitter.com/artistmithu", "https://www.youtube.com/@artistmithu"] },
   body: `<section class="hero"><div class="wrap">
-  <div><h1>${bi(["Forty years of <b>lines</b>, in one place", "চল্লিশ বছরের <b>রেখা</b>, এক জায়গায়"])}</h1>
-  <p>${bi(["A boy copying illustrations from books. A meeting with S. M. Sultan in Narail. Life drawing at the Faculty of Fine Arts in Dhaka. Bangladesh's first solo web show, and scroll drawings made together with hundreds of people. This is one artist's journey, told in line.", "বই থেকে ছবি দেখে আঁকা এক কিশোর। নড়াইলে এস এম সুলতানের সাথে দেখা। ঢাকা চারুকলায় জীবন থেকে আঁকা। দেশের প্রথম একক ওয়েব শো, আর শত মানুষের সাথে মিলে আঁকা দীর্ঘ স্ক্রল। রেখায় বলা একজন শিল্পীর যাত্রা।"])}</p>
-  <div class="facts"><div><strong>40+</strong>${bi(["years of practice", "বছরের চর্চা"])}</div><div><strong>2013</strong>${bi(["Bangladesh's first solo web show", "দেশের প্রথম একক ওয়েব শো"])}</div><div><strong>${works.length}</strong>${bi(["works online", "কাজ অনলাইনে"])}</div></div>
+  <div><h1>${bi(["Thirty-five years of <b>lines</b>, in one place", "পঁয়ত্রিশ বছরের <b>রেখা</b>, এক জায়গায়"])}</h1>
+  <p>${bi(["A boy copying illustrations from books. A meeting with S. M. Sultan in Narail. Life drawing at the Faculty of Fine Arts in Dhaka. Bangladesh's first solo web show, and long scroll drawings made a little every day. This is one artist's journey, told in line.", "বই থেকে ছবি দেখে আঁকা এক কিশোর। নড়াইলে এস এম সুলতানের সাথে দেখা। ঢাকা চারুকলায় জীবন থেকে আঁকা। দেশের প্রথম একক ওয়েব শো, আর প্রতিদিন একটু একটু করে আঁকা দীর্ঘ স্ক্রল। রেখায় বলা একজন শিল্পীর যাত্রা।"])}</p>
+  <div class="facts"><div><strong>35+</strong>${bi(["years of practice", "বছরের চর্চা"])}</div><div><strong>2013</strong>${bi(["Bangladesh's first solo web show", "দেশের প্রথম একক ওয়েব শো"])}</div><div><strong>${works.length}</strong>${bi(["works online", "কাজ অনলাইনে"])}</div></div>
   <p><a class="btn" href="#journey">${bi(["Follow the journey", "যাত্রাটা দেখুন"])}</a></p></div>
   ${heroPhoto ? `<a class="hero-img" href="/works/"><img src="${img(heroPhoto)}" alt="Works by Tanvirul Islam Mithu on an exhibition wall"></a>` : heroImg ? `<a class="hero-img" href="/works/${heroWork.slug}/"><img src="${img(heroImg.path)}" alt="${esc(heroWork.title_en)}"></a>` : ""}
   </div></section>
