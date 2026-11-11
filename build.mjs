@@ -407,7 +407,7 @@ files["videos/index.html"] = page({
 });
 
 // Shows: web shows and exhibitions ---------------------------------------------
-const KIND = { "web-show": ["Web show", "ওয়েব শো"], solo: ["Solo exhibition", "একক প্রদর্শনী"], group: ["Group exhibition", "যৌথ প্রদর্শনী"], "art-fair": ["Art fair", "আর্ট ফেয়ার"] };
+const KIND = { "web-show": ["Web show", "ওয়েব শো"], solo: ["Solo exhibition", "একক প্রদর্শনী"], group: ["Group exhibition", "যৌথ প্রদর্শনী"], "art-fair": ["Art fair", "আর্ট ফেয়ার"], "online-project": ["Online project", "অনলাইন প্রজেক্ট"] };
 const shows = exhibitions.filter((e) => e.slug && e.published !== false);
 const worksById = Object.fromEntries(works.map((w) => [w.id, w]));
 const yt = (u) => { const m = String(u || "").match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); return m ? m[1] : null; };
@@ -417,7 +417,7 @@ const dateRange = (e) => !e.end_date && /-01-01$/.test(e.start_date || "") ? e.s
 const byYear = {};
 for (const e of shows) (byYear[e.start_date ? e.start_date.slice(0, 4) : "—"] ||= []).push(e);
 
-const soloShows = shows.filter((e) => e.kind !== "group" && e.kind !== "art-fair");
+const soloShows = shows.filter((e) => e.kind !== "group" && e.kind !== "art-fair" && e.kind !== "online-project");
 const groupShows = shows.filter((e) => e.kind === "group" || e.kind === "art-fair");
 const yearsOf = (list) => { const by = {}; for (const e of list) (by[e.start_date ? e.start_date.slice(0, 4) : "—"] ||= []).push(e); return by; };
 const showCard = (e) => { const c = showCover(e); const n = showLinks.filter((x) => x.exhibition_id === e.id && worksById[x.artwork_id]).length; return `<a class="show" href="/shows/${e.slug}/">${c ? `<img src="${c}" alt="" loading="lazy">` : `<span class="empty"></span>`}<span class="eyebrow">${bi(KIND[e.kind] || [e.kind, e.kind])}</span><strong>${esc(e.title)}</strong>${e.title_bn ? `<small lang="bn">${esc(e.title_bn)}</small>` : ""}<span class="note">${dateRange(e)}${n ? ` · ${n} works` : ""}</span></a>`; };
@@ -434,6 +434,7 @@ files["shows/index.html"] = page({
   ${groupShows.length ? `<section class="wgroup" id="group"><header><h2>${bi(["Group exhibitions", "যৌথ প্রদর্শনী"])}</h2><span class="note">${groupShows.length}</span></header>
   ${groupShows.some((e) => showCover(e)) ? `<div class="shows">${groupShows.filter((e) => showCover(e)).map(showCard).join("")}</div>` : ""}
   <ul class="ex">${groupShows.map(showLine).join("")}</ul></section>` : ""}
+  ${(() => { const op = shows.filter((e) => e.kind === "online-project"); return op.length ? `<section class="wgroup" id="projects"><header><h2>${bi(["Online projects", "অনলাইন প্রজেক্ট"])}</h2><span class="note">${op.length}</span></header><div class="shows">${op.map(showCard).join("")}</div></section>` : ""; })()}
   </div>`,
 });
 

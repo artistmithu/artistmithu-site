@@ -278,7 +278,7 @@ function edit(w) {
 
 // Shows (exhibitions and web shows) ------------------------------------------------
 let showsData = [], showLinks = [];
-const KINDS = { "web-show": "ওয়েব শো", solo: "একক প্রদর্শনী", group: "যৌথ প্রদর্শনী", "art-fair": "আর্ট ফেয়ার" };
+const KINDS = { "web-show": "ওয়েব শো", solo: "একক প্রদর্শনী", group: "যৌথ প্রদর্শনী", "art-fair": "আর্ট ফেয়ার", "online-project": "অনলাইন প্রজেক্ট" };
 async function loadShows() {
   const [e, l] = await Promise.all([
     sb.from("exhibitions").select("*").order("start_date", { ascending: false, nullsFirst: false }),
