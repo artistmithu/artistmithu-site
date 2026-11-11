@@ -307,7 +307,7 @@ function editShow(x) {
    <label>স্থান / গ্যালারি<input name="venue" value="${v("venue")}"></label><label>শহর<input name="city" value="${v("city")}"></label><label>দেশ<input name="country" value="${v("country")}"></label></div>
   <label>বক্তব্য (ইংরেজি)<textarea name="statement_en" rows="5">${v("statement_en")}</textarea></label>
   <label>বক্তব্য (বাংলা)<textarea name="statement_bn" rows="5">${v("statement_bn")}</textarea></label>
-  <div class="row"><label>YouTube লিংক<input name="youtube_url" value="${v("youtube_url")}"></label><label>মূল ওয়েব শো-এর লিংক<input name="original_url" value="${v("original_url")}"></label><label>আর্কাইভ (Wayback) লিংক<input name="wayback_url" value="${v("wayback_url")}"></label></div>
+  <div class="row"><label>নিজের ভিডিও (স্টোরেজের পাথ, .mp4)<input name="video_path" value="${v("video_path")}" placeholder="portfolio-2026/show.mp4"></label><label>YouTube লিংক<input name="youtube_url" value="${v("youtube_url")}"></label><label>মূল ওয়েব শো-এর লিংক<input name="original_url" value="${v("original_url")}"></label><label>আর্কাইভ (Wayback) লিংক<input name="wayback_url" value="${v("wayback_url")}"></label></div>
   <div class="row"><label>ক্রম (বড় সংখ্যা আগে)<input name="sort" type="number" value="${v("sort") || 0}"></label><label class="check"><input type="checkbox" name="published" ${x.published !== false ? "checked" : ""}> প্রকাশিত</label></div>
   <div><strong>প্রচ্ছদ ছবি</strong> ${x.cover_path ? `<div class="imgs"><figure><img src="${pub(x.cover_path)}" alt=""></figure></div>` : ""}${x.id ? `<input type="file" id="coverUp" accept="image/*">` : `<p class="s">ছবি দিতে আগে সংরক্ষণ করুন।</p>`}</div>
   ${x.id && "images" in x ? `<div><strong>প্রদর্শনীর ছবি</strong> <span class="s">(উদ্বোধন, গ্যালারি, আপনার কাজের পাশে আপনি; একসাথে কয়েকটি দেওয়া যায়)</span><div class="imgs">${(x.images || []).map((p, i) => `<figure><img src="${pub(p)}" alt=""><button class="danger" data-delsimg="${i}">মুছুন</button></figure>`).join("")}</div><input type="file" id="showImgsUp" accept="image/*" multiple></div>` : ""}
@@ -524,6 +524,10 @@ const PROFILE_FIELDS = [
   ["awards", "পুরস্কার ও ফেলোশিপ", "প্রতি লাইনে একটি", 4],
   ["collections", "সংগ্রহ", "যেখানে আপনার কাজ সংগ্রহে আছে, প্রতি লাইনে একটি", 4],
   ["workshops", "কর্মশালা", "প্রতি লাইনে একটি: সাল, দুটি স্পেস, তারপর লেখা", 3],
+  ["process_video", "হোমের প্রসেস ভিডিও", "স্টোরেজের পাথ (.mp4), শুধু ইংরেজি ঘরে", 1],
+  ["process_video_caption", "প্রসেস ভিডিওর ক্যাপশন", "এক-দুই লাইন", 2],
+  ["studio_video", "পরিচিতি পাতার স্টুডিও ভিডিও", "স্টোরেজের পাথ (.mp4), শুধু ইংরেজি ঘরে", 1],
+  ["studio_video_caption", "স্টুডিও ভিডিওর ক্যাপশন", "এক লাইন", 2],
   ["email", "যোগাযোগের ইমেইল", "যোগাযোগ পাতায় দেখাবে (শুধু ইংরেজি ঘরে)", 1],
 ];
 async function upFile(folder, f) {

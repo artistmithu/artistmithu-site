@@ -258,3 +258,8 @@ form.bid .msg.ok{background:var(--ok);color:#fff;padding:8px 10px;border-radius:
 #now .process video{width:100%;aspect-ratio:1/1;background:#000;border-radius:6px}
 #now .process figcaption{color:var(--ink-soft);font-size:15px;line-height:1.55}
 @media (max-width:720px){#now .process{grid-template-columns:1fr}}
+.video.own{aspect-ratio:auto}
+.video.own video{width:100%;aspect-ratio:1/1;background:#000;display:block}
+.studio-video{margin:24px 0;max-width:520px}
+.studio-video video{width:100%;aspect-ratio:1/1;background:#000;border-radius:6px}
+.studio-video figcaption{color:var(--ink-soft);font-size:15px;margin-top:6px}

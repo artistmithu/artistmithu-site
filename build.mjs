@@ -453,7 +453,7 @@ ordered.forEach((e, i) => {
     <h1 class="page-title">${esc(e.title)}${e.title_bn ? ` <small lang="bn">${esc(e.title_bn)}</small>` : ""}</h1>
     <p class="note">${dateRange(e)}${e.venue ? ` · ${esc(e.venue)}` : ""}${e.city ? `, ${esc(e.city)}` : ""}</p>
     <div class="show-head">
-      ${vid ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${vid}" title="${esc(e.title)}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>` : c ? `<img class="show-cover" src="${c}" alt="${esc(e.title)}">` : ""}
+      ${e.video_path ? `<div class="video own"><video controls playsinline preload="none" poster="${img(e.video_path.replace(/\.mp4$/, ".jpg"))}" src="${img(e.video_path)}"></video></div>` : vid ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${vid}" title="${esc(e.title)}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>` : c ? `<img class="show-cover" src="${c}" alt="${esc(e.title)}">` : ""}
       <div class="prose">
         ${e.statement_en ? `<div lang="en">${esc(e.statement_en).split(/\n{2,}/).map((p) => `<p>${p}</p>`).join("")}</div>` : ""}
         ${e.statement_bn ? `<div lang="bn">${esc(e.statement_bn).split(/\n{2,}/).map((p) => `<p>${p}</p>`).join("")}</div>` : ""}
@@ -517,6 +517,7 @@ files["about/index.html"] = page({
   <div class="about-top">${portrait ? `<img class="portrait" src="${img(portrait)}" alt="Tanvirul Islam Mithu">` : ""}
   <div class="prose">${C.statement ? `<blockquote class="statement">${biText(C.statement, paras)}</blockquote>` : ""}${biText(C.bio, paras)}
   <p><a class="btn" href="/cv/">${bi(["CV (one page, PDF)", "সিভি (এক পাতায়, PDF)"])}</a>${C.cv_pdf?.en ? ` <a class="btn alt" href="${img(C.cv_pdf.en)}" download>${bi(["Download CV file", "সিভি ফাইল ডাউনলোড"])}</a>` : ""}</p></div></div>
+  ${C.studio_video?.en ? `<figure class="studio-video"><video controls playsinline preload="none" poster="${img(C.studio_video.en.replace(/\.mp4$/, ".jpg"))}" src="${img(C.studio_video.en)}"></video>${C.studio_video_caption?.en ? `<figcaption>${bi([esc(C.studio_video_caption.en), esc(C.studio_video_caption.bn || C.studio_video_caption.en)])}</figcaption>` : ""}</figure>` : ""}
   ${photoGrid(studio.filter((p) => !p.series_id), ["In the studio", "স্টুডিওতে"])}
   <div class="cvgrid">
   ${C.education ? `<section><h2 class="sec">${bi(["Education", "শিক্ষা"])}</h2>${biList(C.education)}</section>` : ""}
