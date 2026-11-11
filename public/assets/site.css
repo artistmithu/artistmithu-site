@@ -254,3 +254,7 @@ form.bid .msg.ok{background:var(--ok);color:#fff;padding:8px 10px;border-radius:
   .cv a{text-decoration:none}
   @page{margin:16mm}
 }
+#now .process{margin:0 0 28px;display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:20px;align-items:center}
+#now .process video{width:100%;aspect-ratio:1/1;background:#000;border-radius:6px}
+#now .process figcaption{color:var(--ink-soft);font-size:15px;line-height:1.55}
+@media (max-width:720px){#now .process{grid-template-columns:1fr}}

@@ -219,7 +219,9 @@ files["index.html"] = page({
     const recent = works.filter((w) => w.year >= 2020 && w.images[0] && w !== heroWork).sort((a, b) => (b.year - a.year) || ((b.featured ? 1 : 0) - (a.featured ? 1 : 0)) || ((a.sort ?? 0) - (b.sort ?? 0))).slice(0, 6);
     const now = exhibitions.filter((x) => x.slug && x.published !== false && x.start_date).sort((x, y) => String(y.start_date).localeCompare(String(x.start_date))).slice(0, 3);
     if (!recent.length && !now.length) return "";
+    const vid = C.process_video?.en, vcap = C.process_video_caption;
     return `<section class="wrap" id="now"><h2 class="sec">${bi(["Current work", "এখনকার কাজ"])}</h2>
+    ${vid ? `<figure class="process"><video controls playsinline muted preload="none" poster="${img(vid.replace(/\.mp4$/, ".jpg"))}" src="${img(vid)}"></video>${vcap?.en ? `<figcaption>${bi([esc(vcap.en), esc(vcap.bn || vcap.en)])}</figcaption>` : ""}</figure>` : ""}
     ${recent.length ? `<div class="grid">${recent.map((w) => card(w, { plain: true })).join("")}</div>` : ""}
     ${now.length ? `<h3 class="minor">${bi(["Recent exhibitions", "সাম্প্রতিক প্রদর্শনী"])}</h3><div class="shows">${now.map((e) => `<a class="show" href="/shows/${e.slug}/">${e.cover_path ? `<img src="${img(e.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<span class="eyebrow">${e.start_date.slice(0, 4)}</span><strong>${esc(e.title)}</strong><span class="note">${esc(e.venue || "")}</span></a>`).join("")}</div>` : ""}
     <p><a class="btn" href="/shows/">${bi(["All exhibitions", "সব প্রদর্শনী"])}</a> <a class="btn alt" href="/cv/">${bi(["CV", "সিভি"])}</a></p></section>`;
@@ -522,6 +524,7 @@ files["about/index.html"] = page({
   ${groupShows.length ? `<section><h2 class="sec">${bi(["Group exhibitions", "যৌথ প্রদর্শনী"])}</h2><ul class="ex">${groupShows.map(showLine).join("")}</ul></section>` : ""}
   ${C.awards ? `<section><h2 class="sec">${bi(["Awards and fellowships", "পুরস্কার ও ফেলোশিপ"])}</h2>${biList(C.awards)}</section>` : ""}
   ${C.collections ? `<section><h2 class="sec">${bi(["Collections", "সংগ্রহ"])}</h2>${biList(C.collections)}</section>` : ""}
+  ${C.workshops ? `<section><h2 class="sec">${bi(["Workshops", "কর্মশালা"])}</h2>${biList(C.workshops)}</section>` : ""}
   </div></div>`,
 });
 
@@ -545,6 +548,7 @@ files["about/index.html"] = page({
     ${groupShows.length ? `<h2>Selected group exhibitions</h2><ul class="cvl">${[...groupShows].sort(byDate).map(exLine).join("")}</ul>` : ""}
     ${C.awards ? `<h2>Fellowships and awards</h2>${yrList(C.awards)}` : ""}
     ${C.collections ? `<h2>Collections</h2>${yrList(C.collections)}` : ""}
+    ${C.workshops ? `<h2>Workshops</h2>${yrList(C.workshops)}` : ""}
     <h2>Online</h2><ul class="cvl"><li><span class="y"></span><span>Portfolio and archive: <a href="${SITE}/">${SITE.replace(/^https?:\/\//, "")}</a> (${works.length} works)</span></li><li><span class="y"></span><span>Web shows: linesof.life</span></li></ul>
     </div>`,
   });
