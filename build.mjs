@@ -9,7 +9,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || "https://msbgnvltxoxrnvuriiez.s
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_vxt7vC2yHGGhMON90ZFnBw_PehR5Qod";
 // Public address used in share previews (Facebook reads og:url and goes there), canonical links and the sitemap.
 // Set SITE_URL to https://artistmithu.com in the Cloudflare build settings once the domain points at this site.
-const SITE = (process.env.SITE_URL || "https://artistmithu-site.artistmithu.workers.dev").replace(/\/$/, "");
+const SITE = (process.env.SITE_URL || "https://artistmithu.com").replace(/\/$/, "");
 const WHATSAPP = process.env.WHATSAPP_NUMBER || "8801714133725"; // studio WhatsApp, from the artist's portfolio
 const OUT = "dist";
 const BUILD = Date.now().toString(36); // added to asset URLs so browsers fetch fresh CSS/JS after each publish
