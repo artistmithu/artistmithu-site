@@ -523,6 +523,7 @@ const PROFILE_FIELDS = [
   ["education", "শিক্ষা", "প্রতি লাইনে একটি: সাল, ডিগ্রি, প্রতিষ্ঠান", 3],
   ["awards", "পুরস্কার ও ফেলোশিপ", "প্রতি লাইনে একটি", 4],
   ["collections", "সংগ্রহ", "যেখানে আপনার কাজ সংগ্রহে আছে, প্রতি লাইনে একটি", 4],
+  ["email", "যোগাযোগের ইমেইল", "যোগাযোগ পাতায় দেখাবে (শুধু ইংরেজি ঘরে)", 1],
 ];
 async function upFile(folder, f) {
   const path = `${folder}/${Date.now()}-${f.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-")}`;

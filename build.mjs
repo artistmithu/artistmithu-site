@@ -215,6 +215,15 @@ files["index.html"] = page({
   <p><a class="btn" href="#journey">${bi(["Follow the journey", "যাত্রাটা দেখুন"])}</a></p></div>
   ${heroPhoto ? `<a class="hero-img" href="/works/"><img src="${img(heroPhoto)}" alt="Works by Tanvirul Islam Mithu on an exhibition wall"></a>` : heroImg ? `<a class="hero-img" href="/works/${heroWork.slug}/"><img src="${img(heroImg.path)}" alt="${esc(heroWork.title_en)}"></a>` : ""}
   </div></section>
+  ${(() => { // Current practice first: a jury wants to see what the artist is doing now.
+    const recent = works.filter((w) => w.year >= 2020 && w.images[0] && w !== heroWork).sort((a, b) => (b.year - a.year) || ((b.featured ? 1 : 0) - (a.featured ? 1 : 0)) || ((a.sort ?? 0) - (b.sort ?? 0))).slice(0, 6);
+    const now = exhibitions.filter((x) => x.slug && x.published !== false && x.start_date).sort((x, y) => String(y.start_date).localeCompare(String(x.start_date))).slice(0, 3);
+    if (!recent.length && !now.length) return "";
+    return `<section class="wrap" id="now"><h2 class="sec">${bi(["Current work", "এখনকার কাজ"])}</h2>
+    ${recent.length ? `<div class="grid">${recent.map((w) => card(w, { plain: true })).join("")}</div>` : ""}
+    ${now.length ? `<h3 class="minor">${bi(["Recent exhibitions", "সাম্প্রতিক প্রদর্শনী"])}</h3><div class="shows">${now.map((e) => `<a class="show" href="/shows/${e.slug}/">${e.cover_path ? `<img src="${img(e.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<span class="eyebrow">${e.start_date.slice(0, 4)}</span><strong>${esc(e.title)}</strong><span class="note">${esc(e.venue || "")}</span></a>`).join("")}</div>` : ""}
+    <p><a class="btn" href="/shows/">${bi(["All exhibitions", "সব প্রদর্শনী"])}</a> <a class="btn alt" href="/about/">${bi(["CV", "সিভি"])}</a></p></section>`;
+  })()}
   <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap${journeyPic ? "" : " solo"}">
   ${journeyPic}
   <div>${biText(C.journey, journeyList)}<p><a href="/about/">${bi(["Full biography and CV", "পূর্ণ জীবনী ও সিভি"])} →</a></p></div></div></section>
@@ -227,7 +236,7 @@ files["index.html"] = page({
   <section class="wrap"><h2 class="sec">${bi(["Chapters of a life", "জীবনের অধ্যায়"])}</h2><div class="chapters">
   ${chaptersShown().map((s) => { const n = works.filter((w) => w.series_id === s.id).sort(byYearThenSort); const cover = n[0]?.images[0]; return `<a class="chapter" href="/chapters/${s.slug}/">${cover ? `<img src="${img(cover.path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(s.title_en)}</strong><small lang="bn">${esc(s.title_bn || "")}</small><span class="note">${n.length} ${n.length === 1 ? "work" : "works"}</span></a>`; }).join("")}
   </div>${bookShelf()}</section>
-  <section class="wrap"><h2 class="sec">${bi(["Selected works", "নির্বাচিত কাজ"])}</h2><div class="grid">${featured.map((w) => card(w, { plain: true })).join("")}</div><p><a class="btn" href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></section>
+  <section class="wrap"><h2 class="sec">${bi(["From the earlier years", "আগের বছরগুলো থেকে"])}</h2><div class="grid">${featured.map((w) => card(w, { plain: true })).join("")}</div><p><a class="btn" href="/works/">${bi(["See all works", "সব কাজ দেখুন"])}</a></p></section>
   ${posts.length ? `<section class="wrap"><h2 class="sec">${bi(["From the journal", "জার্নাল থেকে"])}</h2><div class="shows">${posts.slice(0, 3).map((p) => `<a class="show" href="/journal/${p.slug}/">${p.cover_path ? `<img src="${img(p.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<strong>${esc(p.title_en)}</strong></a>`).join("")}</div></section>` : ""}`,
 });
 
@@ -351,7 +360,7 @@ files["contact/index.html"] = page({
   path: "/contact/",
   body: `<div class="wrap prose"><h1 class="page-title">${bi(["Contact", "যোগাযোগ"])}</h1>
   <p>${bi(["Ask about a work, a commission or an exhibition. Replies usually within a day.", "কোনো কাজ, অর্ডারে আঁকা বা প্রদর্শনী নিয়ে জানতে লিখুন। সাধারণত এক দিনের মধ্যে উত্তর দেওয়া হয়।"])}</p>
-  ${WHATSAPP ? `<p><a class="btn" href="https://wa.me/${WHATSAPP}" rel="noopener">WhatsApp</a></p>` : ""}
+  ${C.email?.en || WHATSAPP ? `<p>${C.email?.en ? `<a class="btn" href="mailto:${esc(C.email.en.trim())}">${esc(C.email.en.trim())}</a> ` : ""}${WHATSAPP ? `<a class="btn alt" href="https://wa.me/${WHATSAPP}" rel="noopener">WhatsApp</a>` : ""}</p>` : ""}
   <form class="enq" id="contactForm"><input name="name" required placeholder="Name / নাম"><input name="contact" required placeholder="Email or phone / ইমেইল বা ফোন">
   <textarea name="message" rows="5" placeholder="Message / বার্তা"></textarea><button class="btn" type="submit">${bi(["Send", "পাঠান"])}</button><p class="note" hidden></p></form></div>`,
 });
