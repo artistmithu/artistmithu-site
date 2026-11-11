@@ -238,3 +238,19 @@ form.bid .msg.ok{background:var(--ok);color:#fff;padding:8px 10px;border-radius:
 .sharebar a,.sharebar button{border:1px solid var(--line);border-radius:999px;padding:5px 12px;background:var(--sheet);color:var(--ink);text-decoration:none;font-size:14px}
 .sharebar a:hover,.sharebar button:hover{border-color:var(--accent);color:var(--accent)}
 #now h3.minor{font-size:18px;font-weight:600;margin:36px 0 12px}
+.cv{max-width:760px;font-size:15px;line-height:1.5}
+.cv h1{font-size:34px;margin:8px 0 2px}
+.cv .who{margin:0;color:var(--ink-soft)}
+.cv .contact{margin:4px 0 20px}
+.cv h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:24px 0 8px;padding-bottom:4px;border-bottom:1px solid currentColor}
+.cv ul.cvl{list-style:none;margin:0;padding:0}
+.cv ul.cvl li{display:grid;grid-template-columns:56px 1fr;gap:8px;margin:0 0 6px}
+.cv .y{font-variant-numeric:tabular-nums;font-weight:600}
+.cv a{color:inherit}
+@media print{
+  header.top,footer,.tray,.noprint,#tray{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .cv{max-width:none;font-size:11pt}
+  .cv a{text-decoration:none}
+  @page{margin:16mm}
+}

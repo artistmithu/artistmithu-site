@@ -222,7 +222,7 @@ files["index.html"] = page({
     return `<section class="wrap" id="now"><h2 class="sec">${bi(["Current work", "এখনকার কাজ"])}</h2>
     ${recent.length ? `<div class="grid">${recent.map((w) => card(w, { plain: true })).join("")}</div>` : ""}
     ${now.length ? `<h3 class="minor">${bi(["Recent exhibitions", "সাম্প্রতিক প্রদর্শনী"])}</h3><div class="shows">${now.map((e) => `<a class="show" href="/shows/${e.slug}/">${e.cover_path ? `<img src="${img(e.cover_path)}" alt="" loading="lazy">` : `<span class="empty"></span>`}<span class="eyebrow">${e.start_date.slice(0, 4)}</span><strong>${esc(e.title)}</strong><span class="note">${esc(e.venue || "")}</span></a>`).join("")}</div>` : ""}
-    <p><a class="btn" href="/shows/">${bi(["All exhibitions", "সব প্রদর্শনী"])}</a> <a class="btn alt" href="/about/">${bi(["CV", "সিভি"])}</a></p></section>`;
+    <p><a class="btn" href="/shows/">${bi(["All exhibitions", "সব প্রদর্শনী"])}</a> <a class="btn alt" href="/cv/">${bi(["CV", "সিভি"])}</a></p></section>`;
   })()}
   <section class="wrap" id="journey"><h2 class="sec">${bi(["The journey", "যাত্রা"])}</h2><div class="journey-wrap${journeyPic ? "" : " solo"}">
   ${journeyPic}
@@ -480,7 +480,7 @@ for (const w of works) {
   if (inShows.length && files[f]) files[f] = files[f].replace("<!--SHOWS-->", `<dt>${bi(["Shown in", "প্রদর্শিত"])}</dt><dd>${inShows.map((e) => `<a href="/shows/${e.slug}/">${esc(e.title)}</a>`).join(", ")}</dd>`);
 }
 
-const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/contact/", ...(posts.length ? ["/journal/", ...posts.map((p) => `/journal/${p.slug}/`)] : []), ...chaptersShown().map((s) => `/chapters/${s.slug}/`), ...(booksShown().length ? ["/sketchbooks/", ...booksShown().map((b) => `/sketchbooks/${b.slug}/`)] : []), ...works.map((w) => `/works/${w.slug}/`)];
+const urls = ["/", "/works/", "/chapters/", "/shows/", "/videos/", ...shows.map((e) => `/shows/${e.slug}/`), "/about/", "/cv/", "/contact/", ...(posts.length ? ["/journal/", ...posts.map((p) => `/journal/${p.slug}/`)] : []), ...chaptersShown().map((s) => `/chapters/${s.slug}/`), ...(booksShown().length ? ["/sketchbooks/", ...booksShown().map((b) => `/sketchbooks/${b.slug}/`)] : []), ...works.map((w) => `/works/${w.slug}/`)];
 files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${SITE}${u}</loc></url>`).join("")}</urlset>`;
 files["robots.txt"] = `User-agent: *\nDisallow: /admin/\nDisallow: /c/\nSitemap: ${SITE}/sitemap.xml\n`;
 // Old WordPress URLs -> new pages
@@ -514,7 +514,7 @@ files["about/index.html"] = page({
   body: `<div class="wrap about"><h1 class="page-title">${bi(["About", "পরিচিতি"])}</h1>
   <div class="about-top">${portrait ? `<img class="portrait" src="${img(portrait)}" alt="Tanvirul Islam Mithu">` : ""}
   <div class="prose">${C.statement ? `<blockquote class="statement">${biText(C.statement, paras)}</blockquote>` : ""}${biText(C.bio, paras)}
-  ${C.cv_pdf?.en ? `<p><a class="btn" href="${img(C.cv_pdf.en)}" download>${bi(["Download CV (PDF)", "সিভি ডাউনলোড (PDF)"])}</a></p>` : ""}</div></div>
+  <p><a class="btn" href="/cv/">${bi(["CV (one page, PDF)", "সিভি (এক পাতায়, PDF)"])}</a>${C.cv_pdf?.en ? ` <a class="btn alt" href="${img(C.cv_pdf.en)}" download>${bi(["Download CV file", "সিভি ফাইল ডাউনলোড"])}</a>` : ""}</p></div></div>
   ${photoGrid(studio.filter((p) => !p.series_id), ["In the studio", "স্টুডিওতে"])}
   <div class="cvgrid">
   ${C.education ? `<section><h2 class="sec">${bi(["Education", "শিক্ষা"])}</h2>${biList(C.education)}</section>` : ""}
@@ -524,6 +524,31 @@ files["about/index.html"] = page({
   ${C.collections ? `<section><h2 class="sec">${bi(["Collections", "সংগ্রহ"])}</h2>${biList(C.collections)}</section>` : ""}
   </div></div>`,
 });
+
+// CV: one printable page in English, the form fellowship juries ask for. "Save as PDF" prints it.
+{
+  const yr = (e) => (e.start_date || "").slice(0, 4);
+  const place = (e) => [e.venue, e.city, e.country].filter(Boolean).join(", ");
+  const exLine = (e) => `<li><span class="y">${yr(e)}</span><span><a href="${SITE}/shows/${e.slug}/"><i>${esc(e.title)}</i></a>${place(e) ? `, ${esc(place(e))}` : ""}</span></li>`;
+  const yrList = (r) => r?.en ? `<ul class="cvl">${lines(r.en).map((l) => { const m = l.match(/^(\S+)(?:\s{2,}|\t)(.+)$/); return m ? `<li><span class="y">${m[1]}</span><span>${m[2]}</span></li>` : `<li><span class="y"></span><span>${l}</span></li>`; }).join("")}</ul>` : "";
+  const byDate = (a, b) => String(b.start_date).localeCompare(String(a.start_date));
+  const email = C.email?.en?.trim();
+  files["cv/index.html"] = page({
+    title: "CV | Tanvirul Islam Mithu",
+    desc: "Curriculum vitae of Bangladeshi visual artist Tanvirul Islam Mithu: education, solo exhibitions and web shows, group exhibitions, fellowships and collections.",
+    path: "/cv/",
+    body: `<div class="wrap cv"><p class="noprint"><button type="button" class="btn" onclick="print()">${bi(["Save as PDF / Print", "PDF হিসেবে সেভ / প্রিন্ট"])}</button> <a class="btn alt" href="/about/">${bi(["Biography", "জীবনী"])}</a></p>
+    <h1>Tanvirul Islam Mithu</h1><p class="who">Visual artist · Dhaka, Bangladesh · Born 1970s</p>
+    <p class="contact">${email ? `<a href="mailto:${esc(email)}">${esc(email)}</a> · ` : ""}<a href="${SITE}/">${SITE.replace(/^https?:\/\//, "")}</a>${WHATSAPP ? ` · +${WHATSAPP}` : ""}</p>
+    ${C.education ? `<h2>Education</h2>${yrList(C.education)}` : ""}
+    ${soloShows.length ? `<h2>Solo exhibitions and web shows</h2><ul class="cvl">${[...soloShows].sort(byDate).map(exLine).join("")}</ul>` : ""}
+    ${groupShows.length ? `<h2>Selected group exhibitions</h2><ul class="cvl">${[...groupShows].sort(byDate).map(exLine).join("")}</ul>` : ""}
+    ${C.awards ? `<h2>Fellowships and awards</h2>${yrList(C.awards)}` : ""}
+    ${C.collections ? `<h2>Collections</h2>${yrList(C.collections)}` : ""}
+    <h2>Online</h2><ul class="cvl"><li><span class="y"></span><span>Portfolio and archive: <a href="${SITE}/">${SITE.replace(/^https?:\/\//, "")}</a> (${works.length} works)</span></li><li><span class="y"></span><span>Web shows: linesof.life</span></li></ul>
+    </div>`,
+  });
+}
 
 // Journal ----------------------------------------------------------------------------
 const postDate = (p) => fmtDate(p.published_at);
