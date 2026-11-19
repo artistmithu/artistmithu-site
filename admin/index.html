@@ -37,6 +37,15 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
 .pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:420px;overflow:auto}
 .pick label{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px;color:var(--ink)}
 .pick img{width:100%;aspect-ratio:1;object-fit:cover}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.stat{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:10px}.stat .s{font-size:12px;color:var(--soft)}.stat b{display:block;font-size:20px;font-family:"IBM Plex Mono",monospace}
+.k-expense{color:var(--bad)}.k-income{color:var(--ok)}.k-receivable{color:var(--accent)}.k-payable{color:#b26b00}
+@media (prefers-color-scheme:dark){.k-payable{color:#f0b35a}}
+table.lg{width:100%;border-collapse:collapse;font-size:14px;background:var(--sheet)}table.lg td,table.lg th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}table.lg td.n,table.lg th.n{text-align:right;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+table.lg .s{font-size:12px;color:var(--soft)}
+.scroll{overflow-x:auto}
+.bar{height:8px;background:var(--bad);border-radius:4px;opacity:.7;margin-top:7px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{background:transparent;color:var(--ink);border-color:var(--line)}.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 </style>
 </head>
 <body><div class="wrap">
@@ -52,7 +61,7 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
 </section>
 
 <section id="app" hidden>
-  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button><button data-tab="profile" aria-pressed="false">পরিচিতি ও সিভি</button><button data-tab="journal" aria-pressed="false">জার্নাল</button><button data-tab="books" aria-pressed="false">স্কেচখাতা</button></nav>
+  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button><button data-tab="profile" aria-pressed="false">পরিচিতি ও সিভি</button><button data-tab="journal" aria-pressed="false">জার্নাল</button><button data-tab="books" aria-pressed="false">স্কেচখাতা</button><button data-tab="ledger" aria-pressed="false">হিসাব</button></nav>
 
   <div data-pane="works">
     <div class="row" style="margin-bottom:10px"><input id="q" placeholder="নাম বা ইনভেন্টরি দিয়ে খুঁজুন"><select id="fStatus"><option value="">সব</option><option value="nosize">মাপ নেই</option><option value="available">উপলব্ধ</option><option value="sold">বিক্রিত</option><option value="draft">অপ্রকাশিত</option></select><button id="newWork">+ নতুন কাজ</button></div>
@@ -113,6 +122,23 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
     <div id="postEditor" class="panel" hidden></div>
     <div id="posts" class="list"></div>
   </div>
+  <div data-pane="ledger" hidden>
+    <div class="panel" id="lgForm">
+      <strong id="lgTitle">নতুন এন্ট্রি</strong>
+      <div class="seg" id="lgKind"><button type="button" data-k="expense" aria-pressed="true">খরচ</button><button type="button" data-k="income" aria-pressed="false">আয়</button><button type="button" data-k="receivable" aria-pressed="false">পাওনা (আমি পাব)</button><button type="button" data-k="payable" aria-pressed="false">দেনা (আমি দেব)</button></div>
+      <div class="row"><label>তারিখ<input id="lgDate" type="date"></label><label>টাকা (৳) *<input id="lgAmt" type="number" inputmode="decimal" min="0" step="any"></label>
+        <label>খাত<input id="lgCat" list="lgCats" placeholder="যেমন: রং ও ক্যানভাস"></label>
+        <label id="lgPartyL">কোথায় / কাকে দিলাম<input id="lgParty" list="lgParties" placeholder="দোকান বা মানুষের নাম"></label></div>
+      <div class="row"><label>মাধ্যম<select id="lgMethod"><option value="">—</option><option>নগদ</option><option>বিকাশ</option><option>Nagad</option><option>রকেট</option><option>ব্যাংক</option><option>কার্ড</option></select></label>
+        <label id="lgDueL" hidden>কবে দেওয়ার কথা<input id="lgDue" type="date"></label>
+        <label style="grid-column:span 2">নোট<input id="lgNote" placeholder="কী কেনা হলো, কোন কাজের জন্য ইত্যাদি"></label></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="lgSave">সংরক্ষণ</button><button class="alt" id="lgCancel" type="button" hidden>সম্পাদনা বাতিল</button></div>
+      <datalist id="lgCats"></datalist><datalist id="lgParties"></datalist>
+    </div>
+    <div class="row" style="margin:14px 0 8px;align-items:end"><label>মাস<input id="lgMonth" type="month"></label><label>খুঁজুন<input id="lgQ" placeholder="খাত, নাম বা নোট"></label><button class="alt" id="lgCsv" type="button">এই মাসের হিসাব ডাউনলোড (CSV)</button></div>
+    <div id="lgStats" class="stats"></div>
+    <div id="lgBody"></div>
+  </div>
 </section>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -160,7 +186,7 @@ async function onSession(session) {
 document.querySelectorAll("nav.tabs button").forEach((b) => (b.onclick = () => {
   document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-pressed", x === b));
   document.querySelectorAll("[data-pane]").forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
-  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs, profile: loadProfile, journal: loadPosts, books: loadBooks })[b.dataset.tab]?.();
+  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs, profile: loadProfile, journal: loadPosts, books: loadBooks, ledger: loadLedger })[b.dataset.tab]?.();
 }));
 
 async function load() {
@@ -665,6 +691,148 @@ async function loadSubs() {
   const { data } = await sb.from("subscribers").select("*").order("created_at", { ascending: false });
   $("#subs").innerHTML = `<p>${(data || []).length} জন সাবস্ক্রাইবার</p>` + (data || []).map((s) => `<div class="s mono">${esc(s.email)} · ${s.lang}</div>`).join("");
 }
+
+// হিসাব (accounts) ------------------------------------------------------------------
+// Daily and monthly spending, income, and money owed (পাওনা) or owing (দেনা). Admin-only table `ledger` (migration 013).
+const LG_KIND = { expense: "খরচ", income: "আয়", receivable: "পাওনা", payable: "দেনা" };
+const LG_PARTY = { expense: "কোথায় / কাকে দিলাম", income: "কার কাছ থেকে", receivable: "কার কাছে পাব", payable: "কাকে দেব" };
+const LG_CATS = {
+  expense: ["রং ও ক্যানভাস", "কাগজ ও কালি", "ফ্রেম ও বাঁধাই", "স্টুডিও ভাড়া", "বিদ্যুৎ ও ইন্টারনেট", "মোবাইল", "যাতায়াত", "খাবার", "কুরিয়ার", "প্রিন্টিং", "প্রদর্শনী", "সহকারীর মজুরি", "সংসার", "চিকিৎসা", "অন্যান্য"],
+  income: ["ছবি বিক্রি", "প্রিন্ট বিক্রি", "কমিশন কাজ", "কর্মশালা ও ক্লাস", "সম্মানী", "অন্যান্য"],
+  receivable: ["ছবি বিক্রি", "কমিশন কাজ", "ধার দিয়েছি", "অন্যান্য"],
+  payable: ["ধার নিয়েছি", "বাকিতে কেনা", "ভাড়া", "মজুরি", "অন্যান্য"],
+};
+const lgToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+const tk = (n) => "৳" + Number(n || 0).toLocaleString("bn-BD", { maximumFractionDigits: 2 });
+const lgDay = (d) => new Date(d + "T00:00:00").toLocaleDateString("bn-BD", { day: "numeric", month: "short", weekday: "short" });
+const sum = (rows, k) => rows.filter((r) => !k || r.kind === k).reduce((a, r) => a + Number(r.amount), 0);
+let lgKind = "expense", lgEditing = null, lgRows = [], lgOpen = [], lgUsed = { cats: [], parties: [] };
+
+function lgSetKind(k) {
+  lgKind = k;
+  document.querySelectorAll("#lgKind button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.k === k));
+  $("#lgPartyL").firstChild.textContent = LG_PARTY[k];
+  $("#lgDueL").hidden = !(k === "receivable" || k === "payable");
+  const cats = [...new Set([...LG_CATS[k], ...lgUsed.cats])];
+  $("#lgCats").innerHTML = cats.map((c) => `<option value="${esc(c)}">`).join("");
+}
+document.querySelectorAll("#lgKind button").forEach((b) => (b.onclick = () => lgSetKind(b.dataset.k)));
+
+function lgReset() {
+  lgEditing = null; ["#lgAmt", "#lgCat", "#lgParty", "#lgNote", "#lgDue"].forEach((id) => ($(id).value = "")); $("#lgMethod").value = "";
+  $("#lgDate").value = lgToday(); $("#lgTitle").textContent = "নতুন এন্ট্রি"; $("#lgSave").textContent = "সংরক্ষণ"; $("#lgCancel").hidden = true;
+  lgSetKind(lgKind);
+}
+$("#lgCancel").onclick = lgReset;
+
+$("#lgSave").onclick = async () => {
+  const amount = +$("#lgAmt").value;
+  if (!(amount > 0)) return toast("টাকার পরিমাণ লিখুন");
+  const owe = lgKind === "receivable" || lgKind === "payable";
+  if (owe && !$("#lgParty").value.trim()) return toast("কার কাছে পাওনা বা কাকে দেনা, নামটা লিখুন");
+  const row = { kind: lgKind, amount, entry_date: $("#lgDate").value || lgToday(), category: $("#lgCat").value.trim() || null, party: $("#lgParty").value.trim() || null,
+    method: $("#lgMethod").value || null, note: $("#lgNote").value.trim() || null, due_date: owe ? $("#lgDue").value || null : null, updated_at: new Date().toISOString() };
+  $("#lgSave").disabled = true;
+  const { error } = lgEditing ? await sb.from("ledger").update(row).eq("id", lgEditing) : await sb.from("ledger").insert(row);
+  $("#lgSave").disabled = false;
+  if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+  toast(lgEditing ? "পরিবর্তন সংরক্ষণ হয়েছে" : `${LG_KIND[lgKind]} ${tk(amount)} যোগ হয়েছে`);
+  const m = row.entry_date.slice(0, 7); if ($("#lgMonth").value !== m) $("#lgMonth").value = m;
+  lgReset(); loadLedger();
+};
+
+function lgEdit(r) {
+  lgEditing = r.id; lgSetKind(r.kind);
+  $("#lgAmt").value = +r.amount; $("#lgDate").value = r.entry_date; $("#lgCat").value = r.category || ""; $("#lgParty").value = r.party || "";
+  $("#lgMethod").value = r.method || ""; $("#lgNote").value = r.note || ""; $("#lgDue").value = r.due_date || "";
+  $("#lgTitle").textContent = "এন্ট্রি সম্পাদনা"; $("#lgSave").textContent = "পরিবর্তন সংরক্ষণ"; $("#lgCancel").hidden = false;
+  $("#lgForm").scrollIntoView({ behavior: "smooth" });
+}
+
+async function loadLedger() {
+  if (!$("#lgDate").value) lgReset();
+  if (!$("#lgMonth").value) $("#lgMonth").value = lgToday().slice(0, 7);
+  const m = $("#lgMonth").value, [y, mo] = m.split("-").map(Number);
+  const next = mo === 12 ? `${y + 1}-01-01` : `${y}-${String(mo + 1).padStart(2, "0")}-01`;
+  const [a, b, c] = await Promise.all([
+    sb.from("ledger").select("*").gte("entry_date", `${m}-01`).lt("entry_date", next).order("entry_date", { ascending: false }).order("created_at", { ascending: false }),
+    sb.from("ledger").select("*").in("kind", ["receivable", "payable"]).eq("settled", false).order("entry_date"),
+    sb.from("ledger").select("kind,amount,entry_date,category,party").eq("entry_date", lgToday()),
+  ]);
+  const err = a.error || b.error || c.error;
+  if (err) { $("#lgStats").innerHTML = ""; $("#lgBody").innerHTML = `<p class="panel">হিসাব আনা যায়নি: ${esc(err.message)}। ডেটাবেস আপডেট (supabase/013_ledger.sql) চালানো না হলে এটা দেখাবে।</p>`; return; }
+  lgRows = a.data || []; lgOpen = b.data || [];
+  const all = [...lgRows, ...lgOpen];
+  lgUsed = { cats: [...new Set(all.map((r) => r.category).filter(Boolean))], parties: [...new Set(all.map((r) => r.party).filter(Boolean))] };
+  $("#lgParties").innerHTML = lgUsed.parties.map((p) => `<option value="${esc(p)}">`).join("");
+  lgSetKind(lgKind);
+  const today = c.data || [], exp = sum(lgRows, "expense"), inc = sum(lgRows, "income");
+  const isThisMonth = m === lgToday().slice(0, 7);
+  const daysSoFar = isThisMonth ? +lgToday().slice(8) : new Date(y, mo, 0).getDate();
+  $("#lgStats").innerHTML = [
+    ["আজকের খরচ", tk(sum(today, "expense")), "k-expense", sum(today, "income") ? `আজ আয় ${tk(sum(today, "income"))}` : ""],
+    ["এই মাসের খরচ", tk(exp), "k-expense", `দিনে গড়ে ${tk(Math.round(exp / daysSoFar))}`],
+    ["এই মাসের আয়", tk(inc), "k-income", ""],
+    ["মাসের ব্যালান্স", (inc - exp < 0 ? "−" : "") + tk(Math.abs(inc - exp)), inc - exp < 0 ? "k-expense" : "k-income", "আয় থেকে খরচ বাদে"],
+    ["মোট পাওনা বাকি", tk(sum(lgOpen, "receivable")), "k-receivable", `${lgOpen.filter((r) => r.kind === "receivable").length.toLocaleString("bn-BD")}টি, আমি পাব`],
+    ["মোট দেনা বাকি", tk(sum(lgOpen, "payable")), "k-payable", `${lgOpen.filter((r) => r.kind === "payable").length.toLocaleString("bn-BD")}টি, আমি দেব`],
+  ].map(([t, v, cl, sub]) => `<div class="stat"><div class="s">${t}</div><b class="${cl}">${v}</b>${sub ? `<div class="s">${sub}</div>` : ""}</div>`).join("");
+  lgRender();
+}
+
+function lgRender() {
+  const q = $("#lgQ").value.trim().toLowerCase();
+  const late = (r) => r.due_date && r.due_date < lgToday();
+  const openTbl = lgOpen.length ? `<h3>বাকি পাওনা ও দেনা <span class="s">(সব মাসের)</span></h3><div class="scroll"><table class="lg"><tr><th>তারিখ</th><th>ধরন</th><th>নাম</th><th>বিবরণ</th><th class="n">টাকা</th><th></th></tr>${lgOpen.map((r) => `<tr>
+      <td>${lgDay(r.entry_date)}${r.due_date ? `<div class="s" ${late(r) ? 'style="color:var(--bad)"' : ""}>দেওয়ার কথা ${lgDay(r.due_date)}${late(r) ? " · দেরি" : ""}</div>` : ""}</td>
+      <td class="k-${r.kind}">${LG_KIND[r.kind]}</td><td><b>${esc(r.party || "")}</b></td><td>${esc([r.category, r.note].filter(Boolean).join(" · "))}</td><td class="n">${tk(r.amount)}</td>
+      <td data-settlecell="${r.id}"><button class="alt" data-settle="${r.id}">${r.kind === "receivable" ? "পেয়েছি" : "দিয়েছি"}</button> <button class="alt" data-lgedit="${r.id}">সম্পাদনা</button></td></tr>`).join("")}</table></div>` : "";
+  const days = {}; lgRows.forEach((r) => { if (r.kind === "expense" || r.kind === "income") { const d = (days[r.entry_date] ||= { expense: 0, income: 0 }); d[r.kind] += Number(r.amount); } });
+  const dayTbl = Object.keys(days).length ? `<h3>দিন অনুযায়ী</h3><div class="scroll"><table class="lg"><tr><th>দিন</th><th class="n">খরচ</th><th class="n">আয়</th></tr>${Object.entries(days).sort((x, z) => (x[0] < z[0] ? 1 : -1)).map(([d, v]) => `<tr><td>${lgDay(d)}</td><td class="n k-expense">${v.expense ? tk(v.expense) : "—"}</td><td class="n k-income">${v.income ? tk(v.income) : "—"}</td></tr>`).join("")}</table></div>` : "";
+  const cats = {}; lgRows.filter((r) => r.kind === "expense").forEach((r) => (cats[r.category || "খাত নেই"] = (cats[r.category || "খাত নেই"] || 0) + Number(r.amount)));
+  const cmax = Math.max(1, ...Object.values(cats)), ctot = sum(lgRows, "expense") || 1;
+  const catTbl = Object.keys(cats).length ? `<h3>কোন খাতে কত খরচ</h3><div class="scroll"><table class="lg">${Object.entries(cats).sort((x, z) => z[1] - x[1]).map(([k, v]) => `<tr><td style="width:35%">${esc(k)}</td><td><div class="bar" style="width:${(v / cmax) * 100}%"></div></td><td class="n">${tk(v)} <span class="s">(${Math.round((v / ctot) * 100).toLocaleString("bn-BD")}%)</span></td></tr>`).join("")}</table></div>` : "";
+  const list = lgRows.filter((r) => !q || [r.category, r.party, r.note, r.method, LG_KIND[r.kind]].join(" ").toLowerCase().includes(q));
+  const entries = `<h3>এই মাসের সব এন্ট্রি <span class="s">(${list.length.toLocaleString("bn-BD")}টি)</span></h3>${list.length ? `<div class="scroll"><table class="lg"><tr><th>তারিখ</th><th>ধরন</th><th>খাত</th><th>কোথায় / কে</th><th>নোট</th><th class="n">টাকা</th><th></th></tr>${list.map((r) => `<tr>
+      <td>${lgDay(r.entry_date)}</td><td class="k-${r.kind}">${LG_KIND[r.kind]}${(r.kind === "receivable" || r.kind === "payable") && r.settled ? ' <span class="pill available">মিটেছে</span>' : ""}</td>
+      <td>${esc(r.category || "")}</td><td>${esc(r.party || "")}</td><td>${esc(r.note || "")}${r.method ? ` <span class="s">· ${esc(r.method)}</span>` : ""}</td><td class="n">${tk(r.amount)}</td>
+      <td style="white-space:nowrap"><button class="alt" data-lgedit="${r.id}">সম্পাদনা</button> <button class="danger" data-lgdel="${r.id}">মুছুন</button></td></tr>`).join("")}</table></div>` : `<p class="s">${q ? "কিছু পাওয়া যায়নি।" : "এই মাসে এখনো কোনো এন্ট্রি নেই। উপরে খরচ বা আয় লিখে সংরক্ষণ করুন।"}</p>`}`;
+  $("#lgBody").innerHTML = openTbl + dayTbl + catTbl + entries;
+}
+$("#lgMonth").onchange = loadLedger; $("#lgQ").oninput = lgRender;
+
+$("#lgBody").onclick = async (e) => {
+  const d = e.target.dataset, find = (id) => lgRows.find((r) => r.id === id) || lgOpen.find((r) => r.id === id);
+  if (d.lgedit) lgEdit(find(d.lgedit));
+  if (d.lgdel) {
+    if (d.sure !== "1") { e.target.dataset.sure = "1"; e.target.textContent = "নিশ্চিত?"; return; }
+    const { error } = await sb.from("ledger").delete().eq("id", d.lgdel);
+    toast(error ? "মোছা যায়নি: " + error.message : "মুছে ফেলা হয়েছে"); if (lgEditing === d.lgdel) lgReset(); loadLedger();
+  }
+  if (d.settle) {
+    // Settling can also book the money as income/expense today (a sale paid later), or just close it (a loan returned).
+    const r = find(d.settle), as = r.kind === "receivable" ? "আয়" : "খরচ";
+    e.target.closest("td").innerHTML = `<button data-settleas="${r.id}" title="আজকের ${as} হিসেবে যোগ হবে">মিটেছে, ${as} হিসেবেও লিখুন</button> <button class="alt" data-settleonly="${r.id}" title="ধার ফেরত পেলে বা দিলে">শুধু মিটেছে</button>`;
+  }
+  const sid = d.settleas || d.settleonly;
+  if (sid) {
+    const r = find(sid), today = lgToday();
+    const { error } = await sb.from("ledger").update({ settled: true, settled_on: today, updated_at: new Date().toISOString() }).eq("id", sid);
+    if (error) return toast("হয়নি: " + error.message);
+    if (d.settleas) {
+      const ins = await sb.from("ledger").insert({ kind: r.kind === "receivable" ? "income" : "expense", amount: r.amount, entry_date: today, category: r.category, party: r.party, note: `${r.kind === "receivable" ? "পাওনা আদায়" : "দেনা শোধ"}${r.note ? ": " + r.note : ""}` });
+      if (ins.error) return toast("মিটেছে, কিন্তু আয়/খরচ যোগ হয়নি: " + ins.error.message);
+    }
+    toast(r.kind === "receivable" ? `${r.party || ""}-এর পাওনা ${tk(r.amount)} মিটেছে` : `${r.party || ""}-এর দেনা ${tk(r.amount)} শোধ হয়েছে`); loadLedger();
+  }
+};
+
+$("#lgCsv").onclick = () => {
+  const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [["তারিখ", "ধরন", "খাত", "কোথায় / কে", "মাধ্যম", "নোট", "টাকা", "মিটেছে"], ...[...lgRows].reverse().map((r) => [r.entry_date, LG_KIND[r.kind], r.category, r.party, r.method, r.note, +r.amount, r.kind === "receivable" || r.kind === "payable" ? (r.settled ? "হ্যাঁ" : "না") : ""])];
+  const blob = new Blob(["﻿" + lines.map((l) => l.map(cell).join(",")).join("\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `hisab-${$("#lgMonth").value}.csv`; a.click();
+};
 
 $("#publish").onclick = async () => {
   $("#publish").disabled = true;
