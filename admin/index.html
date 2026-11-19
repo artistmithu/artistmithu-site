@@ -35,6 +35,7 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:8px 16px;border-radius:999px}
 .check{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:14px}.check input{width:auto}
 .pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:420px;overflow:auto}
+button.google{display:flex;gap:10px;align-items:center;justify-content:center;background:#fff;color:#1f1f1f;border-color:#dadce0;padding:9px 14px;font-weight:500}
 .pick label{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px;color:var(--ink)}
 .pick img{width:100%;aspect-ratio:1;object-fit:cover}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
@@ -74,10 +75,14 @@ table.lg{width:100%;border-collapse:collapse;font-size:14px}table.lg td,table.lg
 
 <section id="login" class="panel" style="max-width:420px;margin-top:24px">
   <strong>লগইন</strong>
-  <label>ইমেইল<input id="email" type="email" autocomplete="username"></label>
-  <label>পাসওয়ার্ড<input id="password" type="password" autocomplete="current-password"></label>
-  <button id="doLogin">লগইন</button>
-  <button id="doMagic" class="alt">পাসওয়ার্ড ছাড়া ইমেইলে লিংক পাঠান</button>
+  <p class="s" style="margin:0">একবার লগইন করলে এই ফোন বা কম্পিউটারে লগইন থেকে যাবে, লগআউট না করা পর্যন্ত আর চাইবে না।</p>
+  <button id="doGoogle" type="button" class="google"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg> Google দিয়ে লগইন</button>
+  <div class="s" style="text-align:center">অথবা</div>
+  <label>ইমেইল<input id="email" type="email" autocomplete="username" inputmode="email"></label>
+  <button id="doMagic">ইমেইলে লগইন লিংক পাঠান</button>
+  <details><summary class="s" style="cursor:pointer">পাসওয়ার্ড দিয়ে লগইন</summary>
+    <div style="display:grid;gap:8px;margin-top:8px"><label>পাসওয়ার্ড<input id="password" type="password" autocomplete="current-password"></label><button id="doLogin" class="alt">লগইন</button></div>
+  </details>
   <p id="loginMsg" class="s"></p>
 </section>
 
@@ -194,7 +199,8 @@ table.lg{width:100%;border-collapse:collapse;font-size:14px}table.lg td,table.lg
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
 const URL_ = "https://msbgnvltxoxrnvuriiez.supabase.co";
-const sb = createClient(URL_, "sb_publishable_vxt7vC2yHGGhMON90ZFnBw_PehR5Qod");
+// The session is kept in this browser and refreshed automatically, so a device stays logged in until "লগআউট".
+const sb = createClient(URL_, "sb_publishable_vxt7vC2yHGGhMON90ZFnBw_PehR5Qod", { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pub = (p) => `${URL_}/storage/v1/object/public/artworks/${p}`;
@@ -204,13 +210,22 @@ let hasMode = false; // true once migration 002 (price_mode) is applied
 const fxRate = () => { try { return +localStorage.getItem("fx") || 122; } catch { return 122; } };
 
 // Auth
+const back = () => location.origin + location.pathname;
+try { $("#email").value = localStorage.getItem("adminEmail") || ""; } catch {}
+const saveEmail = (e) => { try { if (e) localStorage.setItem("adminEmail", e); } catch {} };
+$("#doGoogle").onclick = async () => {
+  const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: back() } });
+  if (error) $("#loginMsg").textContent = /not enabled|provider/i.test(error.message) ? "Google লগইন এখনো চালু করা হয়নি। আপাতত ইমেইলের লিংক দিয়ে লগইন করুন।" : "লগইন হয়নি: " + error.message;
+};
 $("#doLogin").onclick = async () => {
-  const { error } = await sb.auth.signInWithPassword({ email: $("#email").value, password: $("#password").value });
+  const { error } = await sb.auth.signInWithPassword({ email: $("#email").value.trim(), password: $("#password").value });
   $("#loginMsg").textContent = error ? "লগইন হয়নি: " + error.message : "";
 };
 $("#doMagic").onclick = async () => {
-  const { error } = await sb.auth.signInWithOtp({ email: $("#email").value, options: { emailRedirectTo: location.href } });
-  $("#loginMsg").textContent = error ? error.message : "ইমেইলে লিংক পাঠানো হয়েছে।";
+  const email = $("#email").value.trim(); if (!email) return ($("#loginMsg").textContent = "ইমেইল লিখুন");
+  saveEmail(email);
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: back(), shouldCreateUser: false } });
+  $("#loginMsg").textContent = error ? error.message : "ইমেইলে লিংক পাঠানো হয়েছে। এই ফোনেই ইমেইলটা খুলে লিংকে চাপুন।";
 };
 $("#logout").onclick = () => sb.auth.signOut();
 // Supabase docs: don't await other Supabase calls inside this callback (it can lock); defer them.
@@ -220,6 +235,7 @@ async function onSession(session) {
   const on = !!session;
   $("#login").hidden = on; $("#app").hidden = !on; $("#logout").hidden = !on; $("#publish").hidden = !on;
   $("#who").textContent = session?.user?.email || "";
+  if (session?.user?.email) saveEmail(session.user.email);
   if (on) {
     if (started) return;
     const { data, error } = await sb.rpc("is_admin");

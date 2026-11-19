@@ -26,3 +26,7 @@ Create a deploy hook in Cloudflare Pages (Settings → Builds → Deploy hooks) 
 
 ## হিসাব (accounts) tab
 The studio panel has a private "হিসাব" tab: monthly income and spending with a daily chart and category totals, পাওনা/দেনা (money owed to or by the artist), projects with an optional budget (e.g. বাড়ি বানানো, যশোরের খরচ), and an import box that takes pasted CSV/JSON (for moving data over from the old "আমার দিন" page). Data lives in the admin-only `ledger` and `ledger_projects` tables; run `supabase/013_ledger.sql` once in the SQL editor before using it. Nothing from it is ever built into the public site.
+
+## Login
+The admin login keeps the session in the browser (refreshed automatically), so each device stays logged in until "লগআউট". Options: Google, an emailed login link (the address is remembered on the device), or password.
+To turn on Google: create an OAuth client (Web) in Google Cloud Console with the redirect URI `https://msbgnvltxoxrnvuriiez.supabase.co/auth/v1/callback`, then paste its Client ID and secret in Supabase → Authentication → Sign In / Providers → Google. In Supabase → Authentication → URL Configuration, add `https://artistmithu.com/admin/` to Redirect URLs. A Google account with the same email as the admin user links to it automatically.
