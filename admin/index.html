@@ -37,7 +37,37 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
 .pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:420px;overflow:auto}
 .pick label{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px;color:var(--ink)}
 .pick img{width:100%;aspect-ratio:1;object-fit:cover}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.stat{background:var(--sheet);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:10px 12px}.stat .s{font-size:12px;color:var(--soft)}.stat b{display:block;font-size:21px;font-family:"IBM Plex Mono",monospace;line-height:1.3}
+.st-expense{border-left-color:var(--bad)}.st-income{border-left-color:var(--ok)}.st-receivable{border-left-color:var(--accent)}.st-payable{border-left-color:var(--warn)}
+:root{--warn:#b26b00}@media (prefers-color-scheme:dark){:root{--warn:#f0b35a}}
+.k-expense{color:var(--bad)}.k-income{color:var(--ok)}.k-receivable{color:var(--accent)}.k-payable{color:var(--warn)}
+.k-bg-expense{background:var(--bad)}.k-bg-income{background:var(--ok)}.k-bg-receivable{background:var(--accent)}.k-bg-payable{background:var(--warn)}
+.lg-wrap{display:grid;gap:12px}.lg-wrap h3{margin:8px 0 4px}
+.lg-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.lg-month{display:flex;gap:8px;align-items:center}.lg-month b{font-size:20px}.lg-month .s{font-size:12px;color:var(--soft)}.lg-month input{width:auto;padding:4px 6px;font-size:13px}
+button.round{border-radius:999px;width:34px;height:34px;padding:0;font-size:18px;line-height:1}
+button.sm{padding:2px 8px;font-size:13px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{background:transparent;color:var(--ink);border-color:var(--line)}.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.lg-form summary{cursor:pointer;list-style:none}.lg-form summary::-webkit-details-marker{display:none}.lg-form:not([open]){padding:12px 16px}
+.lg-form input.big{font-size:22px;font-family:"IBM Plex Mono",monospace;padding:5px 9px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.hbar{display:grid;grid-template-columns:minmax(90px,32%) 1fr auto;gap:10px;align-items:center;font-size:14px;padding:3px 0}.hbar div{height:10px;background:var(--paper);border-radius:5px;overflow:hidden}.hbar i{display:block;height:100%;border-radius:5px;opacity:.75}.hbar b{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:13px;white-space:nowrap}.hbar .s{color:var(--soft);font-size:11px}
+.daychart{display:flex;align-items:flex-end;gap:2px;height:120px;padding-top:6px}.dc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0}.dc i{display:block;background:var(--bad);opacity:.6;border-radius:3px 3px 0 0;min-height:1px}.dc.today i{opacity:1}.dc span{font-size:10px;color:var(--soft);text-align:center;height:14px;line-height:14px}
+.day{margin:8px 0}.day-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;padding:4px 2px;border-bottom:1px solid var(--line)}
+.entry{display:grid;grid-template-columns:8px 1fr auto auto;gap:10px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--line)}
+.entry .dot{width:8px;height:8px;border-radius:50%}.entry .t{font-weight:600}.entry .s{font-size:13px;color:var(--soft)}
+.e-amt{font-family:"IBM Plex Mono",monospace;font-weight:500;white-space:nowrap}.e-act{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.tag{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.pcard{text-align:left;display:grid;gap:3px;background:var(--sheet);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px}.pcard.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}.pcard.done{opacity:.65}.pcard b{font-family:"IBM Plex Mono",monospace;font-size:20px}.pcard .s{font-size:12px;color:var(--soft)}
+.meter{height:8px;background:var(--paper);border-radius:4px;overflow:hidden;margin-top:4px}.meter i{display:block;height:100%;background:var(--ok)}
+table.lg{width:100%;border-collapse:collapse;font-size:14px}table.lg td,table.lg th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}table.lg .n{text-align:right;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+.scroll{overflow-x:auto}
+@media (max-width:560px){.entry{grid-template-columns:8px 1fr auto}.e-act{grid-column:2/4}.lg-month input{display:none}.stat b{font-size:18px}}
 </style>
+
 </head>
 <body><div class="wrap">
 <header><h1>স্টুডিও অ্যাডমিন</h1><span id="who" class="mono"></span><button id="publish" hidden title="নতুন তথ্য দিয়ে সাইট আবার তৈরি করুন">সাইটে প্রকাশ করুন</button><button id="logout" class="alt" hidden>লগআউট</button></header>
@@ -52,7 +82,7 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
 </section>
 
 <section id="app" hidden>
-  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button><button data-tab="profile" aria-pressed="false">পরিচিতি ও সিভি</button><button data-tab="journal" aria-pressed="false">জার্নাল</button><button data-tab="books" aria-pressed="false">স্কেচখাতা</button></nav>
+  <nav class="tabs"><button data-tab="works" aria-pressed="true">কাজ</button><button data-tab="shows" aria-pressed="false">প্রদর্শনী</button><button data-tab="inq" aria-pressed="false">জিজ্ঞাসা</button><button data-tab="client" aria-pressed="false">ক্লায়েন্ট লিংক</button><button data-tab="subs" aria-pressed="false">সাবস্ক্রাইবার</button><button data-tab="profile" aria-pressed="false">পরিচিতি ও সিভি</button><button data-tab="journal" aria-pressed="false">জার্নাল</button><button data-tab="books" aria-pressed="false">স্কেচখাতা</button><button data-tab="ledger" aria-pressed="false">হিসাব</button></nav>
 
   <div data-pane="works">
     <div class="row" style="margin-bottom:10px"><input id="q" placeholder="নাম বা ইনভেন্টরি দিয়ে খুঁজুন"><select id="fStatus"><option value="">সব</option><option value="nosize">মাপ নেই</option><option value="available">উপলব্ধ</option><option value="sold">বিক্রিত</option><option value="draft">অপ্রকাশিত</option></select><button id="newWork">+ নতুন কাজ</button></div>
@@ -113,6 +143,50 @@ label{display:grid;gap:3px;font-size:13px;color:var(--soft)}
     <div id="postEditor" class="panel" hidden></div>
     <div id="posts" class="list"></div>
   </div>
+  <div data-pane="ledger" hidden class="lg-wrap">
+    <div class="lg-head">
+      <div class="lg-month"><button class="alt round" id="lgPrev" type="button" aria-label="আগের মাস">‹</button><div><div class="s">মাস</div><b id="lgMonthName"></b></div><button class="alt round" id="lgNext" type="button" aria-label="পরের মাস">›</button><input id="lgMonth" type="month" aria-label="মাস বাছাই"></div>
+      <nav class="seg lg-views" id="lgViews"><button type="button" data-v="month" aria-pressed="true">মাসের হিসাব</button><button type="button" data-v="projects" aria-pressed="false">প্রজেক্ট</button><button type="button" data-v="owe" aria-pressed="false">পাওনা-দেনা</button><button type="button" data-v="import" aria-pressed="false">আমদানি</button></nav>
+    </div>
+    <div id="lgStats" class="stats"></div>
+
+    <details class="panel lg-form" id="lgForm" open>
+      <summary><strong id="lgTitle">+ নতুন এন্ট্রি</strong></summary>
+      <div class="seg" id="lgKind"><button type="button" data-k="expense" aria-pressed="true">খরচ</button><button type="button" data-k="income" aria-pressed="false">আয়</button><button type="button" data-k="receivable" aria-pressed="false">পাওনা (আমি পাব)</button><button type="button" data-k="payable" aria-pressed="false">দেনা (আমি দেব)</button></div>
+      <div class="row"><label>টাকা (৳) *<input id="lgAmt" class="big" type="number" inputmode="decimal" min="0" step="any" placeholder="০"></label><label>তারিখ<input id="lgDate" type="date"></label>
+        <label>খাত<input id="lgCat" list="lgCats" placeholder="যেমন: রং ও ক্যানভাস"></label>
+        <label>প্রজেক্ট<select id="lgProj"></select></label></div>
+      <div class="chips" id="lgChips"></div>
+      <div class="row"><label id="lgPartyL">কোথায় / কাকে দিলাম<input id="lgParty" list="lgParties" placeholder="দোকান বা মানুষের নাম"></label>
+        <label>মাধ্যম<select id="lgMethod"><option value="">—</option><option>নগদ</option><option>বিকাশ</option><option>Nagad</option><option>রকেট</option><option>ব্যাংক</option><option>কার্ড</option></select></label>
+        <label id="lgDueL" hidden>কবে দেওয়ার কথা<input id="lgDue" type="date"></label>
+        <label>নোট<input id="lgNote" placeholder="কী কেনা হলো, কোন কাজের জন্য"></label></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="lgSave">সংরক্ষণ</button><button class="alt" id="lgCancel" type="button" hidden>সম্পাদনা বাতিল</button></div>
+      <datalist id="lgCats"></datalist><datalist id="lgParties"></datalist>
+    </details>
+
+    <div data-lgv="month">
+      <div class="row" style="margin:6px 0;align-items:end"><label>খুঁজুন<input id="lgQ" placeholder="খাত, নাম, প্রজেক্ট বা নোট"></label><button class="alt" id="lgCsv" type="button">এই মাসের হিসাব ডাউনলোড (CSV)</button></div>
+      <div id="lgBody"></div>
+    </div>
+    <div data-lgv="projects" hidden>
+      <div style="margin:6px 0"><button id="lgNewProj" type="button">+ নতুন প্রজেক্ট</button></div>
+      <div id="lgProjEditor" class="panel" hidden></div>
+      <div id="lgProjects" class="cards"></div>
+      <div id="lgProjDetail"></div>
+    </div>
+    <div data-lgv="owe" hidden><div id="lgOwe"></div></div>
+    <div data-lgv="import" hidden>
+      <div class="panel">
+        <strong>অন্য জায়গা থেকে হিসাব আনুন</strong>
+        <p class="s">"আমার দিন" বা অন্য কোথাও থেকে হিসাব কপি করে নিচে পেস্ট করুন, অথবা CSV/JSON ফাইল দিন। প্রতি লাইনে একটা এন্ট্রি: তারিখ, ধরন (খরচ/আয়/পাওনা/দেনা), খাত, টাকা, নোট। কমা বা ট্যাব দিয়ে আলাদা করা যাবে। যেমন:<br><span class="mono">2026-11-02, খরচ, রং ও ক্যানভাস, 1250, নিউমার্কেট</span></p>
+        <label>পেস্ট করুন<textarea id="lgImpText" rows="8" placeholder="তারিখ, ধরন, খাত, টাকা, নোট"></textarea></label>
+        <div class="row"><label>অথবা ফাইল<input id="lgImpFile" type="file" accept=".csv,.json,.txt,text/csv,application/json"></label><label>প্রজেক্ট (ঐচ্ছিক)<select id="lgImpProj"></select></label></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="alt" id="lgImpCheck" type="button">দেখে নিন</button><button id="lgImpGo" type="button" hidden>আমদানি করুন</button></div>
+        <div id="lgImpOut"></div>
+      </div>
+    </div>
+  </div>
 </section>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -160,7 +234,7 @@ async function onSession(session) {
 document.querySelectorAll("nav.tabs button").forEach((b) => (b.onclick = () => {
   document.querySelectorAll("nav.tabs button").forEach((x) => x.setAttribute("aria-pressed", x === b));
   document.querySelectorAll("[data-pane]").forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
-  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs, profile: loadProfile, journal: loadPosts, books: loadBooks })[b.dataset.tab]?.();
+  ({ shows: loadShows, inq: loadInq, client: loadClient, subs: loadSubs, profile: loadProfile, journal: loadPosts, books: loadBooks, ledger: loadLedger })[b.dataset.tab]?.();
 }));
 
 async function load() {
@@ -665,6 +739,322 @@ async function loadSubs() {
   const { data } = await sb.from("subscribers").select("*").order("created_at", { ascending: false });
   $("#subs").innerHTML = `<p>${(data || []).length} জন সাবস্ক্রাইবার</p>` + (data || []).map((s) => `<div class="s mono">${esc(s.email)} · ${s.lang}</div>`).join("");
 }
+
+// হিসাব (accounts) ------------------------------------------------------------------
+// Monthly income and spending, পাওনা/দেনা, and per-project costs. Admin-only tables `ledger` and `ledger_projects` (migration 013).
+const LG_KIND = { expense: "খরচ", income: "আয়", receivable: "পাওনা", payable: "দেনা" };
+const LG_PARTY = { expense: "কোথায় / কাকে দিলাম", income: "কার কাছ থেকে", receivable: "কার কাছে পাব", payable: "কাকে দেব" };
+const LG_CATS = {
+  expense: ["রং ও ক্যানভাস", "কাগজ ও কালি", "ফ্রেম ও বাঁধাই", "স্টুডিও ভাড়া", "বাড়ি ভাড়া", "বিদ্যুৎ ও ইন্টারনেট", "মোবাইল", "যাতায়াত", "খাবার", "বাজার", "কুরিয়ার", "প্রিন্টিং", "প্রদর্শনী", "মজুরি", "নির্মাণ সামগ্রী", "সংসার", "চিকিৎসা", "অন্যান্য"],
+  income: ["ছবি বিক্রি", "প্রিন্ট বিক্রি", "কমিশন কাজ", "কর্মশালা ও ক্লাস", "সম্মানী", "অন্যান্য"],
+  receivable: ["ছবি বিক্রি", "কমিশন কাজ", "ধার দিয়েছি", "অন্যান্য"],
+  payable: ["ধার নিয়েছি", "বাকিতে কেনা", "ভাড়া", "মজুরি", "অন্যান্য"],
+};
+const BN_MONTHS = ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"];
+const lgToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+const bnNum = (n) => Number(n || 0).toLocaleString("bn-BD", { maximumFractionDigits: 2 });
+const tk = (n) => "৳" + bnNum(n);
+const lgDay = (d) => new Date(d + "T00:00:00").toLocaleDateString("bn-BD", { day: "numeric", month: "short", weekday: "short" });
+const lgMonthLabel = (m) => `${BN_MONTHS[+m.slice(5) - 1]} ${bnNum(+m.slice(0, 4)).replace(/,/g, "")}`;
+const sum = (rows, k) => rows.filter((r) => !k || r.kind === k).reduce((a, r) => a + Number(r.amount), 0);
+const isOwe = (k) => k === "receivable" || k === "payable";
+let lgKind = "expense", lgEditing = null, lgRows = [], lgOpen = [], lgProjects = [], lgProjRows = [], lgView = "month", lgProjOpen = null, lgUsed = { cats: [], parties: [] };
+const projName = (id) => lgProjects.find((p) => p.id === id)?.name || "";
+
+// Form -----------------------------------------------------------------------------
+function lgSetKind(k) {
+  lgKind = k;
+  document.querySelectorAll("#lgKind button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.k === k));
+  $("#lgPartyL").firstChild.textContent = LG_PARTY[k];
+  $("#lgDueL").hidden = !isOwe(k);
+  const cats = [...new Set([...lgUsed.cats, ...LG_CATS[k]])];
+  $("#lgCats").innerHTML = cats.map((c) => `<option value="${esc(c)}">`).join("");
+  $("#lgChips").innerHTML = LG_CATS[k].slice(0, 10).map((c) => `<button type="button" class="chip" data-chip="${esc(c)}">${esc(c)}</button>`).join("");
+}
+document.querySelectorAll("#lgKind button").forEach((b) => (b.onclick = () => lgSetKind(b.dataset.k)));
+$("#lgChips").onclick = (e) => { if (e.target.dataset.chip) { $("#lgCat").value = e.target.dataset.chip; $("#lgAmt").focus(); } };
+function lgProjOptions(sel, val) {
+  const active = lgProjects.filter((p) => !p.done || p.id === val);
+  sel.innerHTML = `<option value="">— কোনো প্রজেক্ট নয় —</option>` + active.map((p) => `<option value="${p.id}" ${p.id === val ? "selected" : ""}>${esc(p.name)}</option>`).join("");
+}
+
+function lgReset() {
+  lgEditing = null; ["#lgAmt", "#lgCat", "#lgParty", "#lgNote", "#lgDue"].forEach((id) => ($(id).value = "")); $("#lgMethod").value = "";
+  $("#lgDate").value = lgToday(); $("#lgTitle").textContent = "+ নতুন এন্ট্রি"; $("#lgSave").textContent = "সংরক্ষণ"; $("#lgCancel").hidden = true;
+  lgProjOptions($("#lgProj"), lgView === "projects" ? lgProjOpen : null);
+  lgSetKind(lgKind);
+}
+$("#lgCancel").onclick = lgReset;
+
+$("#lgSave").onclick = async () => {
+  const amount = +$("#lgAmt").value;
+  if (!(amount > 0)) return toast("টাকার পরিমাণ লিখুন");
+  if (isOwe(lgKind) && !$("#lgParty").value.trim()) return toast("কার কাছে পাওনা বা কাকে দেনা, নামটা লিখুন");
+  const row = { kind: lgKind, amount, entry_date: $("#lgDate").value || lgToday(), category: $("#lgCat").value.trim() || null, party: $("#lgParty").value.trim() || null,
+    method: $("#lgMethod").value || null, note: $("#lgNote").value.trim() || null, project_id: $("#lgProj").value || null,
+    due_date: isOwe(lgKind) ? $("#lgDue").value || null : null, updated_at: new Date().toISOString() };
+  $("#lgSave").disabled = true;
+  const { error } = lgEditing ? await sb.from("ledger").update(row).eq("id", lgEditing) : await sb.from("ledger").insert(row);
+  $("#lgSave").disabled = false;
+  if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+  toast(lgEditing ? "পরিবর্তন সংরক্ষণ হয়েছে" : `${LG_KIND[lgKind]} ${tk(amount)} যোগ হয়েছে${row.project_id ? ` (${projName(row.project_id)})` : ""}`);
+  const m = row.entry_date.slice(0, 7); if (lgView === "month" && $("#lgMonth").value !== m) $("#lgMonth").value = m;
+  if (!lgEditing) lgKind = "expense";
+  lgReset(); loadLedger();
+};
+
+function lgEdit(r) {
+  lgEditing = r.id; lgSetKind(r.kind);
+  $("#lgAmt").value = +r.amount; $("#lgDate").value = r.entry_date; $("#lgCat").value = r.category || ""; $("#lgParty").value = r.party || "";
+  $("#lgMethod").value = r.method || ""; $("#lgNote").value = r.note || ""; $("#lgDue").value = r.due_date || ""; lgProjOptions($("#lgProj"), r.project_id);
+  $("#lgTitle").textContent = "এন্ট্রি সম্পাদনা"; $("#lgSave").textContent = "পরিবর্তন সংরক্ষণ"; $("#lgCancel").hidden = false;
+  $("#lgForm").open = true; $("#lgForm").scrollIntoView({ behavior: "smooth" });
+}
+
+// Views and month navigation ------------------------------------------------------
+document.querySelectorAll("#lgViews button").forEach((b) => (b.onclick = () => {
+  lgView = b.dataset.v;
+  document.querySelectorAll("#lgViews button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  document.querySelectorAll("[data-lgv]").forEach((p) => (p.hidden = p.dataset.lgv !== lgView));
+  $("#lgForm").hidden = lgView === "import"; $("#lgStats").hidden = lgView !== "month";
+  document.querySelector(".lg-month").style.visibility = lgView === "month" ? "" : "hidden";
+  if (!lgEditing) lgProjOptions($("#lgProj"), lgView === "projects" ? lgProjOpen : null);
+  lgRenderView();
+}));
+const shiftMonth = (d) => { const [y, m] = $("#lgMonth").value.split("-").map(Number), t = new Date(y, m - 1 + d, 1); $("#lgMonth").value = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}`; loadLedger(); };
+$("#lgPrev").onclick = () => shiftMonth(-1); $("#lgNext").onclick = () => shiftMonth(1);
+$("#lgMonth").onchange = loadLedger; $("#lgQ").oninput = () => lgRenderMonth();
+
+async function loadLedger() {
+  if (!$("#lgMonth").value) $("#lgMonth").value = lgToday().slice(0, 7);
+  const m = $("#lgMonth").value, [y, mo] = m.split("-").map(Number);
+  $("#lgMonthName").textContent = lgMonthLabel(m);
+  const next = mo === 12 ? `${y + 1}-01-01` : `${y}-${String(mo + 1).padStart(2, "0")}-01`;
+  const [a, b, c, p, pr] = await Promise.all([
+    sb.from("ledger").select("*").gte("entry_date", `${m}-01`).lt("entry_date", next).order("entry_date", { ascending: false }).order("created_at", { ascending: false }),
+    sb.from("ledger").select("*").in("kind", ["receivable", "payable"]).eq("settled", false).order("entry_date"),
+    sb.from("ledger").select("kind,amount").eq("entry_date", lgToday()),
+    sb.from("ledger_projects").select("*").order("done").order("sort").order("created_at", { ascending: false }),
+    sb.from("ledger").select("id,kind,amount,entry_date,category,party,note,method,project_id,settled,due_date").not("project_id", "is", null).order("entry_date", { ascending: false }),
+  ]);
+  const err = a.error || b.error || c.error || p.error || pr.error;
+  if (err) { $("#lgStats").innerHTML = ""; $("#lgBody").innerHTML = `<p class="panel">হিসাব আনা যায়নি: ${esc(err.message)}। ডেটাবেস আপডেট (supabase/013_ledger.sql) চালানো না হলে এটা দেখাবে।</p>`; return; }
+  lgRows = a.data || []; lgOpen = b.data || []; lgProjects = p.data || []; lgProjRows = pr.data || [];
+  const all = [...lgRows, ...lgOpen];
+  lgUsed = { cats: [...new Set(all.map((r) => r.category).filter(Boolean))], parties: [...new Set(all.map((r) => r.party).filter(Boolean))] };
+  $("#lgParties").innerHTML = lgUsed.parties.map((x) => `<option value="${esc(x)}">`).join("");
+  if (!lgEditing) { const keep = $("#lgProj").value; lgProjOptions($("#lgProj"), keep || null); if (!$("#lgDate").value) lgReset(); else lgSetKind(lgKind); }
+  lgProjOptions($("#lgImpProj"), $("#lgImpProj").value || null);
+  const today = c.data || [], exp = sum(lgRows, "expense"), inc = sum(lgRows, "income"), bal = inc - exp;
+  const isThisMonth = m === lgToday().slice(0, 7), days = isThisMonth ? +lgToday().slice(8) : new Date(y, mo, 0).getDate();
+  $("#lgStats").innerHTML = [
+    ["আজকের খরচ", tk(sum(today, "expense")), "expense", sum(today, "income") ? `আজ আয় ${tk(sum(today, "income"))}` : isThisMonth ? "" : "আজ"],
+    ["মাসের খরচ", tk(exp), "expense", `দিনে গড়ে ${tk(Math.round(exp / days))}`],
+    ["মাসের আয়", tk(inc), "income", `${bnNum(lgRows.filter((r) => r.kind === "income").length)}টি এন্ট্রি`],
+    ["মাসের ব্যালান্স", (bal < 0 ? "−" : "") + tk(Math.abs(bal)), bal < 0 ? "expense" : "income", bal < 0 ? "আয়ের চেয়ে খরচ বেশি" : "আয় থেকে খরচ বাদে"],
+    ["বাকি পাওনা", tk(sum(lgOpen, "receivable")), "receivable", `${bnNum(lgOpen.filter((r) => r.kind === "receivable").length)}টি, আমি পাব`],
+    ["বাকি দেনা", tk(sum(lgOpen, "payable")), "payable", `${bnNum(lgOpen.filter((r) => r.kind === "payable").length)}টি, আমি দেব`],
+  ].map(([t, v, cl, s]) => `<div class="stat st-${cl}"><div class="s">${t}</div><b class="k-${cl}">${v}</b>${s ? `<div class="s">${s}</div>` : ""}</div>`).join("");
+  lgRenderView();
+}
+function lgRenderView() { ({ month: lgRenderMonth, projects: lgRenderProjects, owe: lgRenderOwe })[lgView]?.(); }
+
+// One row of an entry list, shared by the month, project and পাওনা-দেনা views.
+const lgEntry = (r, opts = {}) => `<div class="entry">
+  <div class="dot k-bg-${r.kind}"></div>
+  <div class="e-main"><div class="t">${esc(r.category || LG_KIND[r.kind])}${r.party ? ` <span class="s">· ${esc(r.party)}</span>` : ""}</div>
+   <div class="s">${opts.date ? lgDay(r.entry_date) + " · " : ""}<span class="k-${r.kind}">${LG_KIND[r.kind]}</span>${r.project_id && !opts.noProj ? ` · <span class="tag">${esc(projName(r.project_id))}</span>` : ""}${r.note ? ` · ${esc(r.note)}` : ""}${r.method ? ` · ${esc(r.method)}` : ""}${isOwe(r.kind) && r.settled ? ' · <span class="pill available">মিটেছে</span>' : ""}${isOwe(r.kind) && !r.settled && r.due_date ? ` · ${r.due_date < lgToday() ? '<b style="color:var(--bad)">দেরি,</b> ' : ""}দেওয়ার কথা ${lgDay(r.due_date)}` : ""}</div></div>
+  <div class="e-amt k-${r.kind}">${r.kind === "expense" ? "−" : r.kind === "income" ? "+" : ""}${tk(r.amount)}</div>
+  <div class="e-act">${opts.settle && !r.settled ? `<span data-settlecell><button class="alt" data-settle="${r.id}">${r.kind === "receivable" ? "পেয়েছি" : "দিয়েছি"}</button></span>` : ""}<button class="alt sm" data-lgedit="${r.id}" title="সম্পাদনা">✎</button><button class="danger sm" data-lgdel="${r.id}" title="মুছুন">✕</button></div></div>`;
+
+const lgBars = (pairs, cls = "expense") => { const max = Math.max(1, ...pairs.map((x) => x[1])), tot = pairs.reduce((a, x) => a + x[1], 0) || 1;
+  return pairs.sort((x, z) => z[1] - x[1]).map(([k, v]) => `<div class="hbar"><span>${esc(k)}</span><div><i class="k-bg-${cls}" style="width:${(v / max) * 100}%"></i></div><b>${tk(v)} <span class="s">${bnNum(Math.round((v / tot) * 100))}%</span></b></div>`).join(""); };
+
+function lgRenderMonth() {
+  const m = $("#lgMonth").value, [y, mo] = m.split("-").map(Number), nd = new Date(y, mo, 0).getDate(), q = $("#lgQ").value.trim().toLowerCase();
+  // Daily spending chart for the whole month
+  const perDay = Array.from({ length: nd }, () => ({ e: 0, i: 0 }));
+  lgRows.forEach((r) => { const d = +r.entry_date.slice(8) - 1; if (r.kind === "expense") perDay[d].e += +r.amount; if (r.kind === "income") perDay[d].i += +r.amount; });
+  const dmax = Math.max(1, ...perDay.map((d) => d.e)), td = m === lgToday().slice(0, 7) ? +lgToday().slice(8) : 0;
+  const chart = sum(lgRows, "expense") ? `<div class="panel"><strong>প্রতিদিনের খরচ</strong><div class="daychart">${perDay.map((d, i) => `<div class="dc${i + 1 === td ? " today" : ""}" title="${bnNum(i + 1)} তারিখ: খরচ ${tk(d.e)}${d.i ? `, আয় ${tk(d.i)}` : ""}"><i style="height:${(d.e / dmax) * 100}%"></i><span>${(i + 1) % 5 === 0 || i === 0 ? bnNum(i + 1) : ""}</span></div>`).join("")}</div></div>` : "";
+  const cats = {}, projs = {};
+  lgRows.filter((r) => r.kind === "expense").forEach((r) => { const c = r.category || "খাত নেই"; cats[c] = (cats[c] || 0) + +r.amount; if (r.project_id) projs[projName(r.project_id)] = (projs[projName(r.project_id)] || 0) + +r.amount; });
+  const breakdown = Object.keys(cats).length ? `<div class="two"><div class="panel"><strong>কোন খাতে কত খরচ</strong>${lgBars(Object.entries(cats))}</div>${Object.keys(projs).length ? `<div class="panel"><strong>এই মাসে প্রজেক্টে খরচ</strong>${lgBars(Object.entries(projs), "receivable")}<p class="s">বাকি ${tk(sum(lgRows, "expense") - Object.values(projs).reduce((a, b) => a + b, 0))} প্রজেক্টের বাইরে</p></div>` : ""}</div>` : "";
+  const list = lgRows.filter((r) => !q || [r.category, r.party, r.note, r.method, LG_KIND[r.kind], projName(r.project_id)].join(" ").toLowerCase().includes(q));
+  const byDay = {}; list.forEach((r) => (byDay[r.entry_date] ||= []).push(r));
+  const entries = `<h3>সব এন্ট্রি <span class="s">(${bnNum(list.length)}টি)</span></h3>` + (list.length ? Object.entries(byDay).map(([d, rs]) => `<div class="day"><div class="day-h"><b>${lgDay(d)}</b><span>${sum(rs, "expense") ? `<span class="k-expense">খরচ ${tk(sum(rs, "expense"))}</span>` : ""}${sum(rs, "income") ? ` <span class="k-income">আয় ${tk(sum(rs, "income"))}</span>` : ""}</span></div>${rs.map((r) => lgEntry(r, { settle: isOwe(r.kind) })).join("")}</div>`).join("")
+    : `<p class="panel s">${q ? "কিছু পাওয়া যায়নি।" : "এই মাসে এখনো কোনো এন্ট্রি নেই। উপরে টাকা আর খাত লিখে সংরক্ষণ করুন।"}</p>`);
+  $("#lgBody").innerHTML = chart + breakdown + entries;
+}
+
+// Projects -------------------------------------------------------------------------
+function lgRenderProjects() {
+  const tot = (id, k) => sum(lgProjRows.filter((r) => r.project_id === id), k);
+  $("#lgProjects").innerHTML = lgProjects.map((p) => { const spent = tot(p.id, "expense"), inc = tot(p.id, "income"), n = lgProjRows.filter((r) => r.project_id === p.id).length, pct = p.budget ? Math.min(100, (spent / p.budget) * 100) : 0, over = p.budget && spent > p.budget;
+    return `<button type="button" class="pcard${p.id === lgProjOpen ? " on" : ""}${p.done ? " done" : ""}" data-proj="${p.id}">
+      <div class="t">${esc(p.name)}${p.done ? ' <span class="pill draft">শেষ</span>' : ""}</div>
+      <b class="k-expense">${tk(spent)}</b><div class="s">মোট খরচ · ${bnNum(n)}টি এন্ট্রি${inc ? ` · আয় ${tk(inc)}` : ""}</div>
+      ${p.budget ? `<div class="meter"><i style="width:${pct}%;${over ? "background:var(--bad)" : ""}"></i></div><div class="s">বাজেট ${tk(p.budget)} · ${over ? `<b style="color:var(--bad)">${tk(spent - p.budget)} বেশি</b>` : `বাকি ${tk(p.budget - spent)}`}</div>` : ""}</button>`; }).join("")
+    || `<p class="panel s">এখনো কোনো প্রজেক্ট নেই। "+ নতুন প্রজেক্ট" চেপে বানান, যেমন: যশোরের খরচ, বাড়ি বানানো।</p>`;
+  lgRenderProjDetail();
+}
+$("#lgProjects").onclick = (e) => { const b = e.target.closest("[data-proj]"); if (!b) return; lgProjOpen = lgProjOpen === b.dataset.proj ? null : b.dataset.proj; if (!lgEditing) lgProjOptions($("#lgProj"), lgProjOpen); lgRenderProjects(); };
+function lgRenderProjDetail() {
+  const D = $("#lgProjDetail"), p = lgProjects.find((x) => x.id === lgProjOpen);
+  if (!p) { D.innerHTML = ""; return; }
+  const rows = lgProjRows.filter((r) => r.project_id === p.id), cats = {}, months = {};
+  rows.filter((r) => r.kind === "expense").forEach((r) => { cats[r.category || "খাত নেই"] = (cats[r.category || "খাত নেই"] || 0) + +r.amount; const m = r.entry_date.slice(0, 7); months[m] = (months[m] || 0) + +r.amount; });
+  D.innerHTML = `<div class="panel"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><strong style="font-size:18px;margin-right:auto">${esc(p.name)}</strong>
+    <button type="button" id="lgProjAdd">+ এই প্রজেক্টে খরচ লিখুন</button><button type="button" class="alt" id="lgProjEdit">প্রজেক্ট সম্পাদনা</button><button type="button" class="alt" id="lgProjCsv">CSV</button></div>
+    ${p.note ? `<p class="s">${esc(p.note)}</p>` : ""}
+    <div class="two">${Object.keys(cats).length ? `<div><strong>খাত অনুযায়ী</strong>${lgBars(Object.entries(cats))}</div>` : ""}${Object.keys(months).length > 1 ? `<div><strong>মাস অনুযায়ী</strong>${Object.entries(months).sort().reverse().map(([m, v]) => `<div class="hbar"><span>${lgMonthLabel(m)}</span><div></div><b>${tk(v)}</b></div>`).join("")}</div>` : ""}</div>
+    <strong>সব এন্ট্রি (${bnNum(rows.length)}টি)</strong><div>${rows.map((r) => lgEntry(r, { date: true, noProj: true, settle: isOwe(r.kind) })).join("") || `<p class="s">এখনো কোনো খরচ লেখা হয়নি।</p>`}</div></div>`;
+  $("#lgProjAdd").onclick = () => { lgReset(); lgSetKind("expense"); lgProjOptions($("#lgProj"), p.id); $("#lgForm").open = true; $("#lgForm").scrollIntoView({ behavior: "smooth" }); $("#lgAmt").focus(); };
+  $("#lgProjEdit").onclick = () => lgEditProj(p);
+  $("#lgProjCsv").onclick = () => lgDownload(rows, `hisab-${p.name}`);
+}
+$("#lgProjDetail").onclick = (e) => lgListClick(e);
+$("#lgNewProj").onclick = () => lgEditProj({});
+function lgEditProj(p) {
+  const E = $("#lgProjEditor"); E.hidden = false;
+  E.innerHTML = `<strong>${p.id ? "প্রজেক্ট সম্পাদনা" : "নতুন প্রজেক্ট"}</strong>
+   <div class="row"><label>নাম *<input id="pjName" value="${esc(p.name || "")}" placeholder="যেমন: বাড়ি বানানো"></label><label>বাজেট (৳, ঐচ্ছিক)<input id="pjBudget" type="number" value="${p.budget ?? ""}"></label><label>শুরু<input id="pjStart" type="date" value="${p.start_date || ""}"></label></div>
+   <label>নোট<input id="pjNote" value="${esc(p.note || "")}" placeholder="যেমন: যশোরে মায়ের বাড়ির কাজ"></label>
+   ${p.id ? `<label class="check"><input type="checkbox" id="pjDone" ${p.done ? "checked" : ""}> প্রজেক্ট শেষ (নতুন এন্ট্রির তালিকায় আর দেখাবে না)</label>` : ""}
+   <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="pjSave" type="button">সংরক্ষণ</button><button class="alt" id="pjClose" type="button">বন্ধ</button>${p.id ? `<button class="danger" id="pjDel" type="button">প্রজেক্ট মুছুন</button>` : ""}</div>`;
+  $("#pjName").focus();
+  $("#pjClose").onclick = () => (E.hidden = true);
+  $("#pjSave").onclick = async () => {
+    const row = { name: $("#pjName").value.trim(), budget: +$("#pjBudget").value || null, start_date: $("#pjStart").value || null, note: $("#pjNote").value.trim() || null };
+    if (!row.name) return toast("প্রজেক্টের নাম দিন");
+    if (p.id) row.done = $("#pjDone").checked;
+    const { data, error } = p.id ? await sb.from("ledger_projects").update(row).eq("id", p.id).select().single() : await sb.from("ledger_projects").insert(row).select().single();
+    if (error) return toast("সংরক্ষণ হয়নি: " + error.message);
+    E.hidden = true; lgProjOpen = data?.id || p.id; toast(`"${row.name}" সংরক্ষণ হয়েছে`); loadLedger();
+  };
+  $("#pjDel") && ($("#pjDel").onclick = async () => {
+    if ($("#pjDel").dataset.sure !== "1") { $("#pjDel").dataset.sure = "1"; $("#pjDel").textContent = "নিশ্চিত? (এন্ট্রিগুলো থাকবে, শুধু প্রজেক্ট থেকে সরবে)"; return; }
+    const { error } = await sb.from("ledger_projects").delete().eq("id", p.id);
+    if (error) return toast(error.message); E.hidden = true; lgProjOpen = null; loadLedger();
+  });
+}
+
+// পাওনা-দেনা -----------------------------------------------------------------------
+async function lgRenderOwe() {
+  const O = $("#lgOwe"), rec = lgOpen.filter((r) => r.kind === "receivable"), pay = lgOpen.filter((r) => r.kind === "payable");
+  const { data: done } = await sb.from("ledger").select("*").in("kind", ["receivable", "payable"]).eq("settled", true).order("settled_on", { ascending: false }).limit(30);
+  const byParty = (rs) => { const g = {}; rs.forEach((r) => (g[r.party || "নাম নেই"] ||= []).push(r)); return Object.entries(g).sort((a, b) => sum(b[1]) - sum(a[1])); };
+  const block = (title, rs, k) => `<div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><strong>${title}</strong><b class="k-${k}">${tk(sum(rs))}</b></div>
+    ${rs.length ? byParty(rs).map(([name, list]) => `<div class="day"><div class="day-h"><b>${esc(name)}</b><b class="k-${k}">${tk(sum(list))}</b></div>${list.map((r) => lgEntry(r, { date: true, settle: true })).join("")}</div>`).join("") : `<p class="s">কিছু বাকি নেই।</p>`}</div>`;
+  O.innerHTML = `<div class="two">${block("আমি পাব (পাওনা)", rec, "receivable")}${block("আমি দেব (দেনা)", pay, "payable")}</div>
+    ${(done || []).length ? `<div class="panel"><strong>সম্প্রতি মিটেছে</strong>${done.map((r) => lgEntry(r, { date: true })).join("")}</div>` : ""}`;
+}
+$("#lgOwe").onclick = (e) => lgListClick(e);
+
+// Shared clicks: edit, delete, settle -----------------------------------------------
+async function lgListClick(e) {
+  const t = e.target.closest("button"); if (!t) return;
+  const d = t.dataset, find = (id) => lgRows.find((r) => r.id === id) || lgOpen.find((r) => r.id === id) || lgProjRows.find((r) => r.id === id);
+  if (d.lgedit) { let r = find(d.lgedit); if (!r) r = (await sb.from("ledger").select("*").eq("id", d.lgedit).single()).data; if (r) lgEdit(r); }
+  if (d.lgdel) {
+    if (d.sure !== "1") { t.dataset.sure = "1"; t.textContent = "নিশ্চিত?"; t.classList.remove("sm"); return; }
+    const { error } = await sb.from("ledger").delete().eq("id", d.lgdel);
+    toast(error ? "মোছা যায়নি: " + error.message : "মুছে ফেলা হয়েছে"); if (lgEditing === d.lgdel) lgReset(); loadLedger();
+  }
+  if (d.settle) {
+    // Settling can also book the money as income/expense today (a sale paid later), or just close it (a loan returned).
+    const r = find(d.settle), as = r.kind === "receivable" ? "আয়" : "খরচ";
+    t.closest("[data-settlecell]").innerHTML = `<button data-settleas="${r.id}" title="আজকের ${as} হিসেবে যোগ হবে">মিটেছে, ${as}েও লিখুন</button> <button class="alt" data-settleonly="${r.id}" title="ধার ফেরত পেলে বা দিলে">শুধু মিটেছে</button>`;
+  }
+  const sid = d.settleas || d.settleonly;
+  if (sid) {
+    const r = find(sid), today = lgToday();
+    const { error } = await sb.from("ledger").update({ settled: true, settled_on: today, updated_at: new Date().toISOString() }).eq("id", sid);
+    if (error) return toast("হয়নি: " + error.message);
+    if (d.settleas) {
+      const ins = await sb.from("ledger").insert({ kind: r.kind === "receivable" ? "income" : "expense", amount: r.amount, entry_date: today, category: r.category, party: r.party, project_id: r.project_id, note: `${r.kind === "receivable" ? "পাওনা আদায়" : "দেনা শোধ"}${r.note ? ": " + r.note : ""}` });
+      if (ins.error) return toast("মিটেছে, কিন্তু আয়/খরচ যোগ হয়নি: " + ins.error.message);
+    }
+    toast(r.kind === "receivable" ? `${r.party || ""}-এর পাওনা ${tk(r.amount)} মিটেছে` : `${r.party || ""}-এর দেনা ${tk(r.amount)} শোধ হয়েছে`); loadLedger();
+  }
+}
+$("#lgBody").onclick = (e) => lgListClick(e);
+
+function lgDownload(rows, name) {
+  const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [["তারিখ", "ধরন", "খাত", "কোথায় / কে", "প্রজেক্ট", "মাধ্যম", "নোট", "টাকা", "মিটেছে"], ...[...rows].sort((a, b) => (a.entry_date < b.entry_date ? -1 : 1)).map((r) => [r.entry_date, LG_KIND[r.kind], r.category, r.party, projName(r.project_id), r.method, r.note, +r.amount, isOwe(r.kind) ? (r.settled ? "হ্যাঁ" : "না") : ""])];
+  const blob = new Blob(["﻿" + lines.map((l) => l.map(cell).join(",")).join("\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `${name}.csv`; a.click();
+}
+$("#lgCsv").onclick = () => lgDownload(lgRows, `hisab-${$("#lgMonth").value}`);
+
+// Import (from আমার দিন or any CSV/JSON) ---------------------------------------------
+const deBn = (s) => String(s ?? "").replace(/[০-৯]/g, (c) => "০১২৩৪৫৬৭৮৯".indexOf(c)).trim();
+function lgParseDate(v) {
+  const s = deBn(v); let m;
+  if ((m = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/))) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+  if ((m = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})/))) { const y = m[3].length === 2 ? "20" + m[3] : m[3]; return `${y}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`; }
+  const t = Date.parse(s); return isNaN(t) ? null : new Date(t).toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+}
+function lgParseKind(v, amt) {
+  const s = String(v ?? "").toLowerCase();
+  if (/পাওনা|receiv|owed to me/.test(s)) return "receivable";
+  if (/দেনা|ধার নি|payab|debt|loan/.test(s)) return "payable";
+  if (/আয়|আয়|income|earn|credit|জমা|বিক্রি/.test(s) || s === "in") return "income";
+  if (/খরচ|ব্যয়|ব্যয়|expense|spend|debit/.test(s) || s === "out") return "expense";
+  return amt < 0 ? "expense" : null;
+}
+const lgNum = (v) => { const n = parseFloat(deBn(v).replace(/[৳,\s]|tk|taka|টাকা/gi, "")); return isNaN(n) ? null : n; };
+const KEYS = { date: /^(date|তারিখ|day|দিন|created_?at|time)$/i, amount: /^(amount|টাকা|taka|tk|value|price|পরিমাণ|amt|cost)$/i, kind: /^(type|kind|ধরন|ধরণ|category_type|direction)$/i,
+  category: /^(category|খাত|cat|head|title|বিষয়|item)$/i, party: /^(party|কার|কাকে|কোথায়|person|shop|name|নাম|from|to)$/i, note: /^(note|নোট|description|desc|details|বিবরণ|memo|remarks)$/i, method: /^(method|মাধ্যম|payment|account)$/i, project: /^(project|প্রজেক্ট)$/i };
+function lgFromObj(o) {
+  const pick = (k) => { for (const [key, v] of Object.entries(o)) if (KEYS[k].test(key.trim())) return v; };
+  const amt = lgNum(pick("amount")); return { date: pick("date"), amount: amt, kind: pick("kind"), category: pick("category"), party: pick("party"), note: pick("note"), method: pick("method"), project: pick("project") };
+}
+function lgSplit(line, sep) { const out = []; let cur = "", q = false; for (const ch of line) { if (ch === '"') q = !q; else if (ch === sep && !q) { out.push(cur); cur = ""; } else cur += ch; } out.push(cur); return out.map((x) => x.trim()); }
+function lgParseImport(text) {
+  text = text.replace(/^﻿/, "").trim(); if (!text) return [];
+  let raw = [];
+  if (/^[[{]/.test(text)) {
+    let j = JSON.parse(text);
+    const arrays = []; const walk = (x) => { if (Array.isArray(x)) { if (x.some((y) => y && typeof y === "object" && !Array.isArray(y))) arrays.push(x); x.forEach(walk); } else if (x && typeof x === "object") Object.values(x).forEach(walk); };
+    walk(j); raw = arrays.flat().filter((o) => o && typeof o === "object").map(lgFromObj);
+  } else {
+    const lines = text.split(/\r?\n/).filter((l) => l.trim()), sep = lines[0].includes("\t") ? "\t" : lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
+    const head = lgSplit(lines[0], sep), hasHead = head.some((h) => Object.values(KEYS).some((re) => re.test(h)));
+    if (hasHead) raw = lines.slice(1).map((l) => { const c = lgSplit(l, sep), o = {}; head.forEach((h, i) => (o[h] = c[i])); return lgFromObj(o); });
+    else raw = lines.map((l) => { const c = lgSplit(l, sep); const ai = c.findIndex((x, i) => i > 0 && lgNum(x) != null && !lgParseDate(x)); const rest = c.filter((_, i) => i !== 0 && i !== ai);
+      const kIdx = rest.findIndex((x) => lgParseKind(x, 1)); const kind = kIdx >= 0 ? rest.splice(kIdx, 1)[0] : null;
+      return { date: c[0], amount: lgNum(c[ai]), kind, category: rest[0], note: rest.slice(1).join(", ") }; });
+  }
+  return raw.map((r) => { const amt = r.amount, kind = lgParseKind(r.kind, amt ?? 1) || "expense", date = lgParseDate(r.date);
+    return { ok: !!date && amt != null && amt !== 0, entry_date: date, kind, amount: Math.abs(amt || 0), category: r.category ? String(r.category).trim() : null, party: r.party ? String(r.party).trim() : null, note: r.note ? String(r.note).trim() : null, method: r.method ? String(r.method).trim() : null, project: r.project ? String(r.project).trim() : null, src: r }; });
+}
+let lgImp = [];
+$("#lgImpFile").onchange = async (e) => { const f = e.target.files[0]; if (f) { $("#lgImpText").value = await f.text(); $("#lgImpCheck").click(); } };
+$("#lgImpCheck").onclick = () => {
+  try { lgImp = lgParseImport($("#lgImpText").value); } catch (err) { $("#lgImpOut").innerHTML = `<p class="s" style="color:var(--bad)">পড়া যায়নি: ${esc(err.message)}</p>`; return; }
+  const good = lgImp.filter((r) => r.ok), bad = lgImp.length - good.length;
+  $("#lgImpGo").hidden = !good.length; $("#lgImpGo").textContent = `${bnNum(good.length)}টি এন্ট্রি আমদানি করুন`;
+  $("#lgImpOut").innerHTML = lgImp.length ? `<p><b>${bnNum(good.length)}টি</b> এন্ট্রি পাওয়া গেছে: খরচ ${tk(sum(good, "expense"))}, আয় ${tk(sum(good, "income"))}${sum(good, "receivable") ? `, পাওনা ${tk(sum(good, "receivable"))}` : ""}${sum(good, "payable") ? `, দেনা ${tk(sum(good, "payable"))}` : ""}।${bad ? ` <span style="color:var(--bad)">${bnNum(bad)}টি লাইনে তারিখ বা টাকা বোঝা যায়নি, ওগুলো বাদ যাবে।</span>` : ""} একই জিনিস দুবার আমদানি করলে দুবার যোগ হবে।</p>
+    <div class="scroll"><table class="lg"><tr><th>তারিখ</th><th>ধরন</th><th>খাত</th><th>নোট</th><th class="n">টাকা</th></tr>${lgImp.slice(0, 40).map((r) => `<tr ${r.ok ? "" : 'style="opacity:.45;text-decoration:line-through"'}><td>${r.entry_date ? lgDay(r.entry_date) : esc(r.src.date || "?")}</td><td class="k-${r.kind}">${LG_KIND[r.kind]}</td><td>${esc(r.category || "")}</td><td>${esc([r.party, r.note].filter(Boolean).join(" · "))}</td><td class="n">${tk(r.amount)}</td></tr>`).join("")}</table></div>${lgImp.length > 40 ? `<p class="s">আরও ${bnNum(lgImp.length - 40)}টি…</p>` : ""}`
+    : `<p class="s">কিছু পাওয়া যায়নি।</p>`;
+};
+$("#lgImpGo").onclick = async () => {
+  const good = lgImp.filter((r) => r.ok); if (!good.length) return;
+  $("#lgImpGo").disabled = true;
+  // Projects named in the file are created if they don't exist yet.
+  const names = [...new Set(good.map((r) => r.project).filter(Boolean))].filter((n) => !lgProjects.some((p) => p.name === n));
+  if (names.length) { const { error } = await sb.from("ledger_projects").insert(names.map((name) => ({ name }))); if (error) { $("#lgImpGo").disabled = false; return toast(error.message); } lgProjects = (await sb.from("ledger_projects").select("*")).data || lgProjects; }
+  const fixed = $("#lgImpProj").value || null;
+  const rows = good.map((r) => ({ entry_date: r.entry_date, kind: r.kind, amount: r.amount, category: r.category, party: r.party, note: r.note, method: r.method, project_id: fixed || lgProjects.find((p) => p.name === r.project)?.id || null, source: "import" }));
+  for (let i = 0; i < rows.length; i += 200) {
+    const { error } = await sb.from("ledger").insert(rows.slice(i, i + 200));
+    if (error) { $("#lgImpGo").disabled = false; return toast(`${bnNum(i)}টি যোগ হয়েছে, তারপর থেমে গেছে: ${error.message}`); }
+  }
+  $("#lgImpGo").disabled = false; $("#lgImpGo").hidden = true; $("#lgImpText").value = ""; $("#lgImpOut").innerHTML = `<p class="k-income"><b>${bnNum(rows.length)}টি এন্ট্রি যোগ হয়েছে।</b></p>`; lgImp = [];
+  const last = rows.map((r) => r.entry_date).sort().pop(); $("#lgMonth").value = last.slice(0, 7); loadLedger();
+};
 
 $("#publish").onclick = async () => {
   $("#publish").disabled = true;
