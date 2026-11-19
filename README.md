@@ -25,4 +25,4 @@ Create a deploy hook in Cloudflare Pages (Settings → Builds → Deploy hooks) 
 `FIXTURE=snapshot.json node build.mjs` builds from a saved JSON snapshot (`{series, works, images, exhibitions}`).
 
 ## হিসাব (accounts) tab
-The studio panel has a private "হিসাব" tab for daily and monthly expenses, income, and money owed (পাওনা) or owing (দেনা). Data lives in the admin-only `ledger` table; run `supabase/013_ledger.sql` once in the SQL editor before using it. Nothing from it is ever built into the public site.
+The studio panel has a private "হিসাব" tab: monthly income and spending with a daily chart and category totals, পাওনা/দেনা (money owed to or by the artist), projects with an optional budget (e.g. বাড়ি বানানো, যশোরের খরচ), and an import box that takes pasted CSV/JSON (for moving data over from the old "আমার দিন" page). Data lives in the admin-only `ledger` and `ledger_projects` tables; run `supabase/013_ledger.sql` once in the SQL editor before using it. Nothing from it is ever built into the public site.
